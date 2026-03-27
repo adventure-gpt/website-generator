@@ -1,0 +1,25 @@
+appId: com.websitegenerator.installer
+productName: "Website Generator Setup"
+directories:
+  output: dist
+files:
+  - src/**/*
+  - templates/**/*
+  - assets/**/*
+  - "!**/node_modules/.cache"
+mac:
+  target:
+    - dmg
+  icon: assets/icon.png
+  category: public.app-category.developer-tools
+linux:
+  target:
+    - AppImage
+    - deb
+  icon: assets/icon.png
+  category: Development
+  synopsis: "Set up your AI-powered website builder"
+win:
+  target:
+    - nsis
+  icon: assets/icon.png
