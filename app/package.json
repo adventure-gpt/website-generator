@@ -1,6 +1,6 @@
 {
   "name": "website-generator",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "AI-powered website builder — chat to create, preview live, deploy instantly",
   "author": {
     "name": "Website Generator",
@@ -18,6 +18,7 @@
   },
   "build": {
     "productName": "Website Generator",
+    "artifactName": "Website-Generator-Setup-${version}.${ext}",
     "appId": "com.websitegenerator.app",
     "publish": [
       {
