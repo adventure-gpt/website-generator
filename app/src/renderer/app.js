@@ -1915,6 +1915,14 @@ function setupSettingsModal() {
     }
   });
 
+  // Re-run setup
+  $('#settings-rerun-setup').addEventListener('click', async function () {
+    closeSettings();
+    await window.api.setSettings({ authSetupSeen: false });
+    var setupStatus = await window.api.checkSetup();
+    showSetupScreen(setupStatus);
+  });
+
   // Close on overlay click
   $('#settings-modal').addEventListener('click', function (e) {
     if (e.target === this) closeSettings();
