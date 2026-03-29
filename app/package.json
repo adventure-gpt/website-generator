@@ -1,0 +1,47 @@
+{
+  "name": "website-generator",
+  "version": "1.0.0",
+  "description": "AI-powered website builder — chat to create, preview live, deploy instantly",
+  "author": {
+    "name": "Website Generator",
+    "email": "hello@websitegenerator.app"
+  },
+  "homepage": "https://github.com/adventure-gpt/website-generator",
+  "repository": "https://github.com/adventure-gpt/website-generator",
+  "main": "src/main/index.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "build:win": "electron-builder --win"
+  },
+  "build": {
+    "productName": "Website Generator",
+    "appId": "com.websitegenerator.app",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "adventure-gpt",
+        "repo": "website-generator"
+      }
+    ],
+    "extraResources": [
+      {
+        "from": "../installer/templates",
+        "to": "templates",
+        "filter": [
+          "AGENTS.md",
+          "CLAUDE.md"
+        ]
+      }
+    ]
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.3"
+  }
+}

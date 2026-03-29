@@ -54,7 +54,7 @@ You don't need special words or commands. Just describe what you want.
 - **Your projects** are in the `projects` folder inside your workspace. Each website gets its own folder in there. You don't need to touch these — the AI manages them.
 - **Desktop shortcuts** — when you deploy a site, the AI creates a shortcut on your desktop. Double-click to open your live site.
 - **Live URLs** — every deployed site gets a URL like `your-project.pages.dev` that works on any device.
-- **Your account** — every site has its own login. You'll create an account (email + password) the first time you use each site. After that, your data is private and synced — log in on your phone and you see the same stuff as on your computer.
+- **Your account** — every site has its own login. The first time you use a site, you'll create an account with your email and set up a passkey (like fingerprint or Face ID). You'll also get recovery keys — save those somewhere safe as a backup. After that, signing in is just a tap. Your data is private and synced — sign in on your phone and you see the same stuff as on your computer.
 
 ---
 

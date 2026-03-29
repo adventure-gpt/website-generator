@@ -10,12 +10,12 @@ Plain English, 1-3 sentences. No file names, terminal output, or technical terms
 - Vite + React + Tailwind CSS v4 (Vite plugin)
 - Cloudflare Pages + Pages Functions + D1 (SQLite database)
 - vite-plugin-pwa (full PWA: service worker, offline caching, installable)
-- bcryptjs (password hashing for auth)
+- @simplewebauthn/server + @simplewebauthn/browser (passkey auth via WebAuthn)
 Extra libs when needed: Recharts, date-fns, Lucide React, Framer Motion, React Router.
 Never: jQuery, Bootstrap, CSS-in-JS.
 
 ## AUTH (Every Project — Non-Negotiable)
-Every project has user accounts. Email + password auth. D1 stores users, sessions, and all app data scoped by user_id. HttpOnly session cookies. Frontend: loading → logged out → logged in states. Login/register page is polished, not an afterthought. Log out button in header. All API endpoints validate session before returning data.
+Every project has user accounts. Passkeys (WebAuthn) as primary auth — no passwords. Recovery keys as backup (also usable as sole login if user prefers). D1 stores users, passkeys, recovery_keys, sessions, all app data scoped by user_id. HttpOnly session cookies. Frontend: loading → logged out → logged in. Auth screens are polished. Log out + passkey/recovery-key management in settings. All endpoints validate session. Use @simplewebauthn/server + @simplewebauthn/browser.
 
 ## PWA (Every Project — Non-Negotiable)
 Full PWA via vite-plugin-pwa: manifest, icons (192+512 PNG), service worker with Workbox, offline app shell caching, runtimeCaching for fonts/images. BUT every project also works perfectly as a normal browser website. PWA is an enhancement, never a requirement. Don't cache API calls. Offline state shows friendly message. Design for standalone mode (no browser back button) while also working in a tab.
@@ -28,13 +28,13 @@ You have full, authenticated CLI access to GitHub via `gh` and Cloudflare via `w
 
 ## NEW PROJECT
 1. `npm create vite@latest [name] -- --template react && cd [name] && npm install`
-2. `npm install tailwindcss @tailwindcss/vite && npm install vite-plugin-pwa -D && npm install bcryptjs`
+2. `npm install tailwindcss @tailwindcss/vite && npm install vite-plugin-pwa -D && npm install @simplewebauthn/server @simplewebauthn/browser`
 3. Configure vite.config.js: Tailwind plugin + VitePWA plugin with manifest, workbox, icons
 4. `@import "tailwindcss";` in index.css, add manifest/meta tags to index.html
 5. Create icons in public/, _redirects, wrangler.toml
 6. `wrangler d1 create [name]-db` → update wrangler.toml with database_id
-7. Write schema.sql (users + sessions + app tables), apply locally
-8. Create functions/api/auth/ (register, login, logout, me)
+7. Write schema.sql (users + passkeys + recovery_keys + sessions + app tables), apply locally
+8. Create functions/api/auth/ (register-options, register-verify, login-options, login-verify, recovery-login, recovery-keys, logout, me)
 9. Write ALL app code — complete, working, auth end-to-end, PWA configured
 10. git init, commit, `wrangler pages dev -- npm run dev` → localhost:8788
 

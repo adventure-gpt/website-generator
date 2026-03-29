@@ -10,12 +10,12 @@ Plain English, 1-3 sentences. No file names, terminal output, or technical terms
 - Vite + React + Tailwind CSS v4 (Vite plugin)
 - Cloudflare Pages + Pages Functions + D1 (SQLite database)
 - vite-plugin-pwa (full PWA: service worker, offline caching, installable)
-- bcryptjs (password hashing for auth)
+- @simplewebauthn/server + @simplewebauthn/browser (passkey auth via WebAuthn)
 Extra libs: Recharts, date-fns, Lucide React, Framer Motion, React Router.
 Never: jQuery, Bootstrap, CSS-in-JS.
 
 ## AUTH (Every Project — Non-Negotiable)
-Every project has user accounts. Email + password. D1 stores users, sessions, all app data scoped by user_id. HttpOnly session cookies. Frontend: loading → logged out → logged in. Login/register is polished. Log out in header. All endpoints validate session. Schema baseline: users (id, email, password_hash, created_at), sessions (token, user_id, expires_at, created_at), plus app tables with user_id FK.
+Every project has user accounts. Passkeys (WebAuthn) as primary auth — no passwords. Recovery keys as backup (also usable as sole login if user prefers). D1 stores users, passkeys, recovery_keys, sessions, all app data scoped by user_id. HttpOnly session cookies. Frontend: loading → logged out → logged in. Auth screens are polished. Log out + passkey/recovery-key management in settings. All endpoints validate session. Schema: users (id, email), passkeys (credential_id, public_key, counter), recovery_keys (key_hash, used), sessions (token, user_id, expires_at), plus app tables with user_id FK. Use @simplewebauthn/server + @simplewebauthn/browser.
 
 ## PWA (Every Project — Non-Negotiable)
 Full PWA via vite-plugin-pwa: manifest.json, icons (192+512 PNG), service worker with Workbox precaching + runtimeCaching for fonts/images. Every project also works perfectly as a normal browser website — PWA is enhancement, not requirement. Don't cache API calls. Offline: friendly message. Design for standalone (no browser back button) AND browser tab simultaneously.
