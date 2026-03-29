@@ -285,16 +285,23 @@ app.whenReady().then(() => {
   // ── Auto-updater ──────────────────────────────────────────
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.logger = require('electron-log');
+  autoUpdater.logger.transports.file.level = 'info';
 
+  autoUpdater.on('checking-for-update', () => {
+    safeSend('updater:event', { type: 'checking' });
+  });
   autoUpdater.on('update-available', (info) => {
     safeSend('updater:event', { type: 'available', version: info.version });
+  });
+  autoUpdater.on('update-not-available', () => {
+    safeSend('updater:event', { type: 'up-to-date' });
   });
   autoUpdater.on('update-downloaded', (info) => {
     safeSend('updater:event', { type: 'downloaded', version: info.version });
   });
   autoUpdater.on('error', (err) => {
-    // Silent — don't bother the user with update errors
-    console.error('Auto-updater error:', err.message);
+    safeSend('updater:event', { type: 'error', message: err.message });
   });
 
   // Check for updates after a short delay (don't block startup)

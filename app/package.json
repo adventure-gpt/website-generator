@@ -1,6 +1,6 @@
 {
   "name": "website-generator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "AI-powered website builder — chat to create, preview live, deploy instantly",
   "author": {
     "name": "Website Generator",
@@ -42,6 +42,7 @@
     "electron-builder": "^26.0.0"
   },
   "dependencies": {
+    "electron-log": "^5.4.3",
     "electron-updater": "^6.8.3"
   }
 }

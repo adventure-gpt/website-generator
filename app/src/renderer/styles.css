@@ -1590,6 +1590,13 @@ html, body {
   font-weight: 600;
 }
 
+.settings-version {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-tertiary);
+  margin-left: 6px;
+}
+
 .modal-close {
   width: 28px;
   height: 28px;

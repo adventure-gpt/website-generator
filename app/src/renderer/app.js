@@ -800,8 +800,11 @@ function setupAPIListeners() {
 
   // ── Auto-updater notifications ──
   window.api.onUpdaterEvent(function (evt) {
+    console.log('Updater event:', evt.type, evt.version || evt.message || '');
     if (evt.type === 'downloaded') {
       showUpdateBanner(evt.version);
+    } else if (evt.type === 'error') {
+      console.error('Updater error:', evt.message);
     }
   });
 
@@ -1943,6 +1946,13 @@ async function openSettings() {
   }
   claudeSelect.value = modelInfo.selectedClaude;
   codexSelect.value = modelInfo.selectedCodex;
+
+  // Show version
+  try {
+    var version = await window.api.getVersion();
+    var versionEl = document.getElementById('settings-version');
+    if (versionEl) versionEl.textContent = 'v' + version;
+  } catch (e) {}
 
   $('#settings-modal').classList.remove('hidden');
 }
