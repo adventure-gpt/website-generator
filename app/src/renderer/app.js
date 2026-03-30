@@ -751,6 +751,11 @@ function setupAPIListeners() {
         sl.tools.push({ name: 'system', detail: event.text || '' });
         break;
       }
+      case 'rate_limit': {
+        // Don't put rate limit text into the chat — show a banner instead
+        showRateLimitBanner(evtProject, event.resetInfo);
+        return; // Skip rendering — nothing changed in data
+      }
     }
 
     // ═══ STEP 2: Update DOM — always re-render from data (single source of truth) ═══
@@ -810,6 +815,24 @@ function setupAPIListeners() {
 
 }
 
+function showRateLimitBanner(projectName, resetInfo) {
+  var existing = document.getElementById('rate-limit-banner');
+  if (existing) existing.remove();
+
+  var msg = 'Rate limit reached';
+  if (resetInfo) msg += ' \u2014 resets at ' + resetInfo;
+
+  var banner = el('div', { id: 'rate-limit-banner', className: 'rate-limit-banner' });
+  banner.appendChild(el('span', { textContent: msg }));
+  var dismissBtn = el('button', { className: 'rate-limit-dismiss', textContent: '\u2715' });
+  dismissBtn.addEventListener('click', function () { banner.remove(); });
+  banner.appendChild(dismissBtn);
+  document.body.appendChild(banner);
+
+  // Auto-dismiss after 30 seconds
+  setTimeout(function () { if (banner.parentNode) banner.remove(); }, 30000);
+}
+
 function showUpdateBanner(version) {
   if (document.getElementById('update-banner')) return;
   var banner = el('div', { id: 'update-banner', className: 'update-banner' }, [
@@ -867,17 +890,58 @@ function renderProjectList() {
     })(project.name);
     actionsDiv.appendChild(deleteBtn);
 
-    var item = el('div', { className: cls }, [
+    var item = el('div', { className: cls, draggable: true }, [
       el('span', { className: 'project-dot' }),
       el('span', { className: 'project-name', textContent: project.name }),
       actionsDiv,
     ]);
+    item.dataset.project = project.name;
     (function (name) {
       item.addEventListener('click', function () { selectProject(name); });
     })(project.name);
 
+    // Drag and drop
+    item.addEventListener('dragstart', function (e) {
+      e.dataTransfer.setData('text/plain', this.dataset.project);
+      this.classList.add('dragging');
+    });
+    item.addEventListener('dragend', function () {
+      this.classList.remove('dragging');
+    });
+    item.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      this.classList.add('drag-over');
+    });
+    item.addEventListener('dragleave', function () {
+      this.classList.remove('drag-over');
+    });
+    item.addEventListener('drop', function (e) {
+      e.preventDefault();
+      this.classList.remove('drag-over');
+      var fromName = e.dataTransfer.getData('text/plain');
+      var toName = this.dataset.project;
+      if (fromName && toName && fromName !== toName) {
+        reorderProject(fromName, toName);
+      }
+    });
+
     listEl.appendChild(item);
   }
+}
+
+function reorderProject(fromName, toName) {
+  var names = state.projects.map(function (p) { return p.name; });
+  var fromIdx = names.indexOf(fromName);
+  var toIdx = names.indexOf(toName);
+  if (fromIdx === -1 || toIdx === -1) return;
+  names.splice(fromIdx, 1);
+  names.splice(toIdx, 0, fromName);
+  // Reorder state.projects to match
+  var projectMap = {};
+  for (var i = 0; i < state.projects.length; i++) projectMap[state.projects[i].name] = state.projects[i];
+  state.projects = names.map(function (n) { return projectMap[n]; });
+  window.api.reorderProjects(names);
+  renderProjectList();
 }
 
 function showNewProjectInput() {
@@ -1208,12 +1272,17 @@ function createUserBubble(text, msg, msgIndex) {
 }
 
 function createAssistantBubble(text, msg) {
-  var bubble = el('div', { className: 'message-bubble' });
-  bubble.appendChild(renderMarkdown(text));
+  var wrapper = el('div', { className: 'message message-assistant' });
 
-  var actions = createMessageActions(text);
-  var row = el('div', { className: 'message-row' }, [bubble, actions]);
-  var wrapper = el('div', { className: 'message message-assistant' }, [row]);
+  // Only show text bubble if there's actual content
+  var hasText = text && text.trim();
+  if (hasText) {
+    var bubble = el('div', { className: 'message-bubble' });
+    bubble.appendChild(renderMarkdown(text));
+    var actions = createMessageActions(text);
+    var row = el('div', { className: 'message-row' }, [bubble, actions]);
+    wrapper.appendChild(row);
+  }
 
   // Show tool usage from imported messages
   if (msg && msg.tools && msg.tools.length > 0) {
@@ -1229,7 +1298,12 @@ function createAssistantBubble(text, msg) {
       ]));
     }
     var toolsBlock = el('details', { className: 'activity-block' }, [toolsSummary, toolsList]);
-    wrapper.insertBefore(toolsBlock, row);
+    // Insert tools before the text row (if it exists), or just append
+    if (wrapper.firstChild) {
+      wrapper.insertBefore(toolsBlock, wrapper.firstChild);
+    } else {
+      wrapper.appendChild(toolsBlock);
+    }
   }
 
   // Timestamp
@@ -2287,6 +2361,8 @@ function renderTextBlock(text, fragment) {
     }
 
     var lines = trimmed.split('\n');
+
+    // Unordered list: lines starting with - or *
     if (lines.every(function (l) { return /^\s*[-*]\s/.test(l) || !l.trim(); })) {
       var ul = el('ul');
       for (var j = 0; j < lines.length; j++) {
@@ -2300,8 +2376,26 @@ function renderTextBlock(text, fragment) {
       continue;
     }
 
+    // Ordered list: lines starting with 1. 2. etc.
+    if (lines.some(function (l) { return /^\s*\d+[.)]\s/.test(l); })) {
+      var ol = el('ol');
+      for (var oj = 0; oj < lines.length; oj++) {
+        var olText = lines[oj].replace(/^\s*\d+[.)]\s+/, '').trim();
+        if (!olText) continue;
+        var oli = el('li');
+        renderInline(olText, oli);
+        ol.appendChild(oli);
+      }
+      fragment.appendChild(ol);
+      continue;
+    }
+
+    // Regular paragraph — preserve single line breaks as <br>
     var p = el('p');
-    renderInline(trimmed, p);
+    for (var lk = 0; lk < lines.length; lk++) {
+      if (lk > 0) p.appendChild(document.createElement('br'));
+      renderInline(lines[lk], p);
+    }
     fragment.appendChild(p);
   }
 }

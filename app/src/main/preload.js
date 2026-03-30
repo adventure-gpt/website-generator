@@ -17,6 +17,7 @@ contextBridge.exposeInMainWorld('api', {
   getActiveProject: () => ipcRenderer.invoke('project:get-active'),
   setActiveProject: (name) => ipcRenderer.invoke('project:set-active', name),
   openProjectFolder: (name) => ipcRenderer.invoke('project:open-folder', name),
+  reorderProjects: (names) => ipcRenderer.invoke('project:reorder', names),
 
   // Dev Server
   startDevServer: () => ipcRenderer.invoke('devserver:start'),

@@ -147,7 +147,16 @@ class ProjectManager {
         const hasPkg = fs.existsSync(path.join(projectPath, 'package.json'));
         return { name: d.name, path: projectPath, hasPackageJson: hasPkg };
       })
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .sort((a, b) => {
+        // Sort by directory creation time (oldest first)
+        try {
+          const aStat = fs.statSync(a.path);
+          const bStat = fs.statSync(b.path);
+          return aStat.birthtimeMs - bStat.birthtimeMs;
+        } catch {
+          return a.name.localeCompare(b.name);
+        }
+      });
   }
 
   createProject(name) {

@@ -545,6 +545,10 @@ html, body {
 
 .project-item:hover { background: var(--bg-hover); }
 .project-item.active { background: var(--accent-dim); color: var(--text-primary); }
+.project-item.dragging { opacity: 0.4; }
+.project-item.drag-over { border-top: 2px solid var(--accent); margin-top: -2px; }
+.project-item[draggable] { cursor: grab; }
+.project-item[draggable]:active { cursor: grabbing; }
 
 .project-dot {
   width: 6px;
@@ -1082,6 +1086,36 @@ html, body {
   font-family: inherit;
 }
 .update-btn:hover { background: rgba(255,255,255,0.3); }
+
+/* Rate limit banner */
+.rate-limit-banner {
+  position: fixed;
+  top: 36px;
+  left: 240px;
+  right: 0;
+  background: var(--warning);
+  color: #000;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  z-index: 9998;
+}
+
+.rate-limit-dismiss {
+  background: none;
+  border: none;
+  color: #000;
+  font-size: 16px;
+  cursor: pointer;
+  opacity: 0.5;
+  margin-left: 12px;
+  font-family: inherit;
+}
+.rate-limit-dismiss:hover { opacity: 1; }
 
 /* Status messages */
 .message-status {

@@ -402,7 +402,25 @@ ipcMain.handle('ai:set-model', (_event, backend, model) => {
 
 // ── IPC: Projects ────────────────────────────────────────────
 ipcMain.handle('project:list', () => {
-  return projectManager.listProjects();
+  const projects = projectManager.listProjects();
+  const settings = getSettings();
+  const order = settings.projectOrder || [];
+  if (order.length > 0) {
+    const orderMap = {};
+    for (var i = 0; i < order.length; i++) orderMap[order[i]] = i;
+    projects.sort(function (a, b) {
+      var ai = orderMap[a.name] !== undefined ? orderMap[a.name] : 9999;
+      var bi = orderMap[b.name] !== undefined ? orderMap[b.name] : 9999;
+      return ai - bi;
+    });
+  }
+  return projects;
+});
+
+ipcMain.handle('project:reorder', (_event, orderedNames) => {
+  const settings = getSettings();
+  settings.projectOrder = orderedNames;
+  saveSettings(settings);
 });
 
 ipcMain.handle('project:create', (_event, name) => {

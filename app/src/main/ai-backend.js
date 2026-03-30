@@ -72,7 +72,7 @@ class AIBackend {
     let contextPrompt = this.buildPrompt(history, projectSettings);
 
     if (effectiveBackend === 'codex') {
-      const sysPrompt = `You are a website builder agent inside the "Website Generator" desktop app. Your job is to create, modify, and improve web projects. You have full filesystem access to the project directory. Always write code directly — do not just describe changes. Use modern web frameworks (Vite, React, etc.) and create production-quality code. When creating a new project, scaffold it fully with package.json, install dependencies, and ensure it runs with "npm run dev". IMPORTANT: Always use "npm install --legacy-peer-deps" instead of plain "npm install" to avoid peer dependency conflicts. Read AGENTS.md in the project directory for full instructions.`;
+      const sysPrompt = `You are a website builder agent inside the "Website Generator" desktop app. Your job is to create, modify, and improve web projects. You have full filesystem access to the project directory. Always write code directly — do not just describe changes. Use modern web frameworks (Vite, React, etc.) and create production-quality code. When creating a new project, scaffold it fully with package.json, install dependencies, and ensure it runs with "npm run dev". IMPORTANT: Always use "npm install --legacy-peer-deps" instead of plain "npm install" to avoid peer dependency conflicts. CRITICAL: NEVER start dev servers yourself — do NOT run "wrangler pages dev", "npm run dev", "npm start", or any long-running server command. The desktop app starts the dev server automatically. Running one yourself will hang forever because the process never exits. Read AGENTS.md in the project directory for full instructions.`;
       contextPrompt = sysPrompt + '\n\n' + contextPrompt;
     }
 
@@ -153,6 +153,11 @@ class AIBackend {
 
         for (const line of lines) {
           if (!line.trim()) continue;
+          // Detect rate limit messages (plain text, not JSON)
+          if (this._isRateLimit(line)) {
+            onEvent({ type: 'rate_limit', text: line.trim(), resetInfo: this._parseResetTime(line) });
+            continue;
+          }
           const parsed = this.parseClaudeEvent(line);
           if (parsed) {
             if (parsed.type === 'text') fullText += parsed.text;
@@ -163,6 +168,10 @@ class AIBackend {
 
       child.stderr.on('data', (data) => {
         const text = data.toString();
+        if (this._isRateLimit(text)) {
+          onEvent({ type: 'rate_limit', text: text.trim(), resetInfo: this._parseResetTime(text) });
+          return;
+        }
         if (!text.includes('ExperimentalWarning') && !text.includes('Debugger')) {
           onEvent({ type: 'status', text: text.trim() });
         }
@@ -317,6 +326,10 @@ class AIBackend {
 
       child.stderr.on('data', (data) => {
         const text = data.toString();
+        if (this._isRateLimit(text)) {
+          onEvent({ type: 'rate_limit', text: text.trim(), resetInfo: this._parseResetTime(text) });
+          return;
+        }
         if (!text.includes('Warning') && !text.includes('ExperimentalWarning')) {
           onEvent({ type: 'status', text: text.trim() });
         }
@@ -354,6 +367,23 @@ class AIBackend {
         reject(new Error(this.friendlySpawnError(err, 'Codex CLI')));
       });
     });
+  }
+
+  _isRateLimit(text) {
+    if (!text) return false;
+    // Only match the actual rate limit banner text from Claude/Codex CLIs
+    return /you've hit your limit/i.test(text) ||
+      /usage limit|plan limit/i.test(text);
+  }
+
+  _parseResetTime(text) {
+    // Try to extract reset time like "resets 10pm (America/New_York)"
+    var match = text.match(/resets?\s+(\d{1,2}(?::\d{2})?\s*(?:am|pm))/i);
+    if (match) return match[1];
+    // Try "retry after X seconds"
+    var retryMatch = text.match(/retry\s+after\s+(\d+)\s*s/i);
+    if (retryMatch) return retryMatch[1] + 's';
+    return null;
   }
 
   stopProject(projectName) {

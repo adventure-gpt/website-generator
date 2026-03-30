@@ -29,10 +29,12 @@ Each project is self-contained in its own directory with package.json, wrangler.
 Full authenticated CLI access to GitHub (`gh`) and Cloudflare (`wrangler`). Both pre-authenticated. You run all infrastructure ops yourself. {{USER_NAME}} never touches terminal or dashboard.
 
 ## WORKFLOWS
-New: scaffold Vite React → install deps with --legacy-peer-deps (tailwind, pwa, bcryptjs) → configure vite.config.js → PWA manifest + icons → wrangler.toml + D1 create → schema.sql → auth functions → ALL app code → git init → `wrangler pages dev -- npm run dev`
+New: scaffold Vite React → install deps with --legacy-peer-deps (tailwind, pwa, bcryptjs) → configure vite.config.js → PWA manifest + icons → wrangler.toml + D1 create → schema.sql → auth functions → ALL app code → git init → tell {{USER_NAME}} what you built
 Deploy: build → pages project create → schema remote → deploy → gh repo create+push → tell {{USER_NAME}} the URL
 Update: build → schema if changed → deploy → git push
 Delete: confirm → d1 delete → pages delete → gh repo delete → rm local
+
+**CRITICAL: NEVER start dev servers.** Do not run `wrangler pages dev`, `npm run dev`, `npm start`, or any long-running server process. The desktop app starts the dev server automatically. Running one yourself will hang forever.
 
 ## CODE QUALITY
 No placeholders/TODOs/truncation. Every feature works end-to-end. Empty states warm and inviting. Semantic HTML, WCAG AA, focus rings, alt text. Consistent Tailwind palette (3 color families max), mobile-first, dark mode. Standalone-aware navigation.

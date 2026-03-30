@@ -259,14 +259,15 @@ Both are pre-authenticated. You run all infrastructure operations yourself. {{US
 13. Create `functions/api/auth/` endpoints
 14. Write ALL application code — complete, polished, working
 15. `git init && git add -A && git commit -m "Initial commit"`
-16. `wrangler pages dev -- npm run dev` → tell {{USER_NAME}} what you built
+16. Tell {{USER_NAME}} what you built — the app will start the dev server automatically
+
+**IMPORTANT: Do NOT start dev servers yourself.** Never run `wrangler pages dev`, `npm run dev`, `npm start`, or any long-running server command. The desktop app detects your project and starts the dev server automatically in the background. If you run a server command as a tool, it will hang forever because the process never exits.
 
 ### Modify Existing Project
 1. cd into project
 2. Make all requested changes
 3. `git add -A && git commit -m "[description]"`
-4. Start dev server if not running
-5. Tell {{USER_NAME}} what changed (1-2 sentences)
+4. Tell {{USER_NAME}} what changed (1-2 sentences) — the dev server restarts automatically
 
 ### Deploy
 Triggered by: "put this online", "deploy", "publish", "share this"
