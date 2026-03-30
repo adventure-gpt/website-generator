@@ -277,6 +277,7 @@ app.whenReady().then(() => {
   if (settings.cloudflareAccountId) {
     deployer.setAccountId(settings.cloudflareAccountId);
     aiBackend.setCloudflareAccountId(settings.cloudflareAccountId);
+    devServer.setCloudflareAccountId(settings.cloudflareAccountId);
   }
 
   buildAppMenu();
@@ -455,8 +456,10 @@ ipcMain.handle('project:set-settings', (_event, name, settings) => {
 });
 
 // ── IPC: Dev Server ──────────────────────────────────────────
-ipcMain.handle('devserver:start', async () => {
-  const project = projectManager.getActiveProject();
+ipcMain.handle('devserver:start', async (_event, projectName) => {
+  const project = projectName
+    ? projectManager.getProjectByName(projectName)
+    : projectManager.getActiveProject();
   if (!project) throw new Error('No active project');
 
   return devServer.start(project.path, project.name, (evt) => {
@@ -464,15 +467,17 @@ ipcMain.handle('devserver:start', async () => {
   });
 });
 
-ipcMain.handle('devserver:stop', () => {
-  const project = projectManager.getActiveProject();
+ipcMain.handle('devserver:stop', (_event, projectName) => {
+  const project = projectName
+    ? projectManager.getProjectByName(projectName)
+    : projectManager.getActiveProject();
   if (project) devServer.stop(project.name);
 });
 
-ipcMain.handle('devserver:url', () => {
-  const project = projectManager.getActiveProject();
-  if (!project) return null;
-  return devServer.getUrl(project.name);
+ipcMain.handle('devserver:url', (_event, projectName) => {
+  const name = projectName || (projectManager.getActiveProject() || {}).name;
+  if (!name) return null;
+  return devServer.getUrl(name);
 });
 
 // ── IPC: Deploy ──────────────────────────────────────────────
@@ -571,6 +576,7 @@ ipcMain.handle('settings:set', (_event, settings) => {
   if (settings.cloudflareAccountId !== undefined) {
     deployer.setAccountId(settings.cloudflareAccountId);
     aiBackend.setCloudflareAccountId(settings.cloudflareAccountId);
+    devServer.setCloudflareAccountId(settings.cloudflareAccountId);
   }
   if (settings.backend !== undefined) {
     aiBackend.setBackend(settings.backend);

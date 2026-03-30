@@ -1,4 +1,4 @@
-<!-- template-version: 3 -->
+<!-- template-version: 8 -->
 # CLAUDE.md — {{USER_NAME}}'s Web Development Environment
 # NOTE: The canonical instructions are in AGENTS.md. This is a Claude Code fallback.
 

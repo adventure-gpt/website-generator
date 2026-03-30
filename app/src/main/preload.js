@@ -20,9 +20,9 @@ contextBridge.exposeInMainWorld('api', {
   reorderProjects: (names) => ipcRenderer.invoke('project:reorder', names),
 
   // Dev Server
-  startDevServer: () => ipcRenderer.invoke('devserver:start'),
-  stopDevServer: () => ipcRenderer.invoke('devserver:stop'),
-  getDevServerUrl: () => ipcRenderer.invoke('devserver:url'),
+  startDevServer: (projectName) => ipcRenderer.invoke('devserver:start', projectName),
+  stopDevServer: (projectName) => ipcRenderer.invoke('devserver:stop', projectName),
+  getDevServerUrl: (projectName) => ipcRenderer.invoke('devserver:url', projectName),
 
   // Deploy
   deploy: () => ipcRenderer.invoke('deploy:start'),

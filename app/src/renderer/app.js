@@ -796,8 +796,11 @@ function setupAPIListeners() {
         if (isActive) showPreview(event.url);
         break;
       case 'stopped':
-        targetPS.devServerUrl = null;
-        if (isActive) hidePreview();
+        // Only clear if no new server has already started (generation guard in dev-server.js handles this)
+        if (targetPS.devServerUrl) {
+          targetPS.devServerUrl = null;
+          if (isActive) hidePreview(pn);
+        }
         break;
       case 'status':
         break;
@@ -1820,11 +1823,9 @@ async function checkDevServer() {
   var targetPS = getPS(targetProject);
   if (targetPS.devServerStarting) return;
 
-  targetPS.devServerStarting = true;
-  updatePreviewStatus('loading');
-
   try {
-    var url = await window.api.getDevServerUrl();
+    // Check if already running
+    var url = await window.api.getDevServerUrl(targetProject);
     if (state.activeProject !== targetProject) return;
 
     if (url) {
@@ -1833,15 +1834,21 @@ async function checkDevServer() {
       return;
     }
 
-    var newUrl = await window.api.startDevServer();
+    // Need to start — now show loading
+    targetPS.devServerStarting = true;
+    if (state.activeProject === targetProject) updatePreviewStatus('loading');
+
+    var newUrl = await window.api.startDevServer(targetProject);
     if (state.activeProject !== targetProject) return;
 
     if (newUrl) {
       targetPS.devServerUrl = newUrl;
-      showPreview(newUrl);
+      if (state.activeProject === targetProject) showPreview(newUrl);
+    } else if (state.activeProject === targetProject) {
+      updatePreviewStatus(null); // Clear loading if server returned null
     }
   } catch (e) {
-    // Project may not have package.json yet — that's fine
+    if (state.activeProject === targetProject) updatePreviewStatus(null);
   } finally {
     targetPS.devServerStarting = false;
   }
@@ -1850,20 +1857,25 @@ async function checkDevServer() {
 function showPreview(url) {
   var iframe = $('#preview-iframe');
   var empty = $('#preview-empty');
-  iframe.src = url;
+  // Only set src if it actually changed — prevents unnecessary iframe reloads
+  if (iframe.src !== url && iframe.getAttribute('src') !== url) {
+    iframe.src = url;
+  }
   iframe.classList.remove('hidden');
   empty.classList.add('hidden');
   updatePreviewStatus('loaded');
   renderProjectList();
 }
 
-function hidePreview() {
+function hidePreview(projectName) {
   var iframe = $('#preview-iframe');
   var empty = $('#preview-empty');
   iframe.classList.add('hidden');
   iframe.src = '';
   empty.classList.remove('hidden');
-  aps().devServerUrl = null;
+  // Clear the specific project's URL, not whatever is active right now
+  var ps = projectName ? getPS(projectName) : aps();
+  ps.devServerUrl = null;
   updatePreviewStatus(null);
   renderProjectList();
 }
