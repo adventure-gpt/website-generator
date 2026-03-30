@@ -217,9 +217,16 @@ class ProjectManager {
     const templateFiles = ['AGENTS.md', 'CLAUDE.md'];
     for (const file of templateFiles) {
       const dest = path.join(projectDir, file);
-      if (fs.existsSync(dest)) continue; // Don't overwrite existing files
       const src = path.join(templateDir, file);
       if (!fs.existsSync(src)) continue;
+
+      // Check if we should overwrite: compare template versions
+      if (fs.existsSync(dest)) {
+        const srcVersion = this._getTemplateVersion(src);
+        const destVersion = this._getTemplateVersion(dest);
+        if (srcVersion <= destVersion) continue; // Already up to date
+      }
+
       let content = fs.readFileSync(src, 'utf8');
       for (const [placeholder, value] of Object.entries(replacements)) {
         content = content.split(placeholder).join(value);
@@ -258,6 +265,14 @@ class ProjectManager {
     const project = this.getActiveProject();
     if (project) this._ensureTemplates(project.path);
     return project;
+  }
+
+  _getTemplateVersion(filePath) {
+    try {
+      const first = fs.readFileSync(filePath, 'utf8').substring(0, 100);
+      const match = first.match(/template-version:\s*(\d+)/);
+      return match ? parseInt(match[1], 10) : 0;
+    } catch { return 0; }
   }
 
   _ensureTemplates(projectDir) {

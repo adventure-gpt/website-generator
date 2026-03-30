@@ -743,9 +743,14 @@ function setupAPIListeners() {
         if (!isActive) ps.hasNewActivity = true;
         break;
       }
-      case 'result':
-        // Nothing to persist for result metadata
+      case 'result': {
+        // Result marks end of a Claude turn — finalize current message, start fresh for next turn
+        var rl = getLiveMsg(evtProject);
+        if (rl.content || (rl.tools && rl.tools.length > 0)) {
+          newLiveMsg(evtProject);
+        }
         break;
+      }
       case 'status': {
         var sl = getLiveMsg(evtProject);
         sl.tools.push({ name: 'system', detail: event.text || '' });
