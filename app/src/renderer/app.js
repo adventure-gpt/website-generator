@@ -775,7 +775,8 @@ function setupAPIListeners() {
     if (event.type === 'done') {
       renderMessages();
       restoreProjectUI(ps);
-      checkDevServer();
+      // Only check dev server if we don't already have one running
+      if (!ps.devServerUrl) checkDevServer();
     } else {
       renderMessages();
     }
@@ -1402,15 +1403,69 @@ function createTimestamp(ts) {
 function startEditMessage(wrapper, bubble, originalText, msgIndex) {
   if (aps().isGenerating) return;
 
+  // Expand bubble to max width while editing
+  wrapper.classList.add('editing');
+
   // Replace bubble content with a textarea
   var textarea = el('textarea', { className: 'edit-textarea' });
   textarea.value = originalText;
+
+  // Attachment preview area for edit mode
+  var editAttachments = [];
+  var editAttachPreview = el('div', { className: 'edit-attach-preview' });
+
+  // Carry over existing attachments from the original message
+  var messages = state.messages[state.activeProject] || [];
+  var originalMsg = messages[msgIndex];
+  if (originalMsg && originalMsg.attachments) {
+    for (var ei = 0; ei < originalMsg.attachments.length; ei++) {
+      editAttachments.push(originalMsg.attachments[ei]);
+    }
+  }
+
+  function renderEditAttachments() {
+    editAttachPreview.textContent = '';
+    for (var i = 0; i < editAttachments.length; i++) {
+      (function (idx) {
+        var att = editAttachments[idx];
+        var tag = el('span', { className: 'edit-attach-tag' });
+        if (att.type === 'image' && att.dataUrl) {
+          var thumb = el('img', { src: att.dataUrl, className: 'edit-attach-thumb' });
+          tag.appendChild(thumb);
+        }
+        tag.appendChild(el('span', { textContent: att.name || 'image' }));
+        var removeBtn = el('button', { className: 'edit-attach-remove', textContent: '\u00d7' });
+        removeBtn.addEventListener('click', function () {
+          editAttachments.splice(idx, 1);
+          renderEditAttachments();
+        });
+        tag.appendChild(removeBtn);
+        editAttachPreview.appendChild(tag);
+      })(i);
+    }
+  }
+  renderEditAttachments();
+
+  var attachBtn = el('button', { className: 'btn btn-ghost btn-sm', textContent: '+ Image' });
+  attachBtn.addEventListener('click', async function () {
+    var files = await window.api.selectFiles();
+    if (!files) return;
+    for (var fi = 0; fi < files.length; fi++) {
+      var f = files[fi];
+      if (f.dataUrl) {
+        editAttachments.push({ type: 'image', name: f.name, dataUrl: f.dataUrl });
+      }
+    }
+    renderEditAttachments();
+  });
+
   var saveBtn = el('button', { className: 'btn btn-primary btn-sm', textContent: 'Save & Resend' });
   var cancelBtn = el('button', { className: 'btn btn-ghost btn-sm', textContent: 'Cancel' });
-  var btnRow = el('div', { className: 'edit-actions' }, [cancelBtn, saveBtn]);
+  var btnRow = el('div', { className: 'edit-actions' }, [attachBtn, cancelBtn, saveBtn]);
 
   bubble.textContent = '';
   bubble.appendChild(textarea);
+  bubble.appendChild(editAttachPreview);
   bubble.appendChild(btnRow);
   textarea.focus();
   textarea.style.height = textarea.scrollHeight + 'px';
@@ -1420,23 +1475,49 @@ function startEditMessage(wrapper, bubble, originalText, msgIndex) {
     textarea.style.height = textarea.scrollHeight + 'px';
   });
 
+  // Handle paste images into edit textarea
+  textarea.addEventListener('paste', function (e) {
+    var items = e.clipboardData && e.clipboardData.items;
+    if (!items) return;
+    for (var pi = 0; pi < items.length; pi++) {
+      if (items[pi].type.indexOf('image') !== -1) {
+        e.preventDefault();
+        var blob = items[pi].getAsFile();
+        var reader = new FileReader();
+        reader.onload = function (ev) {
+          editAttachments.push({ type: 'image', name: 'pasted-image.png', dataUrl: ev.target.result });
+          renderEditAttachments();
+        };
+        reader.readAsDataURL(blob);
+        return;
+      }
+    }
+  });
+
   cancelBtn.addEventListener('click', function () {
+    wrapper.classList.remove('editing');
     bubble.textContent = '';
     renderInline(originalText, bubble);
   });
 
   saveBtn.addEventListener('click', function () {
     var newText = textarea.value.trim();
-    if (!newText) return;
+    if (!newText && editAttachments.length === 0) return;
+
+    wrapper.classList.remove('editing');
 
     // Truncate messages: remove this message and everything after it
-    var messages = state.messages[state.activeProject] || [];
-    state.messages[state.activeProject] = messages.slice(0, msgIndex);
+    var msgs = state.messages[state.activeProject] || [];
+    state.messages[state.activeProject] = msgs.slice(0, msgIndex);
     window.api.saveChat(state.activeProject, state.messages[state.activeProject]);
 
-    // Re-render and send the edited message
+    // Set up pending attachments from edit
+    pendingAttachments = editAttachments.slice();
+    renderAttachmentPreview();
+
+    // Re-render and send
     renderMessages();
-    $('#chat-input').value = newText;
+    $('#chat-input').value = newText || '';
     sendMessage();
   });
 }
@@ -1776,18 +1857,37 @@ async function sendMessage() {
   $('#send-btn').disabled = true;
 
   aps().isGenerating = true;
+  aps()._lastEventTime = Date.now();
   input.disabled = false; // Keep input enabled for queueing
   $('#stop-btn').classList.remove('hidden');
   $('#deploy-btn').disabled = true;
 
   // Create a live message in data so dots show immediately via renderMessages
-  getLiveMsg(state.activeProject);
+  var sendProject = state.activeProject;
+  getLiveMsg(sendProject);
   renderMessages();
   scrollToBottom();
 
+  // Safety timeout: if no events received for 3 minutes, auto-stop
+  var safetyTimer = setInterval(function () {
+    var ps = getPS(sendProject);
+    if (!ps.isGenerating) { clearInterval(safetyTimer); return; }
+    if (Date.now() - (ps._lastEventTime || 0) > 180000) {
+      clearInterval(safetyTimer);
+      ps.isGenerating = false;
+      finalizeLiveMsg(sendProject);
+      if (state.activeProject === sendProject) {
+        renderMessages();
+        restoreProjectUI(ps);
+      }
+      renderProjectList();
+    }
+  }, 10000);
+
   try {
-    await window.api.sendMessage(fullPrompt, state.activeProject);
+    await window.api.sendMessage(fullPrompt, sendProject);
   } catch (err) {
+    clearInterval(safetyTimer);
     addStatusMessage('Failed to send: ' + err.message);
     aps().isGenerating = false;
     input.disabled = false;
@@ -1857,14 +1957,15 @@ async function checkDevServer() {
 function showPreview(url) {
   var iframe = $('#preview-iframe');
   var empty = $('#preview-empty');
-  // Only set src if it actually changed — prevents unnecessary iframe reloads
-  if (iframe.src !== url && iframe.getAttribute('src') !== url) {
+  // Normalize URLs for comparison (browser adds trailing slash)
+  var currentSrc = (iframe.src || '').replace(/\/+$/, '');
+  var newSrc = (url || '').replace(/\/+$/, '');
+  if (currentSrc !== newSrc) {
     iframe.src = url;
   }
   iframe.classList.remove('hidden');
   empty.classList.add('hidden');
   updatePreviewStatus('loaded');
-  renderProjectList();
 }
 
 function hidePreview(projectName) {

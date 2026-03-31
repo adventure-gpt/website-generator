@@ -1203,6 +1203,33 @@ html, body {
 .edit-textarea:focus {
   border-color: var(--accent);
 }
+/* Expand user message to max width while editing */
+.message-user.editing { width: 100%; }
+.message-user.editing .message-bubble { max-width: 100%; width: 100%; }
+
+.edit-attach-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.edit-attach-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: var(--bg-elevated);
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.edit-attach-thumb { width: 24px; height: 24px; object-fit: cover; border-radius: 3px; }
+.edit-attach-remove {
+  background: none; border: none; color: var(--text-tertiary); cursor: pointer;
+  font-size: 14px; padding: 0 2px; font-family: inherit;
+}
+.edit-attach-remove:hover { color: var(--error); }
+
 .edit-actions {
   display: flex;
   gap: 6px;

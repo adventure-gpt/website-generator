@@ -186,9 +186,13 @@ THE MOST COMMON MISTAKE: Sending messages like "Now let me also check the..." or
       const child = spawn('claude', args, { cwd, shell: true, stdio: ['pipe', 'pipe', 'pipe'], env });
       this.activeProcesses.set(projectName, child);
 
-      // Send prompt via stdin (safe for any content)
-      child.stdin.write(prompt);
-      child.stdin.end();
+      // Send prompt via stdin — handle backpressure for large prompts
+      var ok = child.stdin.write(prompt);
+      if (!ok) {
+        child.stdin.once('drain', () => child.stdin.end());
+      } else {
+        child.stdin.end();
+      }
 
       let buffer = '';
       let fullText = '';
@@ -288,6 +292,22 @@ THE MOST COMMON MISTAKE: Sending messages like "Now let me also check the..." or
         if (typeof content === 'string') return { type: 'text', text: content };
       }
 
+      // API errors (overloaded, rate limit, server errors, etc.)
+      if (obj.type === 'error' && obj.error) {
+        const errType = obj.error.type || '';
+        const errMsg = obj.error.message || 'Unknown error';
+        if (errType === 'overloaded_error' || errMsg.includes('Overloaded')) {
+          return { type: 'rate_limit', text: 'Service is busy right now. Please try again in a moment.' };
+        }
+        if (errType === 'rate_limit_error' || errMsg.includes('rate limit')) {
+          return { type: 'rate_limit', text: errMsg, resetInfo: this._parseResetTime(errMsg) };
+        }
+        if (errType === 'api_error' || errMsg.includes('Internal server error')) {
+          return { type: 'rate_limit', text: 'Service encountered an error. Please try again in a moment.' };
+        }
+        return null; // Suppress other API errors from showing as text
+      }
+
       // System/status events from Claude Code stream
       if (obj.type === 'system') {
         const msg = obj.message || obj.text || '';
@@ -334,8 +354,13 @@ THE MOST COMMON MISTAKE: Sending messages like "Now let me also check the..." or
       const child = spawn('codex', args, { cwd, shell: true, stdio: ['pipe', 'pipe', 'pipe'], env });
       this.activeProcesses.set(projectName, child);
 
-      child.stdin.write(prompt);
-      child.stdin.end();
+      // Handle backpressure for large prompts
+      var ok2 = child.stdin.write(prompt);
+      if (!ok2) {
+        child.stdin.once('drain', () => child.stdin.end());
+      } else {
+        child.stdin.end();
+      }
 
       let fullText = '';
       let stdoutBuf = '';
@@ -418,9 +443,11 @@ THE MOST COMMON MISTAKE: Sending messages like "Now let me also check the..." or
 
   _isRateLimit(text) {
     if (!text) return false;
-    // Only match the actual rate limit banner text from Claude/Codex CLIs
     return /you've hit your limit/i.test(text) ||
-      /usage limit|plan limit/i.test(text);
+      /usage limit|plan limit/i.test(text) ||
+      /overloaded/i.test(text) ||
+      /API Error:\s*(429|500|502|503|529)/i.test(text) ||
+      /internal server error/i.test(text);
   }
 
   _parseResetTime(text) {
