@@ -29,7 +29,7 @@
     ],
     "extraResources": [
       {
-        "from": "../installer/templates",
+        "from": ".",
         "to": "templates",
         "filter": [
           "AGENTS.md",
