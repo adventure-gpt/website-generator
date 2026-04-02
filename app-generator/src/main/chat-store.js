@@ -51,6 +51,38 @@ class ChatStore {
     return messages;
   }
 
+  /**
+   * Returns the forks file path for a project.
+   */
+  forksPath(projectDir) {
+    const appgenDir = path.join(projectDir, '.appgen');
+    if (!fs.existsSync(appgenDir)) {
+      fs.mkdirSync(appgenDir, { recursive: true });
+    }
+    return path.join(appgenDir, 'forks.json');
+  }
+
+  /**
+   * Load fork points for a project.
+   */
+  loadForks(projectDir) {
+    const file = this.forksPath(projectDir);
+    try {
+      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      return data.forkPoints || {};
+    } catch {
+      return {};
+    }
+  }
+
+  /**
+   * Save fork points for a project.
+   */
+  saveForks(projectDir, forks) {
+    const file = this.forksPath(projectDir);
+    fs.writeFileSync(file, JSON.stringify({ version: 1, forkPoints: forks }, null, 2));
+  }
+
   // ── Claude Code CLI Import ──────────────────────────────────
 
   /**

@@ -1200,6 +1200,30 @@ html, body {
   background: var(--bg-elevated);
 }
 
+/* ═══════════ Fork Navigator ═══════════ */
+.fork-navigator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 0;
+  margin: -4px 0 4px 0;
+}
+.fork-nav-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 2px 8px;
+  font-size: 10px;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.fork-nav-btn:hover:not(:disabled) { background: var(--bg-hover); color: var(--text-primary); }
+.fork-nav-btn:disabled { opacity: 0.3; cursor: default; }
+.fork-nav-label { font-size: 11px; color: var(--text-secondary); min-width: 40px; text-align: center; }
+
 /* ═══════════ Edit Message ═══════════ */
 .edit-textarea {
   width: 100%;

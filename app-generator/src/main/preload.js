@@ -40,6 +40,9 @@ contextBridge.exposeInMainWorld('api', {
   importChats: (claudeDir, sessionFiles) => ipcRenderer.invoke('chat:import', claudeDir, sessionFiles),
   detectProjectChatImport: (projectName) => ipcRenderer.invoke('chat:detect-project-import', projectName),
   importProjectChats: (projectName) => ipcRenderer.invoke('chat:import-project', projectName),
+  loadForks: (projectName) => ipcRenderer.invoke('chat:load-forks', projectName),
+  saveForks: (projectName, forks) => ipcRenderer.invoke('chat:save-forks', projectName, forks),
+  clearAIHistory: (projectName) => ipcRenderer.invoke('ai:clear-history', projectName),
 
   // Project settings
   getProjectSettings: (name) => ipcRenderer.invoke('project:get-settings', name),

@@ -7,6 +7,7 @@ var state = {
   projects: [],
   activeProject: null,
   messages: {},
+  forks: {},
   backend: 'claude',
   projectState: {},  // projectName → per-project state
 };
@@ -1018,6 +1019,15 @@ async function selectProject(name) {
     }
   }
 
+  // Load forks from disk on first visit
+  if (!state.forks[name]) {
+    try {
+      state.forks[name] = await window.api.loadForks(name);
+    } catch (e) {
+      state.forks[name] = {};
+    }
+  }
+
   // Scan recent messages for deploy URLs before rendering
   if (!ps.deployedUrl) {
     var recent = (state.messages[name] || []).slice(-10);
@@ -1075,6 +1085,7 @@ async function deleteProject(name) {
   try {
     await window.api.deleteProject(name);
     delete state.messages[name];
+    delete state.forks[name];
     delete state.projectState[name];
     if (state.activeProject === name) {
       state.activeProject = null;
@@ -1112,6 +1123,7 @@ function renderMessages() {
 
   // Build a filtered view for rendering (don't mutate the source array)
   var messages = [];
+  var rawIndexMap = [];
   var lastLiveIndex = -1;
 
   // Find the last _live message index
@@ -1131,16 +1143,18 @@ function renderMessages() {
     if (!isGen && m._live) {
       if (!hasContent && !hasTools) continue; // skip empty
       messages.push(m); // render as normal (createAssistantBubble handles it)
+      rawIndexMap.push(ri);
       continue;
     }
 
     // If generating, only show the LAST _live message as live
     if (m._live && ri !== lastLiveIndex) {
-      if (hasContent || hasTools) messages.push(m); // show as normal
+      if (hasContent || hasTools) { messages.push(m); rawIndexMap.push(ri); }
       continue;
     }
 
     messages.push(m);
+    rawIndexMap.push(ri);
   }
 
   if (messages.length === 0) {
@@ -1150,12 +1164,18 @@ function renderMessages() {
     return;
   }
 
+  var projectForks = state.forks[state.activeProject] || {};
   for (var i = 0; i < messages.length; i++) {
     var msg = messages[i];
+    var rawIdx = rawIndexMap[i];
     // Filter out compaction/system artifacts that may have been imported
     if (msg.role === 'user' && msg.content && isCompactionMessage(msg.content)) continue;
     if (msg.role === 'user') {
-      container.appendChild(createUserBubble(msg.content, msg, i));
+      container.appendChild(createUserBubble(msg.content, msg, rawIdx));
+      // Show fork navigator if this message has multiple branches
+      if (projectForks[rawIdx] && projectForks[rawIdx].branches.length > 1) {
+        container.appendChild(createForkNavigator(rawIdx, projectForks[rawIdx]));
+      }
     } else if (msg.role === 'assistant' && msg._live) {
       // Live message — render with streaming indicators
       container.appendChild(createLiveBubble(msg));
@@ -1403,6 +1423,89 @@ function createTimestamp(ts) {
 }
 
 // ── Edit Message ─────────────────────────────────────────────
+function createForkNavigator(rawIndex, forkPoint) {
+  var isGen = state.activeProject && getPS(state.activeProject).isGenerating;
+  var activeBranch = forkPoint.activeBranch || 0;
+  var total = forkPoint.branches.length;
+
+  var leftBtn = el('button', { className: 'fork-nav-btn', textContent: '\u25C0' });
+  leftBtn.disabled = activeBranch === 0 || isGen;
+  leftBtn.addEventListener('click', function () {
+    switchBranch(rawIndex, activeBranch - 1);
+  });
+
+  var label = el('span', { className: 'fork-nav-label', textContent: (activeBranch + 1) + ' / ' + total });
+
+  var rightBtn = el('button', { className: 'fork-nav-btn', textContent: '\u25B6' });
+  rightBtn.disabled = activeBranch === total - 1 || isGen;
+  rightBtn.addEventListener('click', function () {
+    switchBranch(rawIndex, activeBranch + 1);
+  });
+
+  return el('div', { className: 'fork-navigator' }, [leftBtn, label, rightBtn]);
+}
+
+function switchBranch(forkIndex, newBranchIndex) {
+  if (!state.activeProject) return;
+  var projectName = state.activeProject;
+  if (getPS(projectName).isGenerating) return;
+
+  if (!state.forks[projectName]) state.forks[projectName] = {};
+  var projectForks = state.forks[projectName];
+  var fork = projectForks[forkIndex];
+  if (!fork) return;
+
+  var oldBranchIndex = fork.activeBranch || 0;
+  if (oldBranchIndex === newBranchIndex) return;
+
+  var msgs = state.messages[projectName] || [];
+
+  // Save current continuation (from forkIndex onward) into the active branch slot
+  var currentContinuation = msgs.slice(forkIndex);
+  // Collect sub-forks that belong to this continuation
+  var subForks = {};
+  var forkKeys = Object.keys(projectForks);
+  for (var ki = 0; ki < forkKeys.length; ki++) {
+    var k = parseInt(forkKeys[ki], 10);
+    if (k > forkIndex) {
+      subForks[k] = projectForks[k];
+    }
+  }
+  fork.branches[oldBranchIndex] = { messages: currentContinuation, forks: subForks };
+
+  // Remove sub-forks from the main forks object
+  for (var ki2 = 0; ki2 < forkKeys.length; ki2++) {
+    var k2 = parseInt(forkKeys[ki2], 10);
+    if (k2 > forkIndex) {
+      delete projectForks[k2];
+    }
+  }
+
+  // Load the selected branch
+  var selectedBranch = fork.branches[newBranchIndex];
+  if (selectedBranch && selectedBranch.messages) {
+    state.messages[projectName] = msgs.slice(0, forkIndex).concat(selectedBranch.messages);
+    // Restore sub-forks from the selected branch
+    if (selectedBranch.forks) {
+      var restoreKeys = Object.keys(selectedBranch.forks);
+      for (var rki = 0; rki < restoreKeys.length; rki++) {
+        projectForks[restoreKeys[rki]] = selectedBranch.forks[restoreKeys[rki]];
+      }
+    }
+  } else {
+    state.messages[projectName] = msgs.slice(0, forkIndex);
+  }
+
+  fork.activeBranch = newBranchIndex;
+
+  // Persist
+  window.api.saveChat(projectName, state.messages[projectName]);
+  window.api.saveForks(projectName, projectForks);
+  window.api.clearAIHistory(projectName);
+
+  renderMessages();
+}
+
 function startEditMessage(wrapper, bubble, originalText, msgIndex) {
   if (aps().isGenerating) return;
 
@@ -1509,10 +1612,54 @@ function startEditMessage(wrapper, bubble, originalText, msgIndex) {
 
     wrapper.classList.remove('editing');
 
-    // Truncate messages: remove this message and everything after it
-    var msgs = state.messages[state.activeProject] || [];
-    state.messages[state.activeProject] = msgs.slice(0, msgIndex);
-    window.api.saveChat(state.activeProject, state.messages[state.activeProject]);
+    var projectName = state.activeProject;
+    var msgs = state.messages[projectName] || [];
+    if (!state.forks[projectName]) state.forks[projectName] = {};
+    var projectForks = state.forks[projectName];
+
+    // Save the old continuation as a branch before truncating
+    var oldContinuation = msgs.slice(msgIndex);
+    // Collect sub-forks belonging to this continuation
+    var subForks = {};
+    var forkKeys = Object.keys(projectForks);
+    for (var fki = 0; fki < forkKeys.length; fki++) {
+      var fk = parseInt(forkKeys[fki], 10);
+      if (fk > msgIndex) {
+        subForks[fk] = projectForks[fk];
+      }
+    }
+
+    if (projectForks[msgIndex]) {
+      // Fork already exists — save current branch, add new one
+      var existingFork = projectForks[msgIndex];
+      var activeBr = existingFork.activeBranch || 0;
+      existingFork.branches[activeBr] = { messages: oldContinuation, forks: subForks };
+      existingFork.branches.push({ messages: [], forks: {} });
+      existingFork.activeBranch = existingFork.branches.length - 1;
+    } else {
+      // Create new fork: old continuation is branch 0, new empty is branch 1
+      projectForks[msgIndex] = {
+        activeBranch: 1,
+        branches: [
+          { messages: oldContinuation, forks: subForks },
+          { messages: [], forks: {} }
+        ]
+      };
+    }
+
+    // Remove sub-forks from main forks object (they're saved in the branch)
+    for (var fki2 = 0; fki2 < forkKeys.length; fki2++) {
+      var fk2 = parseInt(forkKeys[fki2], 10);
+      if (fk2 > msgIndex) {
+        delete projectForks[fk2];
+      }
+    }
+
+    // Truncate messages
+    state.messages[projectName] = msgs.slice(0, msgIndex);
+    window.api.saveChat(projectName, state.messages[projectName]);
+    window.api.saveForks(projectName, projectForks);
+    window.api.clearAIHistory(projectName);
 
     // Set up pending attachments from edit
     pendingAttachments = editAttachments.slice();

@@ -571,6 +571,22 @@ ipcMain.handle('chat:import-project', (_event, projectName) => {
   return { totalMessages: totalImported };
 });
 
+ipcMain.handle('chat:load-forks', (_event, projectName) => {
+  const project = projectManager.getProjectByName(projectName);
+  if (!project) return {};
+  return chatStore.loadForks(project.path);
+});
+
+ipcMain.handle('chat:save-forks', (_event, projectName, forks) => {
+  const project = projectManager.getProjectByName(projectName);
+  if (!project) return;
+  chatStore.saveForks(project.path, forks);
+});
+
+ipcMain.handle('ai:clear-history', (_event, projectName) => {
+  aiBackend.clearHistory(projectName);
+});
+
 // ── IPC: Settings ────────────────────────────────────────────
 ipcMain.handle('settings:get', () => getSettings());
 
