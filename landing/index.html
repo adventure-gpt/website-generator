@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website Generator — AI-Powered Website Builder</title>
+  <meta name="description" content="Build websites by chatting with AI. Live preview, one-click deploy, desktop app for Windows, macOS, and Linux.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #09090b;
+      --surface: #18181b;
+      --surface-2: #27272a;
+      --border: #3f3f46;
+      --text: #fafafa;
+      --text-muted: #a1a1aa;
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.25);
+      --green: #22c55e;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Nav */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(9, 9, 11, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      font-weight: 800; font-size: 1.15rem;
+      background: linear-gradient(135deg, #818cf8, #6366f1);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a {
+      color: var(--text-muted); text-decoration: none; font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* Hero */
+    .hero {
+      padding: 10rem 2rem 6rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 600px;
+      background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, #818cf8, #a78bfa, #c084fc);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.25rem; color: var(--text-muted);
+      max-width: 600px; margin: 0 auto 2.5rem;
+      position: relative;
+    }
+    .cta-group {
+      display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+      position: relative;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 2rem; border-radius: 12px;
+      font-size: 1rem; font-weight: 600;
+      text-decoration: none; transition: all 0.2s;
+      border: none; cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--accent); color: white;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    .btn-primary:hover {
+      background: #4f46e5;
+      box-shadow: 0 0 30px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-2);
+      transform: translateY(-1px);
+    }
+    .btn svg { width: 20px; height: 20px; }
+
+    .version-badge {
+      display: inline-block; margin-top: 1.5rem;
+      padding: 0.35rem 0.75rem; border-radius: 999px;
+      background: var(--surface); border: 1px solid var(--border);
+      font-size: 0.8rem; color: var(--text-muted);
+    }
+    .version-badge .dot {
+      display: inline-block; width: 6px; height: 6px;
+      background: var(--green); border-radius: 50%;
+      margin-right: 0.4rem; vertical-align: middle;
+    }
+
+    /* Screenshot */
+    .screenshot-section {
+      padding: 0 2rem 6rem;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .screenshot-wrapper {
+      border-radius: 16px; overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+    }
+    .screenshot-bar {
+      height: 40px; background: var(--surface-2);
+      display: flex; align-items: center; padding: 0 1rem; gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .screenshot-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+    }
+    .screenshot-dot:nth-child(1) { background: #ef4444; }
+    .screenshot-dot:nth-child(2) { background: #eab308; }
+    .screenshot-dot:nth-child(3) { background: #22c55e; }
+    .screenshot-body {
+      aspect-ratio: 16/9;
+      background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 50%, #1a1a2e 100%);
+      display: flex; align-items: center; justify-content: center;
+      padding: 3rem;
+    }
+    .mock-ui {
+      width: 100%; height: 100%;
+      display: grid; grid-template-columns: 220px 1fr 1fr; gap: 1px;
+      background: var(--border); border-radius: 8px; overflow: hidden;
+    }
+    .mock-sidebar {
+      background: var(--surface); padding: 1.5rem;
+    }
+    .mock-sidebar .mock-item {
+      padding: 0.5rem 0.75rem; border-radius: 6px;
+      margin-bottom: 0.25rem; font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .mock-sidebar .mock-item.active {
+      background: var(--accent); color: white;
+    }
+    .mock-chat {
+      background: var(--bg); padding: 1.5rem;
+      display: flex; flex-direction: column; justify-content: flex-end; gap: 0.75rem;
+    }
+    .mock-msg {
+      padding: 0.6rem 0.85rem; border-radius: 8px;
+      font-size: 0.7rem; max-width: 80%;
+    }
+    .mock-msg.user {
+      background: var(--accent); color: white; align-self: flex-end;
+    }
+    .mock-msg.ai {
+      background: var(--surface-2); color: var(--text-muted); align-self: flex-start;
+    }
+    .mock-preview {
+      background: white; padding: 1.5rem;
+      display: flex; flex-direction: column; gap: 0.75rem;
+    }
+    .mock-preview-bar {
+      width: 60%; height: 8px; background: #e5e7eb; border-radius: 4px;
+    }
+    .mock-preview-hero {
+      flex: 1; background: linear-gradient(135deg, #818cf8, #c084fc);
+      border-radius: 8px;
+    }
+    .mock-preview-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; height: 60px;
+    }
+    .mock-preview-card {
+      background: #f3f4f6; border-radius: 6px;
+    }
+
+    /* Features */
+    .features {
+      padding: 6rem 2rem;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .features h2 {
+      text-align: center; font-size: 2rem; font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .features .subtitle {
+      text-align: center; color: var(--text-muted);
+      max-width: 500px; margin: 0 auto 3rem;
+    }
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .feature-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 2rem;
+      transition: border-color 0.2s;
+    }
+    .feature-card:hover { border-color: var(--accent); }
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: var(--accent-glow);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.25rem; font-size: 1.5rem;
+    }
+    .feature-card h3 {
+      font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;
+    }
+    .feature-card p {
+      color: var(--text-muted); font-size: 0.9rem;
+    }
+
+    /* How it works */
+    .how-it-works {
+      padding: 6rem 2rem;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .how-it-works .inner {
+      max-width: 800px; margin: 0 auto;
+    }
+    .how-it-works h2 {
+      text-align: center; font-size: 2rem; font-weight: 700;
+      margin-bottom: 3rem;
+    }
+    .steps {
+      display: flex; flex-direction: column; gap: 2rem;
+    }
+    .step {
+      display: flex; gap: 1.5rem; align-items: flex-start;
+    }
+    .step-num {
+      width: 48px; height: 48px; min-width: 48px;
+      border-radius: 12px;
+      background: var(--accent); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1.25rem;
+    }
+    .step h3 { font-weight: 600; margin-bottom: 0.25rem; }
+    .step p { color: var(--text-muted); font-size: 0.95rem; }
+
+    /* Platforms */
+    .platforms {
+      padding: 6rem 2rem;
+      max-width: 1100px; margin: 0 auto;
+      text-align: center;
+    }
+    .platforms h2 {
+      font-size: 2rem; font-weight: 700; margin-bottom: 1rem;
+    }
+    .platforms .subtitle {
+      color: var(--text-muted); margin-bottom: 3rem;
+    }
+    .platform-cards {
+      display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;
+    }
+    .platform-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 2rem 3rem;
+      text-align: center; min-width: 200px;
+    }
+    .platform-card .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .platform-card h3 { font-weight: 600; margin-bottom: 0.25rem; }
+    .platform-card p { color: var(--text-muted); font-size: 0.85rem; }
+
+    /* CTA */
+    .bottom-cta {
+      padding: 6rem 2rem;
+      text-align: center;
+      position: relative;
+    }
+    .bottom-cta::before {
+      content: '';
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 400px;
+      background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .bottom-cta h2 {
+      font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;
+      position: relative;
+    }
+    .bottom-cta p {
+      color: var(--text-muted); margin-bottom: 2rem;
+      position: relative;
+    }
+    .bottom-cta .btn { position: relative; }
+
+    /* Footer */
+    footer {
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted); font-size: 0.85rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 768px) {
+      .mock-ui { grid-template-columns: 1fr; }
+      .mock-sidebar, .mock-preview { display: none; }
+      .nav-links { gap: 1rem; }
+      .platform-cards { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <div class="logo">Website Generator</div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="https://github.com/adventure-gpt/website-generator" target="_blank">GitHub</a>
+        <a href="https://github.com/adventure-gpt/website-generator/releases/latest/download/Website-Generator-Setup.exe" class="btn btn-primary" style="padding: 0.5rem 1.25rem; font-size: 0.85rem;">Download</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>Build websites by<br><span>chatting with AI</span></h1>
+    <p>Describe what you want in plain English. Watch it appear in real-time. Deploy with a single click. No coding required.</p>
+    <div class="cta-group">
+      <a href="https://github.com/adventure-gpt/website-generator/releases/latest/download/Website-Generator-Setup.exe" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download for Windows
+      </a>
+      <a href="https://github.com/adventure-gpt/website-generator" target="_blank" class="btn btn-secondary">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        View on GitHub
+      </a>
+    </div>
+    <div class="version-badge"><span class="dot"></span> v1.3.1 — Windows, macOS & Linux</div>
+  </section>
+
+  <section class="screenshot-section">
+    <div class="screenshot-wrapper">
+      <div class="screenshot-bar">
+        <div class="screenshot-dot"></div>
+        <div class="screenshot-dot"></div>
+        <div class="screenshot-dot"></div>
+      </div>
+      <div class="screenshot-body">
+        <div class="mock-ui">
+          <div class="mock-sidebar">
+            <div class="mock-item active">My Portfolio</div>
+            <div class="mock-item">Coffee Shop</div>
+            <div class="mock-item">Blog</div>
+            <div class="mock-item">Landing Page</div>
+          </div>
+          <div class="mock-chat">
+            <div class="mock-msg user">Create a modern portfolio with a dark theme and smooth animations</div>
+            <div class="mock-msg ai">Building your portfolio now with a sleek dark design, animated hero section, and project showcase grid...</div>
+            <div class="mock-msg user">Add a contact form at the bottom</div>
+            <div class="mock-msg ai">Done! Added a clean contact form with name, email, and message fields.</div>
+          </div>
+          <div class="mock-preview">
+            <div class="mock-preview-bar"></div>
+            <div class="mock-preview-hero"></div>
+            <div class="mock-preview-grid">
+              <div class="mock-preview-card"></div>
+              <div class="mock-preview-card"></div>
+              <div class="mock-preview-card"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <h2>Everything you need</h2>
+    <p class="subtitle">A complete website-building studio, powered by AI, running right on your desktop.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">💬</div>
+        <h3>Chat to Create</h3>
+        <p>Describe your website in plain English. The AI understands your vision and builds it from scratch — layouts, colors, content, and all.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👁</div>
+        <h3>Live Preview</h3>
+        <p>Watch your website take shape in real-time as the AI works. See every change instantly in the built-in preview panel.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🚀</div>
+        <h3>One-Click Deploy</h3>
+        <p>Publish your site to the web with a single click. Get a live URL you can share with anyone, instantly.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📁</div>
+        <h3>Multi-Project</h3>
+        <p>Manage all your websites in one place. Switch between projects seamlessly with the sidebar navigator.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <h3>Full Customization</h3>
+        <p>Iterate with follow-up messages. Change colors, add sections, tweak layouts — just tell the AI what you want different.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Private & Offline</h3>
+        <p>Everything runs on your machine. Your website files stay on your computer. No cloud accounts or subscriptions required.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-it-works" id="how-it-works">
+    <div class="inner">
+      <h2>How it works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div>
+            <h3>Download & Install</h3>
+            <p>Grab the installer for your platform. Takes less than a minute to set up.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div>
+            <h3>Describe Your Website</h3>
+            <p>Open the app, create a project, and type what you want. "Build me a photography portfolio" or "Create a restaurant menu page" — anything goes.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div>
+            <h3>Refine & Perfect</h3>
+            <p>The AI builds it live. Want changes? Just say so. "Make the header bigger" or "Add a testimonials section." Iterate until it's perfect.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div>
+            <h3>Deploy to the Web</h3>
+            <p>Hit deploy and your site goes live with a real URL. Share it with the world in seconds.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="platforms" id="platforms">
+    <h2>Available everywhere</h2>
+    <p class="subtitle">Runs natively on all major platforms.</p>
+    <div class="platform-cards">
+      <div class="platform-card">
+        <div class="icon">🪟</div>
+        <h3>Windows</h3>
+        <p>.exe installer</p>
+      </div>
+      <div class="platform-card">
+        <div class="icon">🍎</div>
+        <h3>macOS</h3>
+        <p>.dmg installer</p>
+      </div>
+      <div class="platform-card">
+        <div class="icon">🐧</div>
+        <h3>Linux</h3>
+        <p>AppImage & .deb</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="bottom-cta">
+    <h2>Ready to build?</h2>
+    <p>Download Website Generator and start creating beautiful websites in minutes.</p>
+    <a href="https://github.com/adventure-gpt/website-generator/releases/latest/download/Website-Generator-Setup.exe" class="btn btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download Now — Free
+    </a>
+  </section>
+
+  <footer>
+    <p>Built with care. Open source on <a href="https://github.com/adventure-gpt/website-generator" target="_blank">GitHub</a>.</p>
+  </footer>
+</body>
+</html>
