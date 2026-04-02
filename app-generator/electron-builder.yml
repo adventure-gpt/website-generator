@@ -1,0 +1,63 @@
+appId: com.appgenerator.app
+productName: App Generator
+artifactName: "App-Generator-Setup-${version}-${arch}.${ext}"
+
+publish:
+  - provider: github
+    owner: adventure-gpt
+    repo: app-generator
+
+extraResources:
+  - from: templates
+    to: templates
+    filter:
+      - "AGENTS.md"
+      - "CLAUDE.md"
+
+directories:
+  output: dist
+
+files:
+  - "src/**/*"
+  - "assets/**/*"
+  - "templates/**/*"
+  - "package.json"
+  - "!**/*.map"
+  - "!**/node_modules/.cache"
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: assets/icon.png
+
+nsis:
+  oneClick: true
+  perMachine: false
+  allowToChangeInstallationDirectory: false
+  deleteAppDataOnUninstall: false
+
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  icon: assets/icon.png
+  category: public.app-category.developer-tools
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+
+dmg:
+  sign: false
+
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  icon: assets/icon.png
+  category: Development
