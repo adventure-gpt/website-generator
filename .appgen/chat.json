@@ -1,0 +1,286 @@
+[
+  {
+    "role": "user",
+    "content": "Build me a desktop app called Website Generator that lets non-technical users build websites by chatting with AI.",
+    "timestamp": 1743280000000
+  },
+  {
+    "role": "assistant",
+    "content": "Done! Built a full Electron desktop app with chat interface, live preview panel, and one-click deploy. Supports Claude Code and Codex CLI.",
+    "timestamp": 1743280060000
+  },
+  {
+    "role": "user",
+    "content": "Fix the copy button, settings gear icons, and align copy to bottom of messages.",
+    "timestamp": 1743281000000
+  },
+  {
+    "role": "assistant",
+    "content": "Fixed all three - SVG via DOM methods, Lucide icon, flex-end alignment.",
+    "timestamp": 1743281060000
+  },
+  {
+    "role": "user",
+    "content": "No dev server confirmation. Port retry spam in chat.",
+    "timestamp": 1743283000000
+  },
+  {
+    "role": "assistant",
+    "content": "Silenced all intermediate output. Just Preview loading and Preview loaded now.",
+    "timestamp": 1743283060000
+  },
+  {
+    "role": "user",
+    "content": "Historical tool usage not showing from imports.",
+    "timestamp": 1743284000000
+  },
+  {
+    "role": "assistant",
+    "content": "Fixed chat-store dropping tools field and filtering tool-only messages.",
+    "timestamp": 1743284060000
+  },
+  {
+    "role": "user",
+    "content": "Remove the Electron title bar. Add guided setup wizard for non-technical users.",
+    "timestamp": 1743286000000
+  },
+  {
+    "role": "assistant",
+    "content": "Frameless window with titleBarOverlay. Full setup wizard with tool install, OAuth auth, profile collection.",
+    "timestamp": 1743286060000
+  },
+  {
+    "role": "user",
+    "content": "Add model selection. Both should default to most powerful.",
+    "timestamp": 1743288000000
+  },
+  {
+    "role": "assistant",
+    "content": "Model dropdowns in settings. Claude defaults Opus, Codex GPT-5.4. Per-project override.",
+    "timestamp": 1743288060000
+  },
+  {
+    "role": "user",
+    "content": "Need message editing and queueing.",
+    "timestamp": 1743289000000
+  },
+  {
+    "role": "assistant",
+    "content": "Inline edit with truncate-resend. Queue auto-sends after current response.",
+    "timestamp": 1743289060000
+  },
+  {
+    "role": "user",
+    "content": "Codex CLI changed. Error: unexpected argument --quiet.",
+    "timestamp": 1743290000000
+  },
+  {
+    "role": "assistant",
+    "content": "Rewrote: codex exec --full-auto --json, stdin prompt, JSONL parsing.",
+    "timestamp": 1743290060000
+  },
+  {
+    "role": "user",
+    "content": "State management is terrible. Concurrent projects dont work.",
+    "timestamp": 1743300000000
+  },
+  {
+    "role": "assistant",
+    "content": "Per-project state via getPS. Data-first architecture. state.messages as single source of truth.",
+    "timestamp": 1743300060000
+  },
+  {
+    "role": "user",
+    "content": "Duplicates, lost tools, inconsistent UI when switching.",
+    "timestamp": 1743301000000
+  },
+  {
+    "role": "assistant",
+    "content": "Eliminated appendChat races. Only saveChat (full overwrite). renderMessages always from data.",
+    "timestamp": 1743301060000
+  },
+  {
+    "role": "user",
+    "content": "Deploy button broken. Deploy URL wrong.",
+    "timestamp": 1743304000000
+  },
+  {
+    "role": "assistant",
+    "content": "Deploy sends chat message to AI. URL detected from AI response, not guessed.",
+    "timestamp": 1743304060000
+  },
+  {
+    "role": "user",
+    "content": "AI speaks too technically. Narrates debugging steps.",
+    "timestamp": 1743310000000
+  },
+  {
+    "role": "assistant",
+    "content": "Forbidden words list, bad examples, three message max. Rules at top of prompt.",
+    "timestamp": 1743310060000
+  },
+  {
+    "role": "user",
+    "content": "AI has no context about the app it runs inside.",
+    "timestamp": 1743311000000
+  },
+  {
+    "role": "assistant",
+    "content": "Full environment context in system prompt: auto dev servers, preview, what to do/not do.",
+    "timestamp": 1743311060000
+  },
+  {
+    "role": "user",
+    "content": "Wrangler projects white screen. Preview reloading.",
+    "timestamp": 1743320000000
+  },
+  {
+    "role": "assistant",
+    "content": "pages_build_output_dir conflict fixed. Dynamic ports. iframe.src comparison fixed.",
+    "timestamp": 1743320060000
+  },
+  {
+    "role": "user",
+    "content": "Rate limits show raw JSON. 529 errors in chat.",
+    "timestamp": 1743330000000
+  },
+  {
+    "role": "assistant",
+    "content": "API error detection. Amber banner for overloaded/rate limit/500.",
+    "timestamp": 1743330060000
+  },
+  {
+    "role": "user",
+    "content": "Auto-updater broken.",
+    "timestamp": 1743340000000
+  },
+  {
+    "role": "assistant",
+    "content": "Fixed filename mismatch, blockmap, versionless artifact.",
+    "timestamp": 1743340060000
+  },
+  {
+    "role": "user",
+    "content": "Need drag-drop project reordering. Preview messages cluttering chat.",
+    "timestamp": 1743350000000
+  },
+  {
+    "role": "assistant",
+    "content": "Drag-drop with persistent order. Status moved to preview panel.",
+    "timestamp": 1743350060000
+  },
+  {
+    "role": "user",
+    "content": "Edit loses images. Sending with image hangs.",
+    "timestamp": 1743360000000
+  },
+  {
+    "role": "assistant",
+    "content": "Edit preserves attachments with image button. Stdin backpressure fixed with drain event.",
+    "timestamp": 1743360060000
+  },
+  {
+    "role": "user",
+    "content": "AI still narrating. Hard refresh needed for changes.",
+    "timestamp": 1743380000000
+  },
+  {
+    "role": "assistant",
+    "content": "FORBIDDEN WORDS enforced. PWA service worker disabled in dev.",
+    "timestamp": 1743380060000
+  },
+  {
+    "role": "user",
+    "content": "App is deployed at https://github.com/adventure-gpt/website-generator/releases. Download: https://github.com/adventure-gpt/website-generator/releases/latest/download/Website-Generator-Setup.exe. Current version v1.3.0.",
+    "timestamp": 1743390000000
+  },
+  {
+    "role": "assistant",
+    "content": "Live and auto-updating via GitHub Releases.",
+    "timestamp": 1743390060000
+  },
+  {
+    "role": "user",
+    "content": "Distribute this app. You must do ALL of these: 1) Make sure the app has auto-update capability via electron-updater. 2) Bump the version number in package.json (increment the patch version from whatever it currently is). 3) Build the Windows installer with electron-builder. 4) Create a GitHub repo (if it does not exist), push the code, tag with the new version, and create a GitHub Release with the installer attached. 5) Create .github/workflows/build.yml that auto-builds for Windows, macOS, and Linux when a tag is pushed, then push it. 6) Build a professional download/landing page and deploy it to Cloudflare Pages. Give me the download page URL and GitHub release URL when done.",
+    "timestamp": 1775104364786
+  },
+  {
+    "role": "assistant",
+    "content": "\n\nBuilding your distribution now...",
+    "tools": [
+      {
+        "name": "Read",
+        "detail": ""
+      },
+      {
+        "name": "Glob",
+        "detail": ""
+      },
+      {
+        "name": "Read",
+        "detail": ""
+      },
+      {
+        "name": "Read",
+        "detail": ""
+      },
+      {
+        "name": "Glob",
+        "detail": ""
+      },
+      {
+        "name": "Glob",
+        "detail": ""
+      },
+      {
+        "name": "Bash",
+        "detail": ""
+      }
+    ],
+    "timestamp": 1775104368946,
+    "_live": true
+  },
+  {
+    "role": "user",
+    "content": "and make sure you update the website so that mac and linux get pointed to the new site instead now",
+    "timestamp": 1775104396100
+  },
+  {
+    "role": "status",
+    "content": "Queued — will send after current response",
+    "timestamp": 1775104396100
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "tools": [
+      {
+        "name": "Edit",
+        "detail": ""
+      },
+      {
+        "name": "Edit",
+        "detail": ""
+      },
+      {
+        "name": "ToolSearch",
+        "detail": ""
+      },
+      {
+        "name": "TodoWrite",
+        "detail": ""
+      },
+      {
+        "name": "Bash",
+        "detail": ""
+      }
+    ],
+    "timestamp": 1775104399716,
+    "_live": true
+  },
+  {
+    "role": "user",
+    "content": "with proper mac and linux download links",
+    "timestamp": 1775104418350
+  }
+]

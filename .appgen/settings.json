@@ -1,0 +1,6 @@
+{
+  "devCommand": "",
+  "buildCommand": "",
+  "devTimeout": 120,
+  "electronTarget": ""
+}

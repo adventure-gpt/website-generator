@@ -1,0 +1,37 @@
+appId: com.websitegenerator.app
+productName: "Website Generator"
+copyright: "Copyright (c) 2026 Website Generator"
+asar: true
+directories:
+  output: dist
+files:
+  - src/**/*
+  - assets/**/*
+  - "!**/node_modules/.cache"
+  - "!**/*.map"
+mac:
+  target:
+    - dmg
+  icon: assets/icon.png
+  category: public.app-category.developer-tools
+linux:
+  target:
+    - AppImage
+    - deb
+  icon: assets/icon.png
+  category: Development
+  synopsis: "AI-powered website builder"
+win:
+  target:
+    - nsis
+  icon: assets/icon.png
+nsis:
+  oneClick: true
+  perMachine: false
+  allowToChangeInstallationDirectory: false
+  createDesktopShortcut: true
+  shortcutName: "Website Generator"
+publish:
+  provider: github
+  owner: adventure-gpt
+  repo: website-generator

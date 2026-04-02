@@ -1,9 +1,13 @@
-name: Build Installers
+name: Build & Release
 
 on:
   push:
-    tags: ['v*']
+    tags:
+      - 'v*'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -11,42 +15,28 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - os: windows-latest
+            platform: win
           - os: macos-latest
             platform: mac
           - os: ubuntu-latest
             platform: linux
-          - os: windows-latest
-            platform: win
+
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Install dependencies
-        working-directory: installer-electron
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
-      - name: Copy templates
-        working-directory: installer-electron
-        run: node scripts/copy-templates.js
-
-      - name: Build
-        working-directory: installer-electron
-        run: npx electron-builder --${{ matrix.platform }} --publish never
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: installer-${{ matrix.platform }}
-          path: |
-            installer-electron/dist/*.dmg
-            installer-electron/dist/*.AppImage
-            installer-electron/dist/*.deb
-            installer-electron/dist/*.exe
-            !installer-electron/dist/*-unpacked
-            !installer-electron/dist/*.blockmap
-          if-no-files-found: warn
+      - name: Build Electron app
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --${{ matrix.platform }} --publish always
