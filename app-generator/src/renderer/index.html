@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; frame-src http://localhost:* https://localhost:*; img-src 'self' data: blob: http://localhost:* https://localhost:*;">
+  <title>App Generator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app" class="app">
+
+    <!-- ═══════════ Setup Screen ═══════════ -->
+    <div id="setup-screen" class="setup-screen hidden">
+      <div class="setup-drag-bar"></div>
+      <div class="setup-card">
+        <div class="setup-icon">&#9670;</div>
+        <h1>App Generator</h1>
+        <p class="setup-subtitle">Setting up your environment...</p>
+
+        <div id="setup-profile" class="setup-profile hidden">
+          <h3 class="setup-section-title">About You</h3>
+          <p class="setup-section-hint">This helps the AI communicate with you naturally.</p>
+          <div class="profile-fields">
+            <div class="profile-field">
+              <label for="setup-user-name">Name</label>
+              <input type="text" id="setup-user-name" class="settings-input" placeholder="e.g. Alex">
+            </div>
+            <div class="profile-field">
+              <label for="setup-user-email">Email</label>
+              <input type="email" id="setup-user-email" class="settings-input" placeholder="e.g. alex@example.com">
+            </div>
+            <div class="profile-field">
+              <label for="setup-user-pronouns">Pronouns</label>
+              <select id="setup-user-pronouns" class="settings-select">
+                <option value="they">They / Them</option>
+                <option value="he">He / Him</option>
+                <option value="she">She / Her</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="setup-tools" class="setup-tools"></div>
+
+        <div id="setup-ai-choice" class="setup-ai-choice hidden">
+          <h3 class="setup-section-title">AI Backend</h3>
+          <p class="setup-section-hint">Choose which AI engine(s) to install. You can always add the other later in Settings.</p>
+          <div class="ai-choice-options">
+            <label class="ai-choice-option">
+              <input type="checkbox" id="ai-choice-claude" value="claude" checked>
+              <div class="ai-choice-info">
+                <span class="ai-choice-name">Claude Code</span>
+                <span class="ai-choice-desc">Anthropic &mdash; best for full-stack web development</span>
+                <span class="ai-choice-pricing">$20/month &mdash; Anthropic Max plan</span>
+              </div>
+            </label>
+            <label class="ai-choice-option">
+              <input type="checkbox" id="ai-choice-codex" value="codex">
+              <div class="ai-choice-info">
+                <span class="ai-choice-name">Codex CLI</span>
+                <span class="ai-choice-desc">OpenAI &mdash; powerful code generation with GPT-5</span>
+                <span class="ai-choice-pricing">$20/month &mdash; OpenAI Plus plan</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div id="setup-auth" class="setup-auth hidden"></div>
+
+        <div id="setup-migration" class="setup-migration hidden">
+          <div class="migration-card">
+            <h3>Import from existing workspace</h3>
+            <p id="migration-detected"></p>
+            <div class="migration-path-row">
+              <input type="text" id="migration-path-input" class="migration-path-field" placeholder="Paste path or use Browse...">
+              <button id="migration-browse-btn" class="btn btn-ghost" style="padding:8px 14px">Browse...</button>
+            </div>
+            <div style="margin-top:12px">
+              <button id="migrate-btn" class="btn btn-primary">Import projects &amp; config</button>
+              <button id="skip-migrate-btn" class="btn btn-ghost">Start fresh</button>
+            </div>
+            <div id="chat-import-section" class="chat-import-section hidden">
+              <h4>Chat History</h4>
+              <p id="chat-import-info"></p>
+              <button id="import-chats-btn" class="btn btn-ghost" style="margin-top:8px">Import chat history</button>
+              <p id="chat-import-result" class="chat-import-result"></p>
+            </div>
+          </div>
+        </div>
+
+        <div id="setup-actions" class="setup-actions">
+          <button id="setup-install-btn" class="btn btn-primary hidden">Install Missing Tools</button>
+          <button id="setup-continue-btn" class="btn btn-primary hidden">Get Started</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════ Main App ═══════════ -->
+    <div id="main-screen" class="main-screen hidden">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <span class="brand-icon">&#9670;</span>
+          <span class="brand-name">App Generator</span>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-section-header">
+            <span class="section-label">Projects</span>
+            <button id="new-project-btn" class="icon-btn" title="New project">+</button>
+          </div>
+          <div id="new-project-input" class="new-project-input hidden">
+            <input type="text" id="new-project-name" placeholder="my-cool-app" spellcheck="false">
+          </div>
+          <div id="project-list" class="project-list"></div>
+        </div>
+
+        <div class="sidebar-footer">
+          <div class="sidebar-footer-row">
+            <div class="sidebar-footer-left">
+              <span id="sidebar-backend-label" class="sidebar-backend-label">Claude Code</span>
+            </div>
+            <button id="settings-btn" class="icon-btn" title="Settings (Ctrl+,)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Content area -->
+      <div class="content">
+
+        <!-- Empty state: no project selected -->
+        <div id="empty-state" class="empty-state">
+          <div class="empty-state-inner">
+            <div class="empty-icon">&#9670;</div>
+            <h2>App Generator</h2>
+            <p>Create a project to start building</p>
+          </div>
+        </div>
+
+        <!-- Project view: chat + preview -->
+        <div id="project-view" class="project-view hidden">
+
+          <!-- Chat panel -->
+          <div class="chat-panel">
+            <div id="chat-messages" class="chat-messages">
+              <!-- Welcome / prompt chips shown when empty -->
+              <div id="chat-welcome" class="chat-welcome">
+                <h3>What would you like to build?</h3>
+                <p>Describe an app in plain English and the AI will build it for you.</p>
+                <div class="prompt-chips">
+                  <button class="chip" data-prompt="A markdown note-taking app with a file browser sidebar">Note-taking app</button>
+                  <button class="chip" data-prompt="A personal finance tracker that imports CSV files and shows spending charts">Finance tracker</button>
+                  <button class="chip" data-prompt="A clipboard manager that runs in the system tray">Clipboard manager</button>
+                  <button class="chip" data-prompt="A local image resizer with drag-and-drop and batch processing">Image tool</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-input-area">
+              <div id="attachment-preview" class="attachment-preview hidden"></div>
+              <div class="chat-input-wrapper">
+                <button id="attach-btn" class="attach-btn" title="Attach files or images">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M14 8l-5.5 5.5a3.5 3.5 0 01-5-5L9 3a2 2 0 013 3L6.5 11.5a.5.5 0 01-1-1L11 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+                <textarea id="chat-input" placeholder="Describe what you want to build..." rows="1"></textarea>
+                <button id="send-btn" class="send-btn" disabled title="Send message">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 14V2M8 2L3 7M8 2L13 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="chat-hints">
+                <span class="hint-text">Enter to send &middot; Shift+Enter for new line &middot; Paste images</span>
+                <button id="stop-btn" class="stop-btn hidden">Stop generating</button>
+              </div>
+              <div class="chat-actions">
+                <button id="launch-app-btn" class="launch-btn" title="Launch app">&#9654; Launch</button>
+                <a id="deploy-live-link" class="deploy-live-link hidden" href="#" title="Open download page"></a>
+                <button id="open-site-btn" class="deploy-btn hidden" title="Open download page in browser">Open Site</button>
+                <button id="project-settings-btn" class="icon-btn" title="Project settings">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                  </svg>
+                </button>
+                <button id="deploy-btn" class="deploy-btn" title="Build installer, publish, and create download page">
+                  Distribute
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hidden compat elements -->
+          <div id="resize-handle" style="display:none"></div>
+          <div style="display:none"><div id="preview-empty"></div><iframe id="preview-iframe"></iframe><div id="preview-body"></div></div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ Settings Modal ═══════════ -->
+    <div id="settings-modal" class="modal-overlay hidden">
+      <div class="modal settings-modal">
+        <div class="modal-header">
+          <h2>Settings <span id="settings-version" class="settings-version"></span></h2>
+          <button id="settings-close-btn" class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+
+          <div class="settings-group">
+            <h3 class="settings-group-title">General</h3>
+            <div class="settings-row">
+              <label class="settings-label">Workspace Path</label>
+              <div class="settings-input-row">
+                <input type="text" id="settings-workspace" class="settings-input" readonly>
+                <button id="settings-workspace-browse" class="btn btn-ghost btn-sm">Browse</button>
+              </div>
+              <p class="settings-hint">Where your projects are stored</p>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h3 class="settings-group-title">AI</h3>
+            <div class="settings-row">
+              <label class="settings-label">Backend</label>
+              <select id="settings-backend" class="settings-select">
+                <option value="claude">Claude Code</option>
+                <option value="codex">Codex CLI</option>
+              </select>
+              <p class="settings-hint">Which AI engine generates your apps</p>
+            </div>
+            <div class="settings-row">
+              <label class="settings-label">Claude Model</label>
+              <select id="settings-claude-model" class="settings-select"></select>
+              <p class="settings-hint">Most powerful: Opus 4.6. Fastest: Haiku 4.5.</p>
+            </div>
+            <div class="settings-row">
+              <label class="settings-label">Codex Model</label>
+              <select id="settings-codex-model" class="settings-select"></select>
+              <p class="settings-hint">Most powerful: GPT-5.4. Best for coding: GPT-5.3 Codex.</p>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h3 class="settings-group-title">Data</h3>
+            <div class="settings-row">
+              <label class="settings-label">Chat History</label>
+              <button id="settings-import-chats" class="btn btn-ghost btn-sm">Import from Claude Code</button>
+              <p id="settings-import-status" class="settings-hint"></p>
+            </div>
+            <div class="settings-row">
+              <label class="settings-label">Setup Wizard</label>
+              <button id="settings-rerun-setup" class="btn btn-ghost btn-sm">Re-run Setup</button>
+              <p class="settings-hint">Check tools, reconnect accounts, change AI backend.</p>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button id="settings-cancel-btn" class="btn btn-ghost">Cancel</button>
+          <button id="settings-save-btn" class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ Project Settings Modal ═══════════ -->
+    <div id="project-settings-modal" class="modal-overlay hidden">
+      <div class="modal settings-modal">
+        <div class="modal-header">
+          <h2 id="project-settings-title">Project Settings</h2>
+          <button id="project-settings-close-btn" class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+
+          <div class="settings-group">
+            <h3 class="settings-group-title">AI Backend</h3>
+            <div class="settings-row">
+              <label class="settings-label">Backend</label>
+              <select id="ps-backend" class="settings-select">
+                <option value="">Use global default</option>
+                <option value="claude">Claude Code</option>
+                <option value="codex">Codex CLI</option>
+              </select>
+            </div>
+            <div class="settings-row">
+              <label class="settings-label">Claude Model</label>
+              <select id="ps-claude-model" class="settings-select"></select>
+            </div>
+            <div class="settings-row">
+              <label class="settings-label">Codex Model</label>
+              <select id="ps-codex-model" class="settings-select"></select>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h3 class="settings-group-title">Dev Server</h3>
+            <div class="settings-row">
+              <label class="settings-label">Dev Command</label>
+              <input type="text" id="ps-dev-command" class="settings-input" placeholder="npm run dev (auto-detected)">
+              <p class="settings-hint">Custom command to start the dev server. Leave empty to auto-detect from package.json.</p>
+            </div>
+            <div class="settings-row">
+              <label class="settings-label">Startup Timeout (seconds)</label>
+              <input type="number" id="ps-dev-timeout" class="settings-input" value="120" min="10" max="600">
+              <p class="settings-hint">How long to wait for the dev server to start before timing out.</p>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h3 class="settings-group-title">Build</h3>
+            <div class="settings-row">
+              <label class="settings-label">Build Command</label>
+              <input type="text" id="ps-build-command" class="settings-input" placeholder="npm run build (auto-detected)">
+              <p class="settings-hint">Command used to build for production/distribution.</p>
+            </div>
+            <div class="settings-row">
+              <label class="settings-label">Framework</label>
+              <input type="text" id="ps-framework" class="settings-input" placeholder="e.g. vite, next, cra">
+              <p class="settings-hint">Optional framework hint for the AI. Auto-detected if left empty.</p>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h3 class="settings-group-title">Distribution</h3>
+            <div class="settings-row">
+              <label class="settings-label">Target Platform</label>
+              <select id="ps-target-platform" class="settings-select">
+                <option value="all">All (Windows, macOS, Linux)</option>
+                <option value="windows">Windows</option>
+                <option value="mac">macOS</option>
+                <option value="linux">Linux</option>
+              </select>
+              <p class="settings-hint">Which platform(s) to build installers for when distributing.</p>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <h3 class="settings-group-title">Custom Domain</h3>
+            <div class="settings-row">
+              <label class="settings-label">Domain Name</label>
+              <div class="settings-input-row">
+                <input type="text" id="ps-custom-domain" class="settings-input" placeholder="e.g. myapp.com">
+                <button id="ps-domain-clear" class="btn btn-ghost btn-sm" title="Remove domain">Clear</button>
+              </div>
+              <p class="settings-hint">Custom domain for your app's download page (deployed on Cloudflare Pages).</p>
+            </div>
+
+            <div id="ps-domain-guide" class="domain-guide">
+              <div class="domain-step">
+                <div class="domain-step-num">1</div>
+                <div class="domain-step-body">
+                  <div class="domain-step-title">Get a domain</div>
+                  <p class="settings-hint">Purchase from a registrar:</p>
+                  <div class="domain-registrars">
+                    <span class="settings-link" data-url="https://dash.cloudflare.com/?to=/:account/domains/register">Cloudflare Registrar</span>
+                    <span class="domain-sep">&middot;</span>
+                    <span class="settings-link" data-url="https://www.namecheap.com/">Namecheap</span>
+                    <span class="domain-sep">&middot;</span>
+                    <span class="settings-link" data-url="https://porkbun.com/">Porkbun</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="domain-step">
+                <div class="domain-step-num">2</div>
+                <div class="domain-step-body">
+                  <div class="domain-step-title">Configure DNS</div>
+                  <p class="settings-hint">Add a CNAME record pointing to your Cloudflare Pages project:</p>
+                  <div class="settings-dns-example">
+                    <code>CNAME @ <span id="ps-dns-target">&lt;project&gt;</span>.pages.dev</code>
+                  </div>
+                </div>
+              </div>
+
+              <div class="domain-step">
+                <div class="domain-step-num">3</div>
+                <div class="domain-step-body">
+                  <div class="domain-step-title">Connect in Cloudflare</div>
+                  <p class="settings-hint">Go to Workers &amp; Pages &gt; your project &gt; Custom Domains, then add your domain. SSL is automatic.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button id="project-settings-cancel-btn" class="btn btn-ghost">Cancel</button>
+          <button id="project-settings-save-btn" class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════ About Modal ═══════════ -->
+    <div id="about-modal" class="modal-overlay hidden">
+      <div class="modal about-modal">
+        <div class="modal-header">
+          <h2>About</h2>
+          <button id="about-close-btn" class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body about-body">
+          <div class="about-icon">&#9670;</div>
+          <h3>App Generator</h3>
+          <p id="about-version" class="about-version"></p>
+          <p class="about-desc">Build desktop apps with AI. Describe what you want and watch it come to life.</p>
+          <div class="about-links">
+            <span class="about-link" id="about-open-data">Open data folder</span>
+          </div>
+          <p class="about-copyright">Built with Electron, Claude Code, and GitHub Releases</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
