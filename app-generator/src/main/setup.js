@@ -9,6 +9,14 @@ const path = require('path');
 
 const PLATFORM = os.platform(); // 'win32', 'darwin', 'linux'
 
+// Ensure Homebrew paths are in PATH on macOS (especially Apple Silicon)
+if (PLATFORM === 'darwin') {
+  const extra = ['/opt/homebrew/bin', '/opt/homebrew/sbin', '/usr/local/bin'];
+  const current = process.env.PATH || '';
+  const missing = extra.filter(p => !current.includes(p));
+  if (missing.length) process.env.PATH = missing.join(':') + ':' + current;
+}
+
 function commandExists(cmd) {
   return new Promise((resolve) => {
     const which = PLATFORM === 'win32' ? 'where' : 'which';

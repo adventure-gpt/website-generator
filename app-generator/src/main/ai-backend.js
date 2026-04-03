@@ -1,5 +1,13 @@
 const { spawn } = require('child_process');
 
+// Ensure Homebrew paths are in PATH on macOS (especially Apple Silicon)
+if (process.platform === 'darwin') {
+  const extra = ['/opt/homebrew/bin', '/opt/homebrew/sbin', '/usr/local/bin'];
+  const current = process.env.PATH || '';
+  const missing = extra.filter(p => !current.includes(p));
+  if (missing.length) process.env.PATH = missing.join(':') + ':' + current;
+}
+
 const CLAUDE_MODELS = [
   { id: 'opus', label: 'Claude Opus 4.6 (Most powerful)', pricing: '$15 / $75 per 1M tokens' },
   { id: 'sonnet', label: 'Claude Sonnet 4.6 (Fast + capable)', pricing: '$3 / $15 per 1M tokens' },
