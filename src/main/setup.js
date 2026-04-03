@@ -9,12 +9,103 @@ const path = require('path');
 
 const PLATFORM = os.platform(); // 'win32', 'darwin', 'linux'
 
-// Ensure Homebrew paths are in PATH on macOS (especially Apple Silicon)
+// Ensure Homebrew paths and ~/.local/bin are in PATH on macOS
 if (PLATFORM === 'darwin') {
-  const extra = ['/opt/homebrew/bin', '/opt/homebrew/sbin', '/usr/local/bin'];
+  const localBin = path.join(os.homedir(), '.local', 'bin');
+  const extra = [localBin, '/opt/homebrew/bin', '/opt/homebrew/sbin', '/usr/local/bin'];
   const current = process.env.PATH || '';
-  const missing = extra.filter(p => !current.includes(p));
+  const missing = extra.filter(p => !current.split(':').includes(p));
   if (missing.length) process.env.PATH = missing.join(':') + ':' + current;
+}
+
+// Cached brew health status (null = not checked yet)
+let _brewHealthy = null;
+
+/**
+ * Check if Homebrew is functional on macOS. Caches the result.
+ */
+async function checkBrewHealth() {
+  if (PLATFORM !== 'darwin') return false;
+  if (_brewHealthy !== null) return _brewHealthy;
+  return new Promise((resolve) => {
+    execFile('brew', ['--version'], { shell: true, timeout: 10000 }, (err) => {
+      _brewHealthy = !err;
+      resolve(_brewHealthy);
+    });
+  });
+}
+
+/**
+ * macOS fallback: download Node.js binary tarball to ~/.local
+ */
+async function macFallbackInstallNode(onEvent) {
+  const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
+  const localDir = path.join(os.homedir(), '.local');
+  fs.mkdirSync(localDir, { recursive: true });
+  onEvent({ type: 'log', message: 'Homebrew unavailable — downloading Node.js directly...\n' });
+  // Fetch latest LTS version number from nodejs.org
+  let nodeVersion = 'v22.14.0'; // fallback
+  try {
+    const verData = await captureCmd('curl', ['-fsSL', 'https://resolve-node.now.sh/lts'], 10000);
+    const ver = verData.trim();
+    if (ver.match(/^v\d+\.\d+\.\d+$/)) nodeVersion = ver;
+  } catch { /* use fallback version */ }
+  const tarUrl = `https://nodejs.org/dist/${nodeVersion}/node-${nodeVersion}-darwin-${arch}.tar.gz`;
+  onEvent({ type: 'log', message: `Downloading Node.js ${nodeVersion} for ${arch}...\n` });
+  await runCommand('curl', ['-fsSL', tarUrl, '-o', path.join(os.tmpdir(), 'node.tar.gz')], onEvent, 120000);
+  onEvent({ type: 'log', message: 'Extracting Node.js...\n' });
+  await runCommand('tar', ['xzf', path.join(os.tmpdir(), 'node.tar.gz'), '-C', localDir, '--strip-components=1'], onEvent, 30000);
+  // Verify
+  const nodeBin = path.join(localDir, 'bin', 'node');
+  if (!fs.existsSync(nodeBin)) throw new Error('Node.js download failed');
+  // Ensure ~/.local/bin is in PATH for this process
+  const binDir = path.join(localDir, 'bin');
+  if (!process.env.PATH.split(':').includes(binDir)) {
+    process.env.PATH = binDir + ':' + process.env.PATH;
+  }
+}
+
+/**
+ * macOS fallback: download GitHub CLI binary to ~/.local/bin
+ */
+async function macFallbackInstallGh(onEvent) {
+  const arch = process.arch === 'arm64' ? 'arm64' : 'amd64';
+  const localBin = path.join(os.homedir(), '.local', 'bin');
+  fs.mkdirSync(localBin, { recursive: true });
+  onEvent({ type: 'log', message: 'Homebrew unavailable — downloading GitHub CLI directly...\n' });
+  // Get latest version from GitHub API
+  let ghVersion = '2.65.0'; // fallback
+  try {
+    const releaseData = await captureCmd('curl', ['-fsSL', 'https://api.github.com/repos/cli/cli/releases/latest'], 10000);
+    const match = releaseData.match(/"tag_name"\s*:\s*"v([^"]+)"/);
+    if (match) ghVersion = match[1];
+  } catch { /* use fallback version */ }
+  const zipUrl = `https://github.com/cli/cli/releases/download/v${ghVersion}/gh_${ghVersion}_macOS_${arch}.zip`;
+  const zipPath = path.join(os.tmpdir(), 'gh.zip');
+  const extractDir = path.join(os.tmpdir(), 'gh-extract');
+  onEvent({ type: 'log', message: `Downloading GitHub CLI v${ghVersion}...\n` });
+  await runCommand('curl', ['-fsSL', '-o', zipPath, '-L', zipUrl], onEvent, 120000);
+  fs.mkdirSync(extractDir, { recursive: true });
+  await runCommand('unzip', ['-o', zipPath, '-d', extractDir], onEvent, 30000);
+  // Find the gh binary inside the extracted directory
+  const entries = fs.readdirSync(extractDir);
+  const ghDir = entries.find(e => e.startsWith('gh_'));
+  if (!ghDir) throw new Error('GitHub CLI download failed');
+  const ghBin = path.join(extractDir, ghDir, 'bin', 'gh');
+  fs.copyFileSync(ghBin, path.join(localBin, 'gh'));
+  fs.chmodSync(path.join(localBin, 'gh'), 0o755);
+}
+
+/**
+ * Run a command and capture its stdout (utility for version detection).
+ */
+function captureCmd(cmd, args, timeout) {
+  return new Promise((resolve, reject) => {
+    execFile(cmd, args, { shell: true, timeout: timeout || 10000, encoding: 'utf8' }, (err, stdout) => {
+      if (err) reject(err);
+      else resolve(stdout);
+    });
+  });
 }
 
 function commandExists(cmd) {
@@ -213,6 +304,12 @@ async function runSetup(onEvent, options) {
     return;
   }
 
+  // On macOS, check if Homebrew is functional before trying to use it
+  const brewOk = PLATFORM === 'darwin' ? await checkBrewHealth() : false;
+  if (PLATFORM === 'darwin' && !brewOk) {
+    onEvent({ type: 'log', message: 'Homebrew is not available or broken — using direct downloads instead.\n' });
+  }
+
   onEvent({ type: 'status', message: `Installing ${missing.length} tool(s)...` });
 
   for (let i = 0; i < missing.length; i++) {
@@ -223,6 +320,41 @@ async function runSetup(onEvent, options) {
       current: i + 1,
       total: missing.length,
     });
+
+    // macOS fallback: if brew is broken, use direct downloads for core tools
+    if (PLATFORM === 'darwin' && !brewOk && tool.install.darwin && tool.install.darwin[0] === 'brew') {
+      try {
+        if (tool.name === 'Node.js') {
+          await macFallbackInstallNode(onEvent);
+          onEvent({ type: 'installed', message: `${tool.name} installed` });
+          continue;
+        } else if (tool.name === 'GitHub CLI') {
+          await macFallbackInstallGh(onEvent);
+          onEvent({ type: 'installed', message: `${tool.name} installed` });
+          continue;
+        } else if (tool.name === 'Git') {
+          // Git is typically pre-installed via Xcode CLT on macOS
+          onEvent({ type: 'log', message: 'Checking for Xcode Command Line Tools git...\n' });
+          if (fs.existsSync('/usr/bin/git')) {
+            onEvent({ type: 'installed', message: `${tool.name} installed` });
+            continue;
+          }
+          // Trigger Xcode CLT installation prompt
+          onEvent({ type: 'log', message: 'Triggering Xcode Command Line Tools installation...\n' });
+          try {
+            await runCommand('xcode-select', ['--install'], onEvent, 10000);
+          } catch { /* dialog may have opened */ }
+          onEvent({ type: 'warning', message: 'A dialog may have appeared to install developer tools. Please complete it, then re-run setup.' });
+          continue;
+        }
+        // Other brew-based tools: skip with warning
+        onEvent({ type: 'warning', message: `Cannot auto-install ${tool.name} — Homebrew is not working` });
+        continue;
+      } catch (err) {
+        onEvent({ type: 'error', message: `Failed to install ${tool.name}: ${err.message}` });
+        continue;
+      }
+    }
 
     let cmd = tool.install[PLATFORM];
 
@@ -278,10 +410,19 @@ async function runSetup(onEvent, options) {
   }
 }
 
-function runCommand(cmd, args, onEvent) {
+function runCommand(cmd, args, onEvent, timeoutMs) {
+  const timeout = timeoutMs || 180000; // default 3 minutes
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, args, { shell: true, stdio: ['pipe', 'pipe', 'pipe'] });
     let stderrBuf = '';
+    let done = false;
+    const timer = setTimeout(() => {
+      if (!done) {
+        done = true;
+        try { child.kill('SIGTERM'); } catch { /* best effort */ }
+        reject(new Error(`Timed out after ${Math.round(timeout / 1000)}s`));
+      }
+    }, timeout);
     child.stdout.on('data', (d) => onEvent({ type: 'log', message: d.toString() }));
     child.stderr.on('data', (d) => {
       const text = d.toString();
@@ -289,6 +430,9 @@ function runCommand(cmd, args, onEvent) {
       onEvent({ type: 'log', message: text });
     });
     child.on('close', (code) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
       if (code === 0) {
         resolve();
       } else {
@@ -298,7 +442,12 @@ function runCommand(cmd, args, onEvent) {
         reject(new Error(errMsg));
       }
     });
-    child.on('error', reject);
+    child.on('error', (err) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      reject(err);
+    });
   });
 }
 
@@ -367,7 +516,7 @@ function checkAuthClaude() {
   return new Promise((resolve) => {
     // Check environment variable first
     if (process.env.ANTHROPIC_API_KEY) return resolve(true);
-    // Check credentials file
+    // Check credentials file (older Claude Code)
     const credFile = path.join(os.homedir(), '.claude', '.credentials.json');
     if (fs.existsSync(credFile)) {
       try {
@@ -375,7 +524,7 @@ function checkAuthClaude() {
         if (creds.oauthAccount || creds.apiKey || creds.claudeAiOauth) return resolve(true);
       } catch { /* fall through */ }
     }
-    // Check auth.json (newer Claude Code versions)
+    // Check auth.json (older Claude Code)
     const authFile = path.join(os.homedir(), '.claude', 'auth.json');
     if (fs.existsSync(authFile)) {
       try {
@@ -383,7 +532,16 @@ function checkAuthClaude() {
         if (Object.keys(auth).length > 0) return resolve(true);
       } catch { /* fall through */ }
     }
-    resolve(false);
+    // Check via CLI (current Claude Code uses OAuth without local auth files)
+    execFile('claude', ['auth', 'status'], { shell: true, timeout: 10000, encoding: 'utf8' }, (err, stdout) => {
+      if (err) return resolve(false);
+      try {
+        const status = JSON.parse(stdout);
+        resolve(!!status.loggedIn);
+      } catch {
+        resolve(stdout.toLowerCase().includes('logged') || stdout.toLowerCase().includes('authenticated'));
+      }
+    });
   });
 }
 
@@ -455,8 +613,15 @@ function runAuthCommand(serviceId, onEvent) {
         cmd = 'cmd';
         args = ['/c', 'start', 'cmd', '/k', 'claude'];
       } else if (PLATFORM === 'darwin') {
+        // Write a temp script and open it in Terminal (no Automation permission needed)
+        let claudePath = 'claude';
+        try {
+          claudePath = require('child_process').execFileSync('which', ['claude'], { encoding: 'utf8' }).trim() || 'claude';
+        } catch { /* fall back to bare name */ }
+        const scriptPath = path.join(os.tmpdir(), 'claude-auth.sh');
+        fs.writeFileSync(scriptPath, `#!/bin/bash\n"${claudePath}"\n`, { mode: 0o755 });
         cmd = 'open';
-        args = ['-a', 'Terminal', '--args', 'claude'];
+        args = ['-a', 'Terminal', scriptPath];
       } else {
         cmd = 'x-terminal-emulator';
         args = ['-e', 'claude'];

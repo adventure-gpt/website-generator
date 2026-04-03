@@ -1,10 +1,13 @@
 const { spawn } = require('child_process');
 
-// Ensure Homebrew paths are in PATH on macOS (especially Apple Silicon)
+// Ensure Homebrew paths and ~/.local/bin are in PATH on macOS
 if (process.platform === 'darwin') {
-  const extra = ['/opt/homebrew/bin', '/opt/homebrew/sbin', '/usr/local/bin'];
+  const os = require('os');
+  const path = require('path');
+  const localBin = path.join(os.homedir(), '.local', 'bin');
+  const extra = [localBin, '/opt/homebrew/bin', '/opt/homebrew/sbin', '/usr/local/bin'];
   const current = process.env.PATH || '';
-  const missing = extra.filter(p => !current.includes(p));
+  const missing = extra.filter(p => !current.split(':').includes(p));
   if (missing.length) process.env.PATH = missing.join(':') + ':' + current;
 }
 
@@ -144,11 +147,7 @@ WHAT YOU MUST NEVER DO:
 DISTRIBUTION — WHEN THE USER ASKS TO DISTRIBUTE, YOU MUST DO ALL THREE:
 1. Build the installer: run "npm run build" then "npx electron-builder --win" (or appropriate platform)
 2. Publish to GitHub: "gh repo create" (if needed), push code, "gh release create" with the installer from dist/
-<<<<<<< HEAD
 3. Build a download/landing page: Check if a landing page already exists (look for a landing/ directory or a separate site project). If one exists, MODIFY it — do NOT replace it. The user may have spent significant time customizing their site. Only create a new landing page if none exists. Deploy via "npx wrangler pages deploy landing/ --project-name [name]-app"
-=======
-3. Build a download/landing page: create a simple HTML+CSS landing page in a landing/ subdirectory, then deploy via "npx wrangler pages deploy landing/ --project-name [name]-app"
->>>>>>> 1f67820aaf493541534219cfc99864f1ba893ffa
 ALL THREE STEPS ARE MANDATORY. Do not skip the landing page.
 
 AFTER DISTRIBUTING — CI MONITORING:

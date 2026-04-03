@@ -1,11 +1,13 @@
 const { spawn } = require('child_process');
 const os = require('os');
 
-// Ensure Homebrew paths are in PATH on macOS (especially Apple Silicon)
+// Ensure Homebrew paths and ~/.local/bin are in PATH on macOS
 if (process.platform === 'darwin') {
-  const extra = ['/opt/homebrew/bin', '/opt/homebrew/sbin', '/usr/local/bin'];
+  const path = require('path');
+  const localBin = path.join(os.homedir(), '.local', 'bin');
+  const extra = [localBin, '/opt/homebrew/bin', '/opt/homebrew/sbin', '/usr/local/bin'];
   const current = process.env.PATH || '';
-  const missing = extra.filter(p => !current.includes(p));
+  const missing = extra.filter(p => !current.split(':').includes(p));
   if (missing.length) process.env.PATH = missing.join(':') + ':' + current;
 }
 

@@ -329,6 +329,8 @@ async function showSetupScreen(status) {
       installBtn.textContent = 'Installing...';
 
       if (_cleanupSetupEvent) _cleanupSetupEvent();
+      var logEl = $('#setup-log');
+      if (logEl) { logEl.classList.remove('hidden'); logEl.textContent = ''; }
       _cleanupSetupEvent = window.api.onSetupEvent(function (evt) {
         if (evt.type === 'progress') {
           installBtn.textContent = evt.message;
@@ -340,8 +342,29 @@ async function showSetupScreen(status) {
             statusEl.textContent = 'Installed';
             statusEl.className = 'setup-tool-status installed';
           }
+        } else if (evt.type === 'error' || evt.type === 'warning') {
+          if (logEl) {
+            var line = document.createElement('div');
+            line.className = evt.type === 'error' ? 'setup-log-error' : 'setup-log-warn';
+            line.textContent = evt.message;
+            logEl.appendChild(line);
+            logEl.scrollTop = logEl.scrollHeight;
+          }
+        } else if (evt.type === 'log') {
+          if (logEl) {
+            var text = evt.message.replace(/\n+$/, '');
+            if (text) {
+              var span = document.createElement('div');
+              span.className = 'setup-log-line';
+              span.textContent = text;
+              logEl.appendChild(span);
+              while (logEl.childNodes.length > 100) logEl.removeChild(logEl.firstChild);
+              logEl.scrollTop = logEl.scrollHeight;
+            }
+          }
         } else if (evt.type === 'done') {
           installBtn.classList.add('hidden');
+          if (logEl && logEl.childNodes.length === 0) logEl.classList.add('hidden');
           updateGetStartedBtn();
         }
       });

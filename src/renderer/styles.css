@@ -390,10 +390,29 @@ html, body {
 
 .setup-actions {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 12px;
-  justify-content: center;
   margin-top: 24px;
 }
+.setup-log {
+  width: 100%;
+  max-width: 500px;
+  max-height: 160px;
+  overflow-y: auto;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-align: left;
+}
+.setup-log-error { color: var(--error); font-weight: 500; }
+.setup-log-warn { color: var(--warning); }
+.setup-log-line { color: var(--text-tertiary); }
 
 .migration-card {
   background: var(--bg-secondary);
