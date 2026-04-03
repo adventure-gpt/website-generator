@@ -1,6 +1,6 @@
 {
   "name": "website-generator",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "AI-powered website builder — chat to create, preview live, deploy instantly",
   "author": {
     "name": "Website Generator",
@@ -21,6 +21,14 @@
     "artifactName": "Website-Generator-Setup.${ext}",
     "appId": "com.websitegenerator.app",
     "icon": "assets/icon.png",
+    "asar": true,
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json",
+      "!**/node_modules/.cache",
+      "!**/*.map"
+    ],
     "publish": [
       {
         "provider": "github",
