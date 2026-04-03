@@ -1,190 +1,1818 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>App Generator — Build Desktop Apps with AI</title>
-<meta name="description" content="Describe what you want, get a polished desktop app. App Generator uses AI to build, preview, and distribute Electron apps — no coding required.">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#09090b;--surface:#141416;--border:#27272a;
-  --text:#fafafa;--muted:#a1a1aa;--accent:#7c6cfa;--accent-soft:#7c6cfa22;
-  --glow:rgba(124,108,250,0.15);
-}
-html{scroll-behavior:smooth}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
-a{color:var(--accent);text-decoration:none}
-a:hover{text-decoration:underline}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App Generator — Build Desktop Apps with AI, No Coding Required</title>
+  <meta name="description" content="Free desktop app for Windows, macOS, and Linux that turns plain English into real desktop applications. Describe what you want — AI builds, packages, and distributes it. No coding required.">
+  <meta name="keywords" content="app generator, AI app builder, no code, build desktop app with AI, free app creator, Electron app builder, Claude Code, Codex, desktop development for beginners">
+  <meta name="author" content="Bryan Robbins">
+  <meta name="robots" content="index, follow">
 
-/* Hero */
-.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem 1.5rem;position:relative}
-.hero::before{content:'';position:absolute;top:-40%;left:50%;transform:translateX(-50%);width:800px;height:800px;background:radial-gradient(circle,var(--glow) 0%,transparent 70%);pointer-events:none}
-.logo{width:80px;height:80px;border-radius:20px;margin-bottom:2rem;box-shadow:0 0 60px var(--glow)}
-.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;letter-spacing:-0.03em;line-height:1.1;max-width:800px}
-.hero h1 span{background:linear-gradient(135deg,#7c6cfa,#a78bfa,#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero p{margin-top:1.5rem;font-size:1.25rem;color:var(--muted);max-width:560px;line-height:1.7}
-.hero-buttons{display:flex;gap:1rem;margin-top:2.5rem;flex-wrap:wrap;justify-content:center}
-.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 2rem;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;transition:all .2s;border:none}
-.btn-primary{background:var(--accent);color:#fff;box-shadow:0 0 30px var(--glow)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 50px var(--glow);text-decoration:none;color:#fff}
-.btn-secondary{background:var(--surface);color:var(--text);border:1px solid var(--border)}
-.btn-secondary:hover{border-color:var(--accent);text-decoration:none;color:var(--text)}
-.version-badge{margin-top:1.5rem;display:inline-block;padding:.35rem .85rem;border-radius:100px;background:var(--accent-soft);color:var(--accent);font-size:.8rem;font-weight:600;letter-spacing:.02em}
-.platform-note{margin-top:.75rem;font-size:.85rem;color:var(--muted)}
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="App Generator — Build Desktop Apps with AI, No Coding Required">
+  <meta property="og:description" content="Free desktop app for Windows, macOS, and Linux. Describe a desktop app in plain English and AI builds, packages, and distributes it for you. No coding required.">
+  <meta property="og:image" content="https://app-generator.net/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="App Generator">
 
-/* Features */
-.features{padding:6rem 1.5rem;max-width:1100px;margin:0 auto}
-.features h2{text-align:center;font-size:2rem;font-weight:700;margin-bottom:3.5rem;letter-spacing:-0.02em}
-.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
-.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:border-color .2s}
-.feature-card:hover{border-color:var(--accent)}
-.feature-icon{width:48px;height:48px;border-radius:12px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;margin-bottom:1.25rem;font-size:1.4rem}
-.feature-card h3{font-size:1.15rem;font-weight:700;margin-bottom:.5rem}
-.feature-card p{color:var(--muted);font-size:.95rem;line-height:1.6}
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="App Generator — Build Desktop Apps with AI, No Coding Required">
+  <meta name="twitter:description" content="Free desktop app for Windows, macOS & Linux. Describe a desktop app in plain English — AI builds and packages it for you.">
+  <meta name="twitter:image" content="https://app-generator.net/og-image.png">
 
-/* How it works */
-.how{padding:6rem 1.5rem;max-width:900px;margin:0 auto}
-.how h2{text-align:center;font-size:2rem;font-weight:700;margin-bottom:3.5rem}
-.steps{display:flex;flex-direction:column;gap:2.5rem}
-.step{display:flex;gap:1.5rem;align-items:flex-start}
-.step-num{min-width:48px;height:48px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.2rem;flex-shrink:0}
-.step h3{font-size:1.1rem;font-weight:700;margin-bottom:.25rem}
-.step p{color:var(--muted);font-size:.95rem}
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
-/* CTA */
-.cta{padding:6rem 1.5rem;text-align:center}
-.cta-box{max-width:650px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:3.5rem 2.5rem;position:relative;overflow:hidden}
-.cta-box::before{content:'';position:absolute;top:-50%;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(circle,var(--glow) 0%,transparent 70%);pointer-events:none}
-.cta-box h2{font-size:1.75rem;font-weight:700;margin-bottom:1rem;position:relative}
-.cta-box p{color:var(--muted);margin-bottom:2rem;position:relative}
-.cta-box .btn{position:relative}
+  <!-- Theme -->
+  <meta name="theme-color" content="#0f172a">
 
-/* Footer */
-footer{padding:3rem 1.5rem;text-align:center;border-top:1px solid var(--border);color:var(--muted);font-size:.85rem}
-footer a{color:var(--muted)}
-footer a:hover{color:var(--accent)}
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
 
-/* Responsive */
-@media(max-width:640px){
-  .hero h1{font-size:2.2rem}
-  .hero p{font-size:1.05rem}
-  .feature-grid{grid-template-columns:1fr}
-  .step{flex-direction:column;align-items:center;text-align:center}
-}
-</style>
+  <!-- All icons are inline SVGs — no external icon CDN needed -->
+
+  <!-- Structured Data: SoftwareApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "App Generator",
+    "operatingSystem": "Windows 10, Windows 11, macOS, Linux",
+    "applicationCategory": "DeveloperApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Free desktop app for Windows, macOS, and Linux that turns plain English into real desktop applications. No coding required — just describe what you want and AI builds it.",
+    "downloadUrl": "https://github.com/adventure-gpt/app-generator/releases/latest/download/App-Generator-Setup.exe",
+    "softwareVersion": "1.0",
+    "license": "https://opensource.org/licenses/MIT",
+    "author": {
+      "@type": "Person",
+      "name": "Bryan Robbins"
+    }
+  }
+  </script>
+
+  <!-- Structured Data: FAQ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is App Generator really free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The desktop app is completely free and open-source. The only cost is your chosen AI platform (Claude or Codex), starting around $20/month."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do I need to know how to code?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Not at all. You describe what you want in plain English and the AI writes all the code, sets up the project, and handles packaging for you."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What kind of apps can it build?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Desktop applications of all kinds: note-taking apps, file managers, dashboards, inventory trackers, image editors, music players, productivity tools — any Electron-based desktop app you can describe."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I distribute my apps to other people?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! App Generator includes one-click distribution via electron-builder and GitHub Releases. It can build installers for Windows (.exe), macOS (.dmg), and Linux (.AppImage, .deb) automatically via CI."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do the apps support auto-updates?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Every app built with App Generator includes electron-updater for seamless auto-updates via GitHub Releases. Your users always get the latest version."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <style>
+    @keyframes pulse-glow { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.8; } }
+    .animate-pulse-glow { animation: pulse-glow 4s ease-in-out infinite; }
+    html { scroll-behavior: smooth; }
+    .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+    .faq-answer.open { max-height: 300px; }
+    @keyframes tb { 0%,80%,100% { opacity:0.3; transform:scale(0.8); } 40% { opacity:1; transform:scale(1); } }
+    @keyframes sp { to { transform: rotate(360deg); } }
+    .tdot { animation: tb 1.4s ease-in-out infinite; }
+    .tdot:nth-child(2) { animation-delay: 0.2s; }
+    .tdot:nth-child(3) { animation-delay: 0.4s; }
+    .spinner-anim { animation: sp 0.8s linear infinite; }
+  </style>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-300 font-sans">
 
-<!-- Hero -->
-<section class="hero">
-  <svg class="logo" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="80" height="80" rx="18" fill="#7c6cfa"/>
-    <path d="M20 22L30 58H33L40 36L47 58H50L60 22H55L48 50L41 28H39L32 50L25 22Z" fill="white"/>
-  </svg>
-  <h1>Build desktop apps <span>by describing them</span></h1>
-  <p>App Generator turns plain-English descriptions into polished, distributable desktop applications — powered by AI, no coding required.</p>
-  <div class="hero-buttons">
-    <a href="https://github.com/adventure-gpt/app-generator/releases/latest/download/App-Generator-Setup-1.0.1-x64.exe" class="btn btn-primary">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Download for Windows
-    </a>
-    <a href="https://github.com/adventure-gpt/app-generator" class="btn btn-secondary">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-      View on GitHub
-    </a>
-  </div>
-  <div class="version-badge">v1.0.1</div>
-  <p class="platform-note">Windows 10+ &middot; macOS and Linux builds coming via CI</p>
-</section>
+  <!-- ==================== NAV ==================== -->
+  <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="#" id="logo-link" class="flex items-center gap-2 text-white font-bold text-lg">
+        <div id="logo-icon" class="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer select-none">
+          <svg class="w-8 h-8" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="nav-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#10b981"/></linearGradient></defs>
+            <rect width="32" height="32" rx="8" fill="#0f172a"/>
+            <rect x="2" y="2" width="28" height="28" rx="6" fill="url(#nav-g)" opacity="0.15"/>
+            <text x="16" y="22" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="800" fill="#34d399" text-anchor="middle">A</text>
+          </svg>
+        </div>
+        App Generator
+      </a>
+      <div class="hidden sm:flex items-center gap-6">
+        <a href="#how-it-works" class="text-slate-400 hover:text-white text-sm transition-colors">How It Works</a>
+        <a href="#platforms" class="text-slate-400 hover:text-white text-sm transition-colors">Platforms</a>
+        <a href="#faq" class="text-slate-400 hover:text-white text-sm transition-colors">FAQ</a>
+        <div class="relative inline-block" id="nav-download-wrap">
+          <div class="flex items-stretch">
+            <a id="nav-dl-primary" href="https://github.com/adventure-gpt/app-generator/releases/latest/download/App-Generator-Setup.exe" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-l-xl bg-emerald-500 hover:bg-emerald-400 text-white transition-all">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span id="nav-dl-label">Download for Windows</span>
+            </a>
+            <button onclick="toggleNavDropdown(event)" class="flex items-center px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-r-xl border-l border-emerald-400/30 transition-all">
+              <svg class="w-3.5 h-3.5 transition-transform" id="nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+          <div id="nav-dropdown" class="hidden absolute top-full right-0 mt-2 w-56 bg-slate-900 border border-slate-700 rounded-xl overflow-hidden shadow-2xl shadow-slate-950/80 z-50"></div>
+        </div>
+      </div>
+      <button onclick="toggleMobileMenu()" class="sm:hidden text-slate-400 hover:text-white">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="mobile-menu" class="hidden sm:hidden bg-slate-950/95 backdrop-blur-lg border-t border-slate-800/50 px-6 pb-4">
+      <a href="#how-it-works" onclick="closeMobileMenu()" class="block py-2 text-slate-400 hover:text-white text-sm transition-colors">How It Works</a>
+      <a href="#platforms" onclick="closeMobileMenu()" class="block py-2 text-slate-400 hover:text-white text-sm transition-colors">Platforms</a>
+      <a href="#faq" onclick="closeMobileMenu()" class="block py-2 text-slate-400 hover:text-white text-sm transition-colors">FAQ</a>
+      <a id="mobile-dl-btn" href="https://github.com/adventure-gpt/app-generator/releases/latest/download/App-Generator-Setup.exe" class="mt-2 inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white transition-all">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download
+      </a>
+    </div>
+  </nav>
 
-<!-- Features -->
-<section class="features">
-  <h2>Everything you need, nothing you don't</h2>
-  <div class="feature-grid">
-    <div class="feature-card">
-      <div class="feature-icon">&#128172;</div>
-      <h3>Chat to Create</h3>
-      <p>Describe your app idea in plain English. The AI writes all the code, builds the interface, and wires everything together.</p>
+  <!-- ==================== HERO ==================== -->
+  <section class="relative pt-32 pb-20 px-6 overflow-visible">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute top-20 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse-glow"></div>
+      <div class="absolute top-40 right-1/4 w-72 h-72 bg-teal-500/10 rounded-full blur-3xl animate-pulse-glow" style="animation-delay:1.5s"></div>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">&#9889;</div>
-      <h3>Live Preview</h3>
-      <p>See your app running in real-time as it's being built. Test features instantly without leaving the generator.</p>
+    <div class="relative max-w-4xl mx-auto text-center">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-sm text-emerald-300 mb-8 font-medium">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+        Build desktop apps with AI — no coding required
+      </div>
+      <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-tight tracking-tight mb-6">
+        Describe it.<br class="sm:hidden"> <span class="bg-gradient-to-r from-emerald-400 via-cyan-300 to-teal-400 bg-clip-text text-transparent">AI builds it.</span>
+      </h1>
+      <p class="text-xl sm:text-2xl text-slate-400 max-w-2xl mx-auto mb-4 leading-relaxed">
+        A free, open-source desktop app that turns plain English into real desktop applications. Just chat — no coding required.
+      </p>
+      <p class="text-base text-slate-500 max-w-xl mx-auto mb-10 leading-relaxed">
+        Note-taking apps, file managers, dashboards, image editors — if you can describe it, it can build it. Complete with native menus, system tray, auto-updates, and cross-platform installers.
+      </p>
+      <div class="flex flex-col items-center gap-4 mb-4">
+        <a id="hero-dl-btn" href="https://github.com/adventure-gpt/app-generator/releases/latest/download/App-Generator-Setup.exe" class="inline-flex items-center gap-3 px-8 py-4 text-lg font-semibold rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/25 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-950">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span id="hero-dl-label">Download for Windows</span>
+        </a>
+        <div id="hero-alt-downloads" class="flex flex-wrap items-center justify-center gap-3"></div>
+        <a href="#how-it-works" class="inline-flex items-center gap-2 px-6 py-3 text-slate-300 hover:text-white transition-colors font-medium">
+          See how it works <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+      <p class="text-sm text-slate-500">Windows, macOS &amp; Linux &middot; Free &amp; open source</p>
     </div>
-    <div class="feature-card">
-      <div class="feature-icon">&#128230;</div>
-      <h3>One-Click Distribution</h3>
-      <p>Build installers, publish to GitHub, and deploy download pages — all from a single chat command.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">&#128260;</div>
-      <h3>Auto-Updates</h3>
-      <p>Every app you create has built-in auto-update support. Push a new version and users get it automatically.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">&#127912;</div>
-      <h3>Professional Polish</h3>
-      <p>Dark mode, keyboard shortcuts, frameless windows, smooth animations — your apps look and feel native.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">&#128736;</div>
-      <h3>Multiple AI Backends</h3>
-      <p>Choose between Claude and OpenAI Codex. Switch backends per-project to find what works best for your app.</p>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- How it works -->
-<section class="how">
-  <h2>How it works</h2>
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">1</div>
-      <div>
-        <h3>Describe your app</h3>
-        <p>Tell the AI what you want in everyday language. "I want a habit tracker with streaks and charts" is all it takes.</p>
+  <!-- ==================== ANIMATED DEMO ==================== -->
+  <section class="relative mt-4 mb-24 mx-auto max-w-6xl px-4">
+    <div class="rounded-2xl border border-slate-700/60 overflow-hidden shadow-2xl shadow-emerald-500/10 ring-1 ring-white/5" style="background:#0a0a0b;">
+      <div class="demo-window" style="width:100%;aspect-ratio:16/10;position:relative;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+        <!-- Titlebar -->
+        <div style="position:absolute;top:0;left:0;right:0;height:36px;z-index:10;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;background:rgba(10,10,11,0.8);">
+          <div style="width:46px;height:32px;display:flex;align-items:center;justify-content:center;color:#8b8b90;font-size:10px;">&#8212;</div>
+          <div style="width:46px;height:32px;display:flex;align-items:center;justify-content:center;color:#8b8b90;font-size:10px;">&#9723;</div>
+          <div style="width:46px;height:32px;display:flex;align-items:center;justify-content:center;color:#8b8b90;font-size:10px;">&#10005;</div>
+        </div>
+        <div style="display:flex;height:100%;">
+          <!-- Sidebar -->
+          <div style="width:18.75%;background:#111113;border-right:1px solid #2a2a2e;display:flex;flex-direction:column;flex-shrink:0;">
+            <div style="display:flex;align-items:center;gap:8px;padding:12px;padding-top:36px;border-bottom:1px solid rgba(42,42,46,0.5);">
+              <span style="font-size:18px;color:#10b981;">&#9670;</span>
+              <span style="font-size:clamp(10px,1.1vw,13px);font-weight:600;color:#f0f0f2;">App Generator</span>
+            </div>
+            <div style="padding:10px;flex:1;">
+              <div style="font-size:clamp(8px,0.9vw,11px);font-weight:600;color:#5a5a60;text-transform:uppercase;letter-spacing:0.05em;">Projects</div>
+              <div id="demo-projects"></div>
+            </div>
+            <div style="padding:10px 14px;border-top:1px solid rgba(42,42,46,0.5);font-size:clamp(9px,0.95vw,12px);color:#8b8b90;display:flex;justify-content:space-between;align-items:center;">
+              <span>Claude Code</span><span style="font-size:14px;">&#9881;</span>
+            </div>
+          </div>
+          <!-- Chat Panel -->
+          <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+            <div id="demo-chat" style="flex:1;overflow-y:auto;padding:clamp(12px,2vw,24px);display:flex;flex-direction:column;gap:10px;padding-top:44px;"></div>
+            <div style="padding:12px clamp(12px,2vw,24px);border-top:1px solid #2a2a2e;">
+              <div style="display:flex;align-items:center;background:#1a1a1d;border:1px solid #2a2a2e;border-radius:10px;padding:6px 10px;">
+                <input id="demo-input" style="flex:1;background:none;border:none;color:#f0f0f2;font-size:clamp(10px,1.1vw,14px);font-family:inherit;outline:none;" placeholder="Describe the app you want to build..." readonly>
+                <div style="width:26px;height:26px;border-radius:6px;background:#10b981;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;flex-shrink:0;">&#8593;</div>
+              </div>
+              <div style="font-size:clamp(8px,0.85vw,11px);color:#5a5a60;margin-top:4px;">Enter to send &middot; Shift+Enter for new line</div>
+            </div>
+          </div>
+          <!-- Resize Handle -->
+          <div style="width:4px;background:#2a2a2e;flex-shrink:0;"></div>
+          <!-- App Preview Panel -->
+          <div style="width:39%;display:flex;flex-direction:column;flex-shrink:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid #2a2a2e;padding-top:36px;">
+              <span style="font-size:clamp(10px,1.1vw,13px);font-weight:500;color:#8b8b90;">App Preview</span>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <span id="demo-app-status" style="font-size:clamp(8px,0.9vw,11px);color:#22c55e;display:none;"></span>
+                <div id="demo-launch-btn" style="padding:4px 12px;border-radius:6px;background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.3);font-size:clamp(9px,0.95vw,12px);font-weight:500;">Launch</div>
+              </div>
+            </div>
+            <div style="flex:1;background:#111113;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+              <!-- Placeholder -->
+              <div id="demo-placeholder" style="color:#5a5a60;font-size:clamp(10px,1.1vw,14px);text-align:center;line-height:1.6;">
+                <div>Your app will appear here</div>
+                <div style="font-size:clamp(8px,0.95vw,12px);margin-top:4px;">The live preview starts after AI creates your project</div>
+              </div>
+              <!-- Mock Note-Taking App (Light) -->
+              <div id="demo-mock-app" style="width:100%;height:100%;position:absolute;inset:0;opacity:0;transition:opacity 0.6s;display:flex;flex-direction:column;background:#1e1e2e;">
+                <div style="height:32px;background:#181825;display:flex;align-items:center;padding:0 12px;gap:8px;border-bottom:1px solid #313244;">
+                  <span style="font-size:clamp(9px,0.95vw,12px);font-weight:600;color:#cdd6f4;">NoteKeeper</span>
+                  <div style="margin-left:auto;display:flex;gap:12px;">
+                    <span style="font-size:clamp(8px,0.85vw,10px);color:#6c7086;">File</span>
+                    <span style="font-size:clamp(8px,0.85vw,10px);color:#6c7086;">Edit</span>
+                    <span style="font-size:clamp(8px,0.85vw,10px);color:#6c7086;">View</span>
+                    <span style="font-size:clamp(8px,0.85vw,10px);color:#6c7086;">Help</span>
+                  </div>
+                </div>
+                <div style="flex:1;display:flex;overflow:hidden;">
+                  <div style="width:35%;background:#181825;border-right:1px solid #313244;padding:8px;">
+                    <div style="font-size:clamp(7px,0.8vw,9px);font-weight:600;color:#6c7086;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Files</div>
+                    <div style="display:flex;flex-direction:column;gap:2px;">
+                      <div style="padding:4px 8px;border-radius:4px;background:rgba(16,185,129,0.12);font-size:clamp(8px,0.9vw,11px);color:#10b981;display:flex;align-items:center;gap:4px;"><span style="font-size:clamp(7px,0.8vw,10px);">&#128196;</span> meeting-notes.md</div>
+                      <div style="padding:4px 8px;border-radius:4px;font-size:clamp(8px,0.9vw,11px);color:#cdd6f4;display:flex;align-items:center;gap:4px;"><span style="font-size:clamp(7px,0.8vw,10px);">&#128196;</span> project-ideas.md</div>
+                      <div style="padding:4px 8px;border-radius:4px;font-size:clamp(8px,0.9vw,11px);color:#cdd6f4;display:flex;align-items:center;gap:4px;"><span style="font-size:clamp(7px,0.8vw,10px);">&#128196;</span> todo-list.md</div>
+                      <div style="padding:4px 8px;border-radius:4px;font-size:clamp(8px,0.9vw,11px);color:#6c7086;display:flex;align-items:center;gap:4px;"><span style="font-size:clamp(7px,0.8vw,10px);">&#128193;</span> archive/</div>
+                    </div>
+                  </div>
+                  <div style="flex:1;padding:12px;display:flex;flex-direction:column;">
+                    <div style="font-size:clamp(11px,1.3vw,16px);font-weight:700;color:#cdd6f4;margin-bottom:8px;">Meeting Notes</div>
+                    <div style="font-size:clamp(8px,0.9vw,11px);color:#a6adc8;line-height:1.7;">
+                      <div style="margin-bottom:6px;">&#9679; Discussed Q2 roadmap priorities</div>
+                      <div style="margin-bottom:6px;">&#9679; Design review scheduled for Friday</div>
+                      <div style="margin-bottom:6px;">&#9679; Need to finalize API contracts</div>
+                      <div style="color:#6c7086;margin-top:8px;font-size:clamp(7px,0.8vw,9px);">Last edited: just now</div>
+                    </div>
+                  </div>
+                </div>
+                <div style="height:22px;background:#181825;border-top:1px solid #313244;display:flex;align-items:center;padding:0 10px;justify-content:space-between;">
+                  <span style="font-size:clamp(7px,0.75vw,9px);color:#6c7086;">3 files</span>
+                  <span style="font-size:clamp(7px,0.75vw,9px);color:#10b981;">&#9679; Saved</span>
+                </div>
+              </div>
+              <!-- Mock Note-Taking App (Dark Mode) -->
+              <div id="demo-mock-app-dark" style="width:100%;height:100%;position:absolute;inset:0;opacity:0;transition:opacity 0.6s;display:flex;flex-direction:column;background:#11111b;">
+                <div style="height:32px;background:#0d0d15;display:flex;align-items:center;padding:0 12px;gap:8px;border-bottom:1px solid #1e1e2e;">
+                  <span style="font-size:clamp(9px,0.95vw,12px);font-weight:600;color:#cdd6f4;">NoteKeeper</span>
+                  <div style="margin-left:auto;display:flex;gap:4px;align-items:center;">
+                    <div style="width:20px;height:12px;background:#10b981;border-radius:6px;position:relative;"><div style="width:9px;height:9px;border-radius:50%;background:white;position:absolute;right:1.5px;top:1.5px;"></div></div>
+                    <span style="font-size:clamp(7px,0.8vw,9px);color:#6c7086;margin-right:6px;">Dark</span>
+                    <span style="font-size:clamp(8px,0.85vw,10px);color:#6c7086;">File</span>
+                    <span style="font-size:clamp(8px,0.85vw,10px);color:#6c7086;margin-left:6px;">Edit</span>
+                    <span style="font-size:clamp(8px,0.85vw,10px);color:#6c7086;margin-left:6px;">View</span>
+                  </div>
+                </div>
+                <div style="flex:1;display:flex;overflow:hidden;">
+                  <div style="width:35%;background:#0d0d15;border-right:1px solid #1e1e2e;padding:8px;">
+                    <div style="font-size:clamp(7px,0.8vw,9px);font-weight:600;color:#585b70;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Files</div>
+                    <div style="display:flex;flex-direction:column;gap:2px;">
+                      <div style="padding:4px 8px;border-radius:4px;background:rgba(16,185,129,0.15);font-size:clamp(8px,0.9vw,11px);color:#10b981;display:flex;align-items:center;gap:4px;"><span style="font-size:clamp(7px,0.8vw,10px);">&#128196;</span> meeting-notes.md</div>
+                      <div style="padding:4px 8px;border-radius:4px;font-size:clamp(8px,0.9vw,11px);color:#bac2de;display:flex;align-items:center;gap:4px;"><span style="font-size:clamp(7px,0.8vw,10px);">&#128196;</span> project-ideas.md</div>
+                      <div style="padding:4px 8px;border-radius:4px;font-size:clamp(8px,0.9vw,11px);color:#bac2de;display:flex;align-items:center;gap:4px;"><span style="font-size:clamp(7px,0.8vw,10px);">&#128196;</span> todo-list.md</div>
+                    </div>
+                    <div style="margin-top:8px;padding:4px 8px;font-size:clamp(7px,0.8vw,9px);color:#585b70;line-height:1.6;">
+                      Ctrl+N New Note<br>Ctrl+F Find<br>Ctrl+S Save
+                    </div>
+                  </div>
+                  <div style="flex:1;padding:12px;display:flex;flex-direction:column;">
+                    <div style="font-size:clamp(11px,1.3vw,16px);font-weight:700;color:#cdd6f4;margin-bottom:8px;">Meeting Notes</div>
+                    <div style="font-size:clamp(8px,0.9vw,11px);color:#a6adc8;line-height:1.7;">
+                      <div style="margin-bottom:6px;">&#9679; Discussed Q2 roadmap priorities</div>
+                      <div style="margin-bottom:6px;">&#9679; Design review scheduled for Friday</div>
+                      <div style="margin-bottom:6px;">&#9679; Need to finalize API contracts</div>
+                    </div>
+                  </div>
+                </div>
+                <div style="height:22px;background:#0d0d15;border-top:1px solid #1e1e2e;display:flex;align-items:center;padding:0 10px;justify-content:space-between;">
+                  <span style="font-size:clamp(7px,0.75vw,9px);color:#585b70;">Ctrl+K for command palette</span>
+                  <span style="font-size:clamp(7px,0.75vw,9px);color:#10b981;">&#9679; Saved</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div>
-        <h3>Watch it build</h3>
-        <p>The AI creates all the files, writes the code, and sets up the complete app structure. Preview it live as it's built.</p>
+    <p class="text-center text-sm text-slate-500 mt-4">Animated demo of the App Generator desktop experience</p>
+  </section>
+
+  <!-- ==================== FEATURES ==================== -->
+  <section class="py-24 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">Everything you need to build desktop apps</h2>
+        <p class="text-lg text-slate-400 max-w-2xl mx-auto">From idea to distributed application — all through conversation.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/30 transition-all duration-300 hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Chat to Create</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Describe your app in plain English. The AI sets up the project, writes the code, and configures everything automatically.</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/30 transition-all duration-300 hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Live Testing</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Your app automatically launches as a real desktop window. See changes instantly as you iterate through conversation.</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/30 transition-all duration-300 hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">One-Click Distribution</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Build installers with electron-builder and publish releases to GitHub automatically. Your app is ready to share.</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/30 transition-all duration-300 hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Cross-Platform</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Build for Windows, macOS, and Linux from a single codebase. GitHub Actions CI handles multi-platform builds automatically.</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/30 transition-all duration-300 hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Auto-Updates</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Every app includes electron-updater built in. Push a new release and your users get updated seamlessly via GitHub Releases.</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/30 transition-all duration-300 hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
+            <svg class="w-6 h-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Full Customization</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">System tray icons, file dialogs, native menus, keyboard shortcuts, notifications — full access to native desktop APIs.</p>
+        </div>
       </div>
     </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <div>
-        <h3>Iterate and refine</h3>
-        <p>Ask for changes in plain English. "Make the sidebar wider" or "Add a dark mode toggle" — just say it.</p>
+  </section>
+
+  <!-- ==================== WHAT'S NEW ==================== -->
+  <section class="py-24 px-6 border-t border-slate-800/50">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-16">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-sm text-emerald-300 mb-6 font-medium">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          New in latest release
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">What's new</h2>
+        <p class="text-lg text-slate-400 max-w-2xl mx-auto">Recent additions that make building apps even easier.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/30 transition-all duration-300 hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Conversation Branching</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Edit any message and explore alternate paths. Navigate between branches to compare different approaches to your app without losing work.</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/30 transition-all duration-300 hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Adaptive AI</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">The AI matches your technical level automatically. It asks about your project goals before building so you get exactly what you need, not a generic template.</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/30 transition-all duration-300 hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Monetization Guidance</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Built-in walkthroughs for Stripe integration, terms of service, and privacy policies. Everything you need to start charging for your apps.</p>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/30 transition-all duration-300 hover:-translate-y-1">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Licensing &amp; Open Source Choices</h3>
+          <p class="text-slate-400 text-sm leading-relaxed">Decide whether your app is open or closed source as part of the build workflow. The AI configures licenses, README, and repository settings for you.</p>
+        </div>
       </div>
     </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <div>
-        <h3>Distribute instantly</h3>
-        <p>Say "distribute this app" and get a Windows installer, a GitHub release, and a download page — all automatic.</p>
+  </section>
+
+  <!-- ==================== HOW IT WORKS ==================== -->
+  <section id="how-it-works" class="py-24 px-6 border-t border-slate-800/50">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">How it works</h2>
+        <p class="text-lg text-slate-400 max-w-2xl mx-auto">From idea to installed desktop app in four steps.</p>
       </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+            <span class="text-2xl font-extrabold bg-gradient-to-r from-emerald-400 to-cyan-300 bg-clip-text text-transparent">1</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Describe</h3>
+          <p class="text-slate-400 text-sm">Tell the AI what app you want in plain English. "Build me a Markdown editor with live preview."</p>
+        </div>
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+            <span class="text-2xl font-extrabold bg-gradient-to-r from-emerald-400 to-cyan-300 bg-clip-text text-transparent">2</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Build</h3>
+          <p class="text-slate-400 text-sm">AI scaffolds the Electron project, installs dependencies, writes all the code, and configures native features.</p>
+        </div>
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+            <span class="text-2xl font-extrabold bg-gradient-to-r from-emerald-400 to-cyan-300 bg-clip-text text-transparent">3</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Test</h3>
+          <p class="text-slate-400 text-sm">Your app launches as a real desktop window. Iterate with follow-up messages until it is exactly right.</p>
+        </div>
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+            <span class="text-2xl font-extrabold bg-gradient-to-r from-emerald-400 to-cyan-300 bg-clip-text text-transparent">4</span>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-2">Distribute</h3>
+          <p class="text-slate-400 text-sm">One click to build installers for Windows, macOS, and Linux. Publish to GitHub Releases with auto-updates.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== AI PLATFORMS ==================== -->
+  <section id="ai-platforms" class="py-24 px-6 border-t border-slate-800/50">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">Choose your AI platform</h2>
+        <p class="text-lg text-slate-400 max-w-2xl mx-auto">App Generator works with leading AI coding platforms. Pick the one that fits your style.</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 hover:border-emerald-500/30 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-xl">&#9672;</div>
+            <div>
+              <h3 class="text-lg font-bold text-white">Claude</h3>
+              <p class="text-sm text-slate-500">by Anthropic</p>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-1 mb-4">
+            <span class="text-3xl font-extrabold text-white">$20</span>
+            <span class="text-slate-500">/month</span>
+          </div>
+          <ul class="space-y-2 text-sm text-slate-400">
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-emerald-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Claude Code (terminal-based)</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-emerald-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Excellent for complex logic</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-emerald-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Strong reasoning &amp; planning</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-emerald-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Max plan recommended</li>
+          </ul>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 hover:border-emerald-500/30 transition-all duration-300">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-xl">&#9670;</div>
+            <div>
+              <h3 class="text-lg font-bold text-white">Codex</h3>
+              <p class="text-sm text-slate-500">by OpenAI</p>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-1 mb-4">
+            <span class="text-3xl font-extrabold text-white">$20</span>
+            <span class="text-slate-500">/month</span>
+          </div>
+          <ul class="space-y-2 text-sm text-slate-400">
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-emerald-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Codex CLI (terminal-based)</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-emerald-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Fast code generation</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-emerald-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Good multi-file refactoring</li>
+            <li class="flex items-center gap-2"><svg class="w-4 h-4 text-emerald-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Plus plan or higher</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== DOWNLOAD / PLATFORMS ==================== -->
+  <section id="platforms" class="py-24 px-6 border-t border-slate-800/50">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">Download App Generator</h2>
+        <p class="text-lg text-slate-400 max-w-2xl mx-auto">Free and open source. Available for all major platforms.</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <!-- Windows -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center hover:border-emerald-500/30 transition-all duration-300 relative overflow-hidden">
+          <div class="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400 font-medium" id="primary-badge">Primary</div>
+          <div class="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-blue-400" viewBox="0 0 24 24" fill="currentColor"><path d="M3 12V6.5l8-1.1V12H3zm0 .5h8v6.6l-8-1.1V12.5zm9-7.7L21 3v9.5h-9V4.8zM12 12.5h9V21l-9-1.2V12.5z"/></svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-1">Windows</h3>
+          <p class="text-sm text-slate-500 mb-4" id="win-size">.exe installer</p>
+          <a id="dl-windows" href="https://github.com/adventure-gpt/app-generator/releases/latest/download/App-Generator-Setup.exe" class="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/25">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download
+          </a>
+        </div>
+        <!-- macOS -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center hover:border-emerald-500/30 transition-all duration-300">
+          <div class="w-16 h-16 rounded-2xl bg-slate-500/10 flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-slate-400" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-1">macOS</h3>
+          <p class="text-sm text-slate-500 mb-4" id="mac-size">.dmg installer</p>
+          <a id="dl-macos" href="#" class="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all duration-300" style="display:none;">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download
+          </a>
+          <span id="mac-pending" class="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-xl bg-slate-800/50 text-slate-500 border border-slate-800">Coming soon</span>
+        </div>
+        <!-- Linux -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center hover:border-emerald-500/30 transition-all duration-300">
+          <div class="w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-yellow-400" viewBox="0 0 24 24" fill="currentColor"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.022 1.903 1.395.134-.333.133-.468.166-.8-.08-.06-.166-.134-.234-.268-.135-.268-.166-.665-.266-1.065l-.003-.003c-.032-.135-.071-.268-.102-.4-.064-.332-.108-.668-.139-1.002a2.321 2.321 0 00.356-.194c.255-.199.417-.6.44-1.457.008-.27-.026-.537-.078-.8a3.572 3.572 0 00-.148-.6c-.049-.165-.109-.332-.142-.465-.102-.335-.2-.601-.196-.867 0-.332.056-.467.158-.6.497-.6.655-1.333.698-2.067.087-1.466-.178-3.07-1.146-4.4-.966-1.333-1.07-2.2-1.1-3.066-.03-.866.22-1.733-.044-2.466-.364-1-.937-1.467-1.607-1.8-.668-.334-1.427-.4-2.135-.4z"/></svg>
+          </div>
+          <h3 class="text-lg font-bold text-white mb-1">Linux</h3>
+          <p class="text-sm text-slate-500 mb-4" id="linux-size">AppImage &amp; .deb</p>
+          <div id="linux-btns" style="display:none;" class="flex flex-col gap-2 items-center">
+            <a id="dl-linux-appimage" href="#" class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all duration-300">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> AppImage
+            </a>
+            <a id="dl-linux-deb" href="#" class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all duration-300">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> .deb
+            </a>
+          </div>
+          <span id="linux-pending" class="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-xl bg-slate-800/50 text-slate-500 border border-slate-800">Coming soon</span>
+        </div>
+      </div>
+      <div class="text-center mt-8">
+        <a href="https://github.com/adventure-gpt/app-generator" target="_blank" rel="noopener" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-emerald-400 transition-colors">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          View on GitHub
+          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== COMPANION APP CTA ==================== -->
+  <section class="py-20 px-6">
+    <div class="max-w-4xl mx-auto">
+      <div class="relative overflow-hidden rounded-2xl p-8 sm:p-12 flex flex-col sm:flex-row items-center gap-8" style="background: linear-gradient(135deg, #312e81 0%, #4c1d95 50%, #1e1b4b 100%); border: 2px solid rgba(139,92,246,0.6); box-shadow: 0 0 60px rgba(99,102,241,0.25), 0 0 120px rgba(139,92,246,0.1);">
+        <div class="absolute inset-0" style="background: radial-gradient(ellipse at 30% 50%, rgba(99,102,241,0.2) 0%, transparent 70%);"></div>
+        <div class="flex-1 text-center sm:text-left relative z-10">
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-4 uppercase tracking-wider" style="background: rgba(139,92,246,0.3); border: 1px solid rgba(167,139,250,0.5); color: #c4b5fd;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Companion App
+          </div>
+          <h3 class="text-3xl font-extrabold text-white mb-3">Also build websites?</h3>
+          <p class="text-indigo-100 mb-6 text-lg leading-relaxed">Try <span class="text-white font-bold">Website Generator</span> — the same AI-powered experience, but for building and deploying websites with live hosting on Cloudflare.</p>
+          <a href="https://website-generator.net" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-8 py-4 text-base font-semibold rounded-xl text-white transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5" style="background: linear-gradient(135deg, #7c3aed, #6366f1); box-shadow: 0 4px 20px rgba(124,58,237,0.4);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Visit website-generator.net
+          </a>
+        </div>
+        <div class="w-24 h-24 rounded-2xl flex items-center justify-center flex-shrink-0 relative z-10" style="background: rgba(139,92,246,0.25); border: 1px solid rgba(167,139,250,0.4);">
+          <svg class="w-12 h-12" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FAQ ==================== -->
+  <section id="faq" class="py-24 px-6 border-t border-slate-800/50">
+    <div class="max-w-3xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">Frequently asked questions</h2>
+      </div>
+      <div class="space-y-3">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+          <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between px-6 py-4 text-left text-white font-medium hover:bg-slate-800/50 transition-colors">
+            <span>Is App Generator really free?</span>
+            <svg class="w-5 h-5 text-slate-500 transition-transform duration-300 faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer px-6 text-sm text-slate-400 leading-relaxed">
+            <div class="pb-4">Yes. The desktop app is completely free and open-source under the MIT license. The only cost is your chosen AI platform (Claude at $20/month or Codex at $20/month). There are no per-usage fees, no hidden costs, and no premium tiers.</div>
+          </div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+          <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between px-6 py-4 text-left text-white font-medium hover:bg-slate-800/50 transition-colors">
+            <span>Do I need to know how to code?</span>
+            <svg class="w-5 h-5 text-slate-500 transition-transform duration-300 faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer px-6 text-sm text-slate-400 leading-relaxed">
+            <div class="pb-4">Not at all. You describe what you want in plain English and the AI handles all the code — project setup, dependencies, Electron configuration, UI components, and packaging. You just chat and iterate.</div>
+          </div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+          <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between px-6 py-4 text-left text-white font-medium hover:bg-slate-800/50 transition-colors">
+            <span>What kind of apps can it build?</span>
+            <svg class="w-5 h-5 text-slate-500 transition-transform duration-300 faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer px-6 text-sm text-slate-400 leading-relaxed">
+            <div class="pb-4">Desktop applications of all kinds: note-taking apps, file managers, dashboards, inventory trackers, image editors, music players, productivity tools, data viewers, system utilities — any Electron-based desktop app you can describe.</div>
+          </div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+          <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between px-6 py-4 text-left text-white font-medium hover:bg-slate-800/50 transition-colors">
+            <span>Can I distribute my apps to other people?</span>
+            <svg class="w-5 h-5 text-slate-500 transition-transform duration-300 faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer px-6 text-sm text-slate-400 leading-relaxed">
+            <div class="pb-4">Yes! App Generator includes one-click distribution via electron-builder and GitHub Releases. It can create installers for Windows (.exe), macOS (.dmg), and Linux (.AppImage, .deb). You can also set up GitHub Actions for automated multi-platform builds.</div>
+          </div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+          <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between px-6 py-4 text-left text-white font-medium hover:bg-slate-800/50 transition-colors">
+            <span>Do the apps support auto-updates?</span>
+            <svg class="w-5 h-5 text-slate-500 transition-transform duration-300 faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer px-6 text-sm text-slate-400 leading-relaxed">
+            <div class="pb-4">Yes. Every app built with App Generator can include electron-updater for seamless auto-updates via GitHub Releases. When you push a new version, your users receive the update automatically.</div>
+          </div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+          <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between px-6 py-4 text-left text-white font-medium hover:bg-slate-800/50 transition-colors">
+            <span>How is this different from Website Generator?</span>
+            <svg class="w-5 h-5 text-slate-500 transition-transform duration-300 faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer px-6 text-sm text-slate-400 leading-relaxed">
+            <div class="pb-4">Website Generator builds web apps deployed to Cloudflare. App Generator builds native desktop applications with Electron — apps that install on your computer with native menus, system tray, file system access, and offline support. They are companion tools by the same developer.</div>
+          </div>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+          <button onclick="toggleFaq(this)" class="w-full flex items-center justify-between px-6 py-4 text-left text-white font-medium hover:bg-slate-800/50 transition-colors">
+            <span>Can I use it on Mac or Linux?</span>
+            <svg class="w-5 h-5 text-slate-500 transition-transform duration-300 faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer px-6 text-sm text-slate-400 leading-relaxed">
+            <div class="pb-4">Yes! App Generator itself is available for Windows, macOS, and Linux. The apps you build with it can also target all three platforms — you can build cross-platform installers from a single codebase.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="border-t border-slate-800/50 py-12 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+          </div>
+          <span class="text-white font-bold">App Generator</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500">
+          <a href="https://github.com/adventure-gpt/app-generator" target="_blank" rel="noopener" class="hover:text-white transition-colors flex items-center gap-1">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            GitHub
+          </a>
+          <a href="https://website-generator.net" target="_blank" rel="noopener" class="hover:text-white transition-colors">Website Generator</a>
+        </div>
+      </div>
+      <div class="mt-8 text-center text-xs text-slate-600">&copy; 2025 Bryan Robbins. App Generator is free and open-source software.</div>
+    </div>
+  </footer>
+
+  <!-- ==================== SECRET ADMIN PANEL ==================== -->
+  <div id="admin-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:9998;opacity:0;transition:opacity 0.3s;" onclick="closeAdmin()"></div>
+  <div id="admin-panel" style="display:none;position:fixed;top:0;right:-480px;width:480px;max-width:100vw;height:100vh;background:#0c0e14;border-left:1px solid #1e293b;z-index:9999;overflow-y:auto;transition:right 0.35s cubic-bezier(0.4,0,0.2,1);box-shadow:-8px 0 30px rgba(0,0,0,0.5);">
+    <div style="padding:24px;">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;border-radius:8px;background:rgba(16,185,129,0.15);display:flex;align-items:center;justify-content:center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+          </div>
+          <span style="font-weight:700;color:white;font-size:16px;">Admin</span>
+        </div>
+        <button onclick="closeAdmin()" style="width:32px;height:32px;border-radius:8px;background:#1e293b;border:1px solid #334155;color:#94a3b8;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;line-height:1;">&times;</button>
+      </div>
+
+      <!-- Tab switcher (shown after login) -->
+      <div id="admin-tabs" style="display:none;margin-bottom:20px;">
+        <div style="display:flex;gap:4px;background:#111827;border-radius:10px;padding:3px;border:1px solid #1e293b;">
+          <button id="tab-analytics-btn" onclick="switchAdminTab('analytics')" style="flex:1;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(16,185,129,0.15);color:#34d399;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+            Analytics
+          </button>
+          <button id="tab-materials-btn" onclick="switchAdminTab('materials')" style="flex:1;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;background:transparent;color:#64748b;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+            Materials
+          </button>
+        </div>
+      </div>
+
+      <!-- Login form (shown first) -->
+      <div id="admin-login-section">
+        <div style="text-align:center;margin-bottom:20px;">
+          <div style="font-size:14px;color:#94a3b8;">Enter admin password to continue</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <input type="password" id="admin-password" placeholder="Password" style="flex:1;padding:10px 14px;border-radius:10px;background:#1e293b;border:1px solid #334155;color:white;font-size:14px;outline:none;" onkeydown="if(event.key==='Enter')attemptAdminLogin()">
+          <button onclick="attemptAdminLogin()" style="padding:10px 18px;border-radius:10px;background:#10b981;color:white;font-weight:600;font-size:14px;border:none;cursor:pointer;">Enter</button>
+        </div>
+        <div id="admin-login-error" style="color:#f87171;font-size:13px;text-align:center;margin-top:8px;display:none;">Incorrect password</div>
+      </div>
+
+      <!-- Analytics content (shown after login) -->
+      <div id="admin-analytics-section" style="display:none;">
+        <!-- Stat cards -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+          <div style="padding:16px;border-radius:12px;background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(16,185,129,0.05));border:1px solid rgba(16,185,129,0.2);">
+            <div style="font-size:12px;color:#6ee7b7;margin-bottom:4px;">Page Views</div>
+            <div id="stat-views" style="font-size:28px;font-weight:800;color:white;">0</div>
+            <div style="font-size:11px;color:#64748b;margin-top:2px;">All time</div>
+          </div>
+          <div style="padding:16px;border-radius:12px;background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(99,102,241,0.05));border:1px solid rgba(99,102,241,0.2);">
+            <div style="font-size:12px;color:#a5b4fc;margin-bottom:4px;">Download Clicks</div>
+            <div id="stat-downloads" style="font-size:28px;font-weight:800;color:white;">0</div>
+            <div style="font-size:11px;color:#64748b;margin-top:2px;">All time</div>
+          </div>
+          <div style="padding:16px;border-radius:12px;background:linear-gradient(135deg,rgba(244,114,182,0.15),rgba(244,114,182,0.05));border:1px solid rgba(244,114,182,0.2);">
+            <div style="font-size:12px;color:#f9a8d4;margin-bottom:4px;">Sessions</div>
+            <div id="stat-sessions" style="font-size:28px;font-weight:800;color:white;">0</div>
+            <div style="font-size:11px;color:#64748b;margin-top:2px;">Unique visits</div>
+          </div>
+          <div style="padding:16px;border-radius:12px;background:linear-gradient(135deg,rgba(251,191,36,0.15),rgba(251,191,36,0.05));border:1px solid rgba(251,191,36,0.2);">
+            <div style="font-size:12px;color:#fde68a;margin-bottom:4px;">DL Rate</div>
+            <div id="stat-dl-rate" style="font-size:28px;font-weight:800;color:white;">0%</div>
+            <div style="font-size:11px;color:#64748b;margin-top:2px;">Downloads / views</div>
+          </div>
+        </div>
+
+        <!-- Views over time (last 14 days) -->
+        <div style="padding:16px;border-radius:12px;background:#111827;border:1px solid #1e293b;margin-bottom:16px;">
+          <div style="font-size:13px;font-weight:600;color:white;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Views (Last 14 Days)
+          </div>
+          <div id="chart-views" style="display:flex;align-items:flex-end;gap:2px;height:60px;"></div>
+          <div id="chart-views-labels" style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:#475569;font-family:monospace;"></div>
+        </div>
+
+        <!-- Download clicks over time -->
+        <div style="padding:16px;border-radius:12px;background:#111827;border:1px solid #1e293b;margin-bottom:16px;">
+          <div style="font-size:13px;font-weight:600;color:white;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Downloads (Last 14 Days)
+          </div>
+          <div id="chart-downloads" style="display:flex;align-items:flex-end;gap:2px;height:60px;"></div>
+          <div id="chart-downloads-labels" style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:#475569;font-family:monospace;"></div>
+        </div>
+
+        <!-- Platform breakdown -->
+        <div style="padding:16px;border-radius:12px;background:#111827;border:1px solid #1e293b;margin-bottom:16px;">
+          <div style="font-size:13px;font-weight:600;color:white;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Platform Breakdown
+          </div>
+          <div id="platform-bars"></div>
+        </div>
+
+        <!-- Referrer breakdown -->
+        <div style="padding:16px;border-radius:12px;background:#111827;border:1px solid #1e293b;margin-bottom:16px;">
+          <div style="font-size:13px;font-weight:600;color:white;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Top Referrers
+          </div>
+          <div id="referrer-bars"></div>
+        </div>
+
+        <!-- Recent events -->
+        <div style="padding:16px;border-radius:12px;background:#111827;border:1px solid #1e293b;margin-bottom:16px;">
+          <div style="font-size:13px;font-weight:600;color:white;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Recent Events
+            <span style="width:6px;height:6px;border-radius:50%;background:#34d399;display:inline-block;"></span>
+          </div>
+          <div id="recent-events" style="max-height:200px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#334155 transparent;"></div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <button onclick="clearAnalytics()" style="flex:1;padding:10px;border-radius:10px;background:#1e293b;border:1px solid #334155;color:#94a3b8;font-size:13px;cursor:pointer;">Clear Data</button>
+          <a href="https://dash.cloudflare.com" target="_blank" rel="noopener" style="flex:1;padding:10px;border-radius:10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#34d399;font-size:13px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:4px;">
+            CF Dashboard
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+        <div style="font-size:11px;color:#475569;text-align:center;line-height:1.6;">
+          Data stored locally in your browser via localStorage.<br>
+          For server-side analytics, use the Cloudflare Dashboard.
+        </div>
+      </div>
+
+      <!-- Marketing Materials (shown when tab is active) -->
+      <div id="admin-materials-section" style="display:none;">
+        <!-- Category tabs -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+          <button class="mat-cat-btn" data-cat="social" onclick="switchMaterialCat('social')" style="padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid rgba(16,185,129,0.3);background:rgba(16,185,129,0.1);color:#34d399;cursor:pointer;display:flex;align-items:center;gap:4px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Social Media
+          </button>
+          <button class="mat-cat-btn" data-cat="digital" onclick="switchMaterialCat('digital')" style="padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid #1e293b;background:transparent;color:#64748b;cursor:pointer;display:flex;align-items:center;gap:4px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Digital
+          </button>
+          <button class="mat-cat-btn" data-cat="print" onclick="switchMaterialCat('print')" style="padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid #1e293b;background:transparent;color:#64748b;cursor:pointer;display:flex;align-items:center;gap:4px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Print
+          </button>
+        </div>
+
+        <!-- Social Media materials -->
+        <div id="mat-social" class="mat-cat-content">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="border-radius:12px;background:#111827;border:1px solid #1e293b;overflow:hidden;">
+              <div style="aspect-ratio:1/1;background:#0a0d12;padding:12px;display:flex;align-items:center;justify-content:center;">
+                <img src="marketing/social-instagram-square.svg" alt="Instagram Post" style="width:100%;height:100%;object-fit:contain;" loading="lazy">
+              </div>
+              <div style="padding:12px;">
+                <div style="font-size:13px;font-weight:600;color:white;margin-bottom:4px;">Instagram Square Post</div>
+                <div style="font-size:11px;color:#64748b;margin-bottom:8px;">1080x1080 — Feed posts &amp; carousels</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div style="display:flex;gap:4px;">
+                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:#1e293b;color:#94a3b8;">1080x1080</span>
+                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:rgba(16,185,129,0.1);color:#34d399;">SVG</span>
+                  </div>
+                  <a href="marketing/social-instagram-square.svg" download style="font-size:11px;font-weight:600;color:#34d399;text-decoration:none;display:flex;align-items:center;gap:4px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div style="border-radius:12px;background:#111827;border:1px solid #1e293b;overflow:hidden;">
+              <div style="aspect-ratio:3/1;background:#0a0d12;padding:8px;display:flex;align-items:center;justify-content:center;">
+                <img src="marketing/social-twitter-banner.svg" alt="Twitter Banner" style="width:100%;height:100%;object-fit:contain;" loading="lazy">
+              </div>
+              <div style="padding:12px;">
+                <div style="font-size:13px;font-weight:600;color:white;margin-bottom:4px;">Twitter/X Banner</div>
+                <div style="font-size:11px;color:#64748b;margin-bottom:8px;">1500x500 — Profile header image</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div style="display:flex;gap:4px;">
+                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:#1e293b;color:#94a3b8;">1500x500</span>
+                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:rgba(16,185,129,0.1);color:#34d399;">SVG</span>
+                  </div>
+                  <a href="marketing/social-twitter-banner.svg" download style="font-size:11px;font-weight:600;color:#34d399;text-decoration:none;display:flex;align-items:center;gap:4px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div style="border-radius:12px;background:#111827;border:1px solid #1e293b;overflow:hidden;">
+              <div style="aspect-ratio:1200/630;background:#0a0d12;padding:8px;display:flex;align-items:center;justify-content:center;">
+                <img src="marketing/social-facebook-post.svg" alt="Facebook Post" style="width:100%;height:100%;object-fit:contain;" loading="lazy">
+              </div>
+              <div style="padding:12px;">
+                <div style="font-size:13px;font-weight:600;color:white;margin-bottom:4px;">Facebook Post Image</div>
+                <div style="font-size:11px;color:#64748b;margin-bottom:8px;">1200x630 — Optimized for feed sharing</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div style="display:flex;gap:4px;">
+                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:#1e293b;color:#94a3b8;">1200x630</span>
+                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:rgba(16,185,129,0.1);color:#34d399;">SVG</span>
+                  </div>
+                  <a href="marketing/social-facebook-post.svg" download style="font-size:11px;font-weight:600;color:#34d399;text-decoration:none;display:flex;align-items:center;gap:4px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Digital materials -->
+        <div id="mat-digital" class="mat-cat-content" style="display:none;">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="border-radius:12px;background:#111827;border:1px solid #1e293b;overflow:hidden;">
+              <div style="aspect-ratio:728/90;background:#0a0d12;padding:8px;display:flex;align-items:center;justify-content:center;">
+                <img src="marketing/digital-banner-728x90.svg" alt="Leaderboard Banner" style="width:100%;height:100%;object-fit:contain;" loading="lazy">
+              </div>
+              <div style="padding:12px;">
+                <div style="font-size:13px;font-weight:600;color:white;margin-bottom:4px;">Leaderboard Banner</div>
+                <div style="font-size:11px;color:#64748b;margin-bottom:8px;">728x90 — Standard web banner format</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div style="display:flex;gap:4px;">
+                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:#1e293b;color:#94a3b8;">728x90</span>
+                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:rgba(34,211,238,0.1);color:#22d3ee;">SVG</span>
+                  </div>
+                  <a href="marketing/digital-banner-728x90.svg" download style="font-size:11px;font-weight:600;color:#34d399;text-decoration:none;display:flex;align-items:center;gap:4px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div style="border-radius:12px;background:#111827;border:1px solid #1e293b;overflow:hidden;">
+              <div style="aspect-ratio:16/9;background:#0a0d12;padding:8px;display:flex;align-items:center;justify-content:center;">
+                <img src="marketing/digital-screen-1920x1080.svg" alt="Full HD Screen" style="width:100%;height:100%;object-fit:contain;" loading="lazy">
+              </div>
+              <div style="padding:12px;">
+                <div style="font-size:13px;font-weight:600;color:white;margin-bottom:4px;">Full HD Display</div>
+                <div style="font-size:11px;color:#64748b;margin-bottom:8px;">1920x1080 — Digital signage &amp; screens</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div style="display:flex;gap:4px;">
+                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:#1e293b;color:#94a3b8;">1920x1080</span>
+                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:rgba(34,211,238,0.1);color:#22d3ee;">SVG</span>
+                  </div>
+                  <a href="marketing/digital-screen-1920x1080.svg" download style="font-size:11px;font-weight:600;color:#34d399;text-decoration:none;display:flex;align-items:center;gap:4px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Print materials -->
+        <div id="mat-print" class="mat-cat-content" style="display:none;">
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="border-radius:12px;background:#111827;border:1px solid #1e293b;overflow:hidden;">
+              <div style="aspect-ratio:816/1056;max-height:300px;background:#0a0d12;padding:8px;display:flex;align-items:center;justify-content:center;">
+                <img src="marketing/print-flyer-letter.svg" alt="Letter Flyer" style="width:100%;height:100%;object-fit:contain;" loading="lazy">
+              </div>
+              <div style="padding:12px;">
+                <div style="font-size:13px;font-weight:600;color:white;margin-bottom:4px;">Letter Flyer</div>
+                <div style="font-size:11px;color:#64748b;margin-bottom:8px;">8.5x11" — Single-page promotional flyer</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div style="display:flex;gap:4px;">
+                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:#1e293b;color:#94a3b8;">8.5x11 in</span>
+                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:rgba(244,114,182,0.1);color:#f472b6;">SVG</span>
+                  </div>
+                  <a href="marketing/print-flyer-letter.svg" download style="font-size:11px;font-weight:600;color:#34d399;text-decoration:none;display:flex;align-items:center;gap:4px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Usage note -->
+        <div style="margin-top:16px;padding:12px;border-radius:10px;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.1);">
+          <div style="font-size:11px;color:#94a3b8;line-height:1.6;">
+            <span style="font-weight:600;color:#34d399;">Usage:</span> All materials free to use. SVG files are resolution-independent. Open in Figma, Illustrator, or Inkscape to customize.
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
-</section>
 
-<!-- CTA -->
-<section class="cta">
-  <div class="cta-box">
-    <h2>Ready to build something?</h2>
-    <p>Download App Generator and create your first desktop app in minutes.</p>
-    <a href="https://github.com/adventure-gpt/app-generator/releases/latest/download/App-Generator-Setup-1.0.1-x64.exe" class="btn btn-primary">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      Download for Windows
-    </a>
-  </div>
-</section>
+  <!-- ==================== SCRIPTS ==================== -->
+  <script>
+  // Nav scroll effect
+  window.addEventListener('scroll', function() {
+    var nav = document.getElementById('navbar');
+    if (window.scrollY > 20) {
+      nav.classList.add('bg-slate-950/90', 'backdrop-blur-lg', 'border-b', 'border-slate-800/50');
+    } else {
+      nav.classList.remove('bg-slate-950/90', 'backdrop-blur-lg', 'border-b', 'border-slate-800/50');
+    }
+  });
 
-<footer>
-  <p>Built with App Generator &middot; <a href="https://github.com/adventure-gpt/app-generator">GitHub</a></p>
-</footer>
+  // Mobile menu
+  function toggleMobileMenu() {
+    document.getElementById('mobile-menu').classList.toggle('hidden');
+  }
+  function closeMobileMenu() {
+    document.getElementById('mobile-menu').classList.add('hidden');
+  }
 
+  // Nav dropdown
+  var navDropdownOpen = false;
+  function toggleNavDropdown(e) {
+    e.stopPropagation();
+    navDropdownOpen = !navDropdownOpen;
+    document.getElementById('nav-dropdown').classList.toggle('hidden', !navDropdownOpen);
+    document.getElementById('nav-chevron').style.transform = navDropdownOpen ? 'rotate(180deg)' : '';
+  }
+  document.addEventListener('click', function() {
+    navDropdownOpen = false;
+    document.getElementById('nav-dropdown').classList.add('hidden');
+    document.getElementById('nav-chevron').style.transform = '';
+  });
+
+  // FAQ accordion
+  function toggleFaq(btn) {
+    var answer = btn.nextElementSibling;
+    var chevron = btn.querySelector('.faq-chevron');
+    var isOpen = answer.classList.contains('open');
+    document.querySelectorAll('.faq-answer').forEach(function(a) { a.classList.remove('open'); });
+    document.querySelectorAll('.faq-chevron').forEach(function(c) { c.style.transform = ''; });
+    if (!isOpen) {
+      answer.classList.add('open');
+      chevron.style.transform = 'rotate(180deg)';
+    }
+  }
+
+  // Platform detection
+  function detectPlatform() {
+    var ua = navigator.userAgent;
+    if (ua.includes('Mac')) return 'mac';
+    if (ua.includes('Linux')) return 'linux';
+    return 'windows';
+  }
+
+  // Fetch release data from GitHub API
+  function fmtSize(bytes) {
+    return bytes ? '~' + Math.round(bytes / 1048576) + ' MB' : '';
+  }
+
+  function createDownloadLink(url, label, size) {
+    var a = document.createElement('a');
+    a.href = url;
+    a.className = 'flex items-center justify-between px-4 py-2.5 text-sm hover:bg-slate-800 transition-colors text-slate-300';
+    var span1 = document.createElement('span');
+    span1.textContent = label;
+    a.appendChild(span1);
+    if (size) {
+      var span2 = document.createElement('span');
+      span2.className = 'text-slate-500 text-xs';
+      span2.textContent = size;
+      a.appendChild(span2);
+    }
+    return a;
+  }
+
+  function createHeroAltLink(url, label, size) {
+    var a = document.createElement('a');
+    a.href = url;
+    a.className = 'inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/50 hover:border-slate-600 transition-all duration-200';
+    // Download icon SVG
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '14');
+    svg.setAttribute('height', '14');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    var path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path1.setAttribute('d', 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4');
+    var poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    poly.setAttribute('points', '7 10 12 15 17 10');
+    var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', '12'); line.setAttribute('y1', '15');
+    line.setAttribute('x2', '12'); line.setAttribute('y2', '3');
+    svg.appendChild(path1); svg.appendChild(poly); svg.appendChild(line);
+    a.appendChild(svg);
+    var labelSpan = document.createTextNode(label);
+    a.appendChild(labelSpan);
+    if (size) {
+      var sizeSpan = document.createElement('span');
+      sizeSpan.className = 'text-xs text-slate-500';
+      sizeSpan.textContent = '(' + size + ')';
+      a.appendChild(sizeSpan);
+    }
+    return a;
+  }
+
+  fetch('https://api.github.com/repos/adventure-gpt/app-generator/releases/latest')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data || !data.assets) return;
+      var version = (data.tag_name || '').replace(/^v/, '');
+      var assets = data.assets;
+      var exe = assets.find(function(a) { return a.name.endsWith('.exe'); });
+      var dmg = assets.find(function(a) { return a.name.endsWith('.dmg'); });
+      var appimage = assets.find(function(a) { return a.name.endsWith('.AppImage'); });
+      var deb = assets.find(function(a) { return a.name.endsWith('.deb'); });
+      var platform = detectPlatform();
+      var vStr = version ? ' v' + version : '';
+      var primaryLabel, primaryUrl;
+
+      if (platform === 'mac' && dmg) {
+        primaryUrl = dmg.browser_download_url;
+        primaryLabel = 'Download' + vStr + ' for macOS';
+      } else if (platform === 'linux' && appimage) {
+        primaryUrl = appimage.browser_download_url;
+        primaryLabel = 'Download' + vStr + ' for Linux';
+      } else if (exe) {
+        primaryUrl = exe.browser_download_url;
+        primaryLabel = 'Download' + vStr + ' for Windows';
+      }
+
+      if (primaryUrl) {
+        document.getElementById('nav-dl-primary').href = primaryUrl;
+        document.getElementById('nav-dl-label').textContent = primaryLabel;
+        document.getElementById('hero-dl-btn').href = primaryUrl;
+        document.getElementById('hero-dl-label').textContent = primaryLabel;
+      }
+
+      // Nav dropdown (safe DOM construction)
+      var dropdown = document.getElementById('nav-dropdown');
+      dropdown.textContent = '';
+      var altDownloads = [];
+      if (exe && platform !== 'windows') altDownloads.push({ label: 'Windows', url: exe.browser_download_url, size: fmtSize(exe.size) });
+      if (dmg && platform !== 'mac') altDownloads.push({ label: 'macOS', url: dmg.browser_download_url, size: fmtSize(dmg.size) });
+      if (appimage && platform !== 'linux') altDownloads.push({ label: 'Linux (AppImage)', url: appimage.browser_download_url, size: fmtSize(appimage.size) });
+      if (deb) altDownloads.push({ label: 'Linux (.deb)', url: deb.browser_download_url, size: fmtSize(deb.size) });
+      altDownloads.forEach(function(d) {
+        dropdown.appendChild(createDownloadLink(d.url, d.label, d.size));
+      });
+
+      // Hero alt downloads (safe DOM construction)
+      var heroAlt = document.getElementById('hero-alt-downloads');
+      heroAlt.textContent = '';
+      var heroAlts = [];
+      if (platform !== 'windows' && exe) heroAlts.push({ label: 'Windows', url: exe.browser_download_url, size: fmtSize(exe.size) });
+      if (platform !== 'mac' && dmg) heroAlts.push({ label: 'macOS', url: dmg.browser_download_url, size: fmtSize(dmg.size) });
+      if (platform !== 'linux' && appimage) heroAlts.push({ label: 'Linux', url: appimage.browser_download_url, size: fmtSize(appimage.size) });
+      heroAlts.forEach(function(d) {
+        heroAlt.appendChild(createHeroAltLink(d.url, d.label, d.size));
+      });
+
+      // Platform cards
+      if (exe) {
+        document.getElementById('dl-windows').href = exe.browser_download_url;
+        var winSize = fmtSize(exe.size);
+        document.getElementById('win-size').textContent = '.exe installer' + (winSize ? ' (' + winSize + ')' : '');
+      }
+      if (dmg) {
+        document.getElementById('dl-macos').href = dmg.browser_download_url;
+        document.getElementById('dl-macos').style.display = '';
+        document.getElementById('mac-pending').style.display = 'none';
+        var macSize = fmtSize(dmg.size);
+        document.getElementById('mac-size').textContent = '.dmg installer' + (macSize ? ' (' + macSize + ')' : '');
+      }
+      if (appimage || deb) {
+        document.getElementById('linux-btns').style.display = '';
+        document.getElementById('linux-pending').style.display = 'none';
+        if (appimage) document.getElementById('dl-linux-appimage').href = appimage.browser_download_url;
+        else document.getElementById('dl-linux-appimage').style.display = 'none';
+        if (deb) document.getElementById('dl-linux-deb').href = deb.browser_download_url;
+        else document.getElementById('dl-linux-deb').style.display = 'none';
+      }
+    })
+    .catch(function() { /* keep defaults */ });
+
+  // ==================== DEMO ANIMATION ====================
+  (function() {
+    var chat = document.getElementById('demo-chat');
+    var input = document.getElementById('demo-input');
+    var projects = document.getElementById('demo-projects');
+    if (!chat || !input || !projects) { console.error('Demo elements not found'); return; }
+
+    function w(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
+
+    function addProject(name, active) {
+      var d = document.createElement('div');
+      d.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:6px;font-size:clamp(9px,1vw,13px);margin-top:5px;opacity:0;transition:opacity 0.3s;' + (active ? 'background:rgba(16,185,129,0.12);color:#f0f0f2;' : 'color:#8b8b90;');
+      var dot = document.createElement('span');
+      dot.style.cssText = 'width:6px;height:6px;border-radius:50%;flex-shrink:0;background:' + (active ? '#10b981' : '#5a5a60') + ';';
+      var label = document.createElement('span');
+      label.textContent = name;
+      d.appendChild(dot);
+      d.appendChild(label);
+      projects.appendChild(d);
+      requestAnimationFrame(function() { d.style.opacity = '1'; });
+    }
+
+    function typeIn(text, speed) {
+      return new Promise(function(resolve) {
+        var i = 0;
+        var iv = setInterval(function() {
+          input.value = text.substring(0, i + 1);
+          i++;
+          if (i >= text.length) { clearInterval(iv); resolve(); }
+        }, speed || 35);
+      });
+    }
+
+    function addUser(text) {
+      var d = document.createElement('div');
+      d.style.cssText = 'max-width:88%;align-self:flex-end;opacity:0;transform:translateY(8px);transition:all 0.35s ease;';
+      var b = document.createElement('div');
+      b.style.cssText = 'padding:8px 14px;border-radius:10px;font-size:clamp(10px,1.1vw,14px);line-height:1.6;background:#10b981;color:white;border-bottom-right-radius:4px;';
+      b.textContent = text;
+      d.appendChild(b);
+      chat.appendChild(d);
+      requestAnimationFrame(function() { d.style.opacity = '1'; d.style.transform = 'translateY(0)'; });
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function addDots() {
+      var d = document.createElement('div');
+      d.style.cssText = 'max-width:88%;align-self:flex-start;';
+      d.id = 'demo-dots';
+      var b = document.createElement('div');
+      b.style.cssText = 'padding:8px 14px;border-radius:10px;background:#1a1a1d;border-bottom-left-radius:4px;';
+      var t = document.createElement('div');
+      t.style.cssText = 'display:flex;gap:4px;padding:4px 0;';
+      for (var i = 0; i < 3; i++) {
+        var dot = document.createElement('div');
+        dot.className = 'tdot';
+        dot.style.cssText = 'width:6px;height:6px;border-radius:50%;background:#5a5a60;';
+        t.appendChild(dot);
+      }
+      b.appendChild(t);
+      d.appendChild(b);
+      chat.appendChild(d);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function removeDots() {
+      var e = document.getElementById('demo-dots');
+      if (e) e.remove();
+    }
+
+    function addTools(steps, done) {
+      var d = document.createElement('div');
+      d.style.cssText = 'background:#1a1a1d;border-radius:10px;padding:8px 12px;font-size:clamp(9px,0.95vw,12px);color:#8b8b90;max-width:88%;align-self:flex-start;opacity:0;transform:translateY(8px);transition:all 0.35s;';
+      var sum = document.createElement('div');
+      sum.style.cssText = 'display:flex;align-items:center;gap:8px;';
+      var sp = document.createElement('span');
+      if (done) {
+        sp.style.cssText = 'width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;';
+      } else {
+        sp.className = 'spinner-anim';
+        sp.style.cssText = 'width:10px;height:10px;border:1.5px solid #10b981;border-top-color:transparent;border-radius:50%;flex-shrink:0;';
+      }
+      var lb = document.createElement('span');
+      lb.textContent = done ? steps.length + ' steps completed' : 'Working... (' + steps.length + ' steps)';
+      sum.appendChild(sp);
+      sum.appendChild(lb);
+      var ul = document.createElement('ul');
+      ul.style.cssText = 'list-style:none;margin-top:6px;display:flex;flex-direction:column;gap:3px;';
+      for (var i = 0; i < steps.length; i++) {
+        var li = document.createElement('li');
+        li.style.cssText = 'display:flex;align-items:center;gap:6px;';
+        var dot = document.createElement('span');
+        if (i === steps.length - 1 && !done) {
+          dot.className = 'spinner-anim';
+          dot.style.cssText = 'width:8px;height:8px;border:1.5px solid #10b981;border-top-color:transparent;border-radius:50%;flex-shrink:0;';
+        } else {
+          dot.style.cssText = 'width:6px;height:6px;border-radius:50%;background:#22c55e;flex-shrink:0;';
+        }
+        var nm = document.createElement('span');
+        nm.textContent = steps[i];
+        li.appendChild(dot);
+        li.appendChild(nm);
+        ul.appendChild(li);
+      }
+      d.appendChild(sum);
+      d.appendChild(ul);
+      chat.appendChild(d);
+      requestAnimationFrame(function() { d.style.opacity = '1'; d.style.transform = 'translateY(0)'; });
+      chat.scrollTop = chat.scrollHeight;
+      return d;
+    }
+
+    function streamAsst(text, speed) {
+      return new Promise(function(resolve) {
+        var d = document.createElement('div');
+        d.style.cssText = 'max-width:88%;align-self:flex-start;';
+        var b = document.createElement('div');
+        b.style.cssText = 'padding:8px 14px;border-radius:10px;font-size:clamp(10px,1.1vw,14px);line-height:1.6;background:#1a1a1d;color:#f0f0f2;border-bottom-left-radius:4px;';
+        d.appendChild(b);
+        chat.appendChild(d);
+        var i = 0;
+        var iv = setInterval(function() {
+          b.textContent = text.substring(0, i + 1);
+          chat.scrollTop = chat.scrollHeight;
+          i++;
+          if (i >= text.length) { clearInterval(iv); resolve(); }
+        }, speed || 15);
+      });
+    }
+
+    async function runDemo() {
+      await w(800);
+      addProject('note-taking-app', true);
+      await w(500);
+
+      // User types the initial request
+      await typeIn('Build me a note-taking app with a file browser sidebar', 25);
+      await w(350);
+      addUser('Build me a note-taking app with a file browser sidebar');
+      input.value = '';
+      await w(250);
+
+      // Thinking
+      addDots();
+      await w(1400);
+      removeDots();
+
+      // Tool activity phase 1
+      var t1 = addTools(['npm init electron-app', 'npm install electron', 'React + Vite setup'], false);
+      await w(1100);
+      t1.remove();
+
+      // Tool activity phase 2
+      var t2 = addTools(['npm init electron-app', 'npm install electron', 'React + Vite setup', 'main process config', 'file system API', 'React components', 'markdown parser'], false);
+      await w(1400);
+      t2.remove();
+
+      // Done
+      addTools(['npm init electron-app', 'npm install electron', 'React + Vite setup', 'main process config', 'file system API', 'React components', 'markdown parser', 'native menus', 'electron-builder config'], true);
+      await w(350);
+
+      await streamAsst('Done! I built a note-taking app with a file browser sidebar, Markdown support, and native menus. Your app is launching now!', 16);
+      await w(400);
+
+      // Show mock app
+      document.getElementById('demo-placeholder').style.display = 'none';
+      document.getElementById('demo-mock-app').style.opacity = '1';
+      document.getElementById('demo-app-status').textContent = 'Running';
+      document.getElementById('demo-app-status').style.display = '';
+      document.getElementById('demo-launch-btn').textContent = 'Relaunch';
+      await w(2000);
+
+      // Follow-up: dark mode + shortcuts
+      await typeIn('Add dark mode and keyboard shortcuts', 30);
+      await w(300);
+      addUser('Add dark mode and keyboard shortcuts');
+      input.value = '';
+      await w(250);
+
+      addDots();
+      await w(1100);
+      removeDots();
+
+      addTools(['update theme system', 'keyboard shortcut bindings', 'dark mode toggle'], true);
+      await w(300);
+      await streamAsst('Updated! Dark mode toggle in the title bar, plus Ctrl+N, Ctrl+F, and Ctrl+S shortcuts. Relaunching now!', 16);
+      await w(400);
+
+      // Switch to dark mode
+      document.getElementById('demo-mock-app').style.opacity = '0';
+      await w(300);
+      document.getElementById('demo-mock-app-dark').style.opacity = '1';
+      await w(2500);
+
+      // Package request
+      await typeIn('Package it for Windows', 35);
+      await w(300);
+      addUser('Package it for Windows');
+      input.value = '';
+      await w(250);
+
+      addDots();
+      await w(900);
+      removeDots();
+
+      addTools(['electron-builder build', 'code signing', 'installer created'], true);
+      await w(300);
+      await streamAsst('Your app is packaged! NoteKeeper-Setup.exe is ready in the dist/ folder. Want me to set up GitHub Releases for auto-updates?', 16);
+
+      document.getElementById('demo-app-status').textContent = 'Packaged';
+      document.getElementById('demo-app-status').style.color = '#10b981';
+      await w(4000);
+
+      // Reset and loop
+      chat.textContent = '';
+      projects.textContent = '';
+      document.getElementById('demo-placeholder').style.display = '';
+      document.getElementById('demo-mock-app').style.opacity = '0';
+      document.getElementById('demo-mock-app-dark').style.opacity = '0';
+      document.getElementById('demo-app-status').style.display = 'none';
+      document.getElementById('demo-app-status').style.color = '#22c55e';
+      document.getElementById('demo-launch-btn').textContent = 'Launch';
+      input.value = '';
+      await w(1500);
+      runDemo().catch(function(e) { console.error('Demo loop error:', e); });
+    }
+
+    runDemo().catch(function(e) { console.error('Demo error:', e); });
+  })();
+
+  // ==================== ANALYTICS TRACKING ====================
+  (function() {
+    var STORAGE_KEY = 'appgen_analytics';
+    var SESSION_KEY = 'appgen_session';
+
+    function getAnalytics() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || createEmpty(); }
+      catch(e) { return createEmpty(); }
+    }
+
+    function createEmpty() {
+      return { views: [], downloads: [], platforms: {}, referrers: {}, events: [], sessions: 0 };
+    }
+
+    function saveAnalytics(data) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+    }
+
+    function todayStr() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function timeStr() {
+      return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function detectPlatformName() {
+      var ua = navigator.userAgent;
+      if (ua.includes('Mac')) return 'macOS';
+      if (ua.includes('Linux') && !ua.includes('Android')) return 'Linux';
+      if (ua.includes('Android')) return 'Android';
+      if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
+      if (ua.includes('Windows')) return 'Windows';
+      return 'Other';
+    }
+
+    function getReferrerDomain() {
+      if (!document.referrer) return 'Direct';
+      try {
+        var url = new URL(document.referrer);
+        if (url.hostname === location.hostname) return 'Direct';
+        return url.hostname.replace('www.', '');
+      } catch(e) { return 'Other'; }
+    }
+
+    function trackEvent(type, detail) {
+      var data = getAnalytics();
+      var today = todayStr();
+      var platform = detectPlatformName();
+
+      // Count by day
+      var arr = type === 'download' ? data.downloads : data.views;
+      var dayEntry = arr.find(function(d) { return d.date === today; });
+      if (dayEntry) { dayEntry.count++; }
+      else { arr.push({ date: today, count: 1 }); }
+
+      // Keep only last 90 days
+      var cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 90);
+      var cutoffStr = cutoff.toISOString().slice(0, 10);
+      if (type === 'download') { data.downloads = data.downloads.filter(function(d) { return d.date >= cutoffStr; }); }
+      else { data.views = data.views.filter(function(d) { return d.date >= cutoffStr; }); }
+
+      // Platform
+      data.platforms[platform] = (data.platforms[platform] || 0) + 1;
+
+      // Referrer (only on pageview)
+      if (type === 'pageview') {
+        var ref = getReferrerDomain();
+        data.referrers[ref] = (data.referrers[ref] || 0) + 1;
+      }
+
+      // Recent events (keep last 50)
+      data.events.unshift({ type: type, detail: detail || '', time: timeStr(), date: today, platform: platform });
+      if (data.events.length > 50) data.events = data.events.slice(0, 50);
+
+      // Session tracking
+      if (!sessionStorage.getItem(SESSION_KEY)) {
+        sessionStorage.setItem(SESSION_KEY, '1');
+        data.sessions = (data.sessions || 0) + 1;
+      }
+
+      saveAnalytics(data);
+    }
+
+    // Track pageview on load
+    trackEvent('pageview', location.pathname);
+
+    // Track download clicks
+    function trackDownloadClick(e) {
+      var a = e.target.closest('a');
+      if (a && a.href && (a.href.includes('/download/') || a.href.includes('releases'))) {
+        var label = a.href.split('/').pop() || 'unknown';
+        trackEvent('download', label);
+      }
+    }
+    document.addEventListener('click', trackDownloadClick);
+
+    // Expose for admin panel
+    window._appgenAnalytics = {
+      get: getAnalytics,
+      save: saveAnalytics,
+      clear: function() { localStorage.removeItem(STORAGE_KEY); }
+    };
+  })();
+
+  // ==================== SECRET ADMIN PANEL ====================
+  (function() {
+    var clickCount = 0;
+    var clickTimer = null;
+    // SHA-256 hash of the admin password
+    var ADMIN_HASH = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'; // "admin"
+
+    var logoIcon = document.getElementById('logo-icon');
+    if (logoIcon) {
+      logoIcon.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        clickCount++;
+        clearTimeout(clickTimer);
+        if (clickCount >= 7) {
+          clickCount = 0;
+          openAdmin();
+        } else {
+          clickTimer = setTimeout(function() { clickCount = 0; }, 2000);
+        }
+      });
+    }
+
+    // Prevent the parent <a> from navigating when clicking the icon
+    var logoLink = document.getElementById('logo-link');
+    if (logoLink) {
+      logoLink.addEventListener('click', function(e) {
+        // Only prevent if the click came from the icon area
+        if (e.target.closest('#logo-icon')) {
+          e.preventDefault();
+        }
+      });
+    }
+
+    async function hashPassword(pw) {
+      var data = new TextEncoder().encode(pw);
+      var buf = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(buf)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+    }
+
+    window.openAdmin = function() {
+      var panel = document.getElementById('admin-panel');
+      var overlay = document.getElementById('admin-overlay');
+      panel.style.display = 'block';
+      overlay.style.display = 'block';
+      // Check if already authed this session
+      if (sessionStorage.getItem('appgen_admin_authed')) {
+        showAnalytics();
+      }
+      requestAnimationFrame(function() {
+        overlay.style.opacity = '1';
+        panel.style.right = '0px';
+      });
+    };
+
+    window.closeAdmin = function() {
+      var panel = document.getElementById('admin-panel');
+      var overlay = document.getElementById('admin-overlay');
+      panel.style.right = '-480px';
+      overlay.style.opacity = '0';
+      setTimeout(function() {
+        panel.style.display = 'none';
+        overlay.style.display = 'none';
+      }, 350);
+    };
+
+    window.attemptAdminLogin = async function() {
+      var pw = document.getElementById('admin-password').value;
+      var hash = await hashPassword(pw);
+      if (hash === ADMIN_HASH) {
+        sessionStorage.setItem('appgen_admin_authed', '1');
+        document.getElementById('admin-login-error').style.display = 'none';
+        showAnalytics();
+      } else {
+        document.getElementById('admin-login-error').style.display = 'block';
+      }
+    };
+
+    window.clearAnalytics = function() {
+      if (confirm('Clear all locally stored analytics data?')) {
+        window._appgenAnalytics.clear();
+        showAnalytics();
+      }
+    };
+
+    function showAnalytics() {
+      document.getElementById('admin-login-section').style.display = 'none';
+      document.getElementById('admin-tabs').style.display = 'block';
+      document.getElementById('admin-analytics-section').style.display = 'block';
+      document.getElementById('admin-materials-section').style.display = 'none';
+      renderAnalytics();
+    }
+
+    window.switchAdminTab = function(tab) {
+      var analyticsBtn = document.getElementById('tab-analytics-btn');
+      var materialsBtn = document.getElementById('tab-materials-btn');
+      var analyticsSection = document.getElementById('admin-analytics-section');
+      var materialsSection = document.getElementById('admin-materials-section');
+      if (tab === 'analytics') {
+        analyticsBtn.style.background = 'rgba(16,185,129,0.15)';
+        analyticsBtn.style.color = '#34d399';
+        materialsBtn.style.background = 'transparent';
+        materialsBtn.style.color = '#64748b';
+        analyticsSection.style.display = 'block';
+        materialsSection.style.display = 'none';
+      } else {
+        materialsBtn.style.background = 'rgba(16,185,129,0.15)';
+        materialsBtn.style.color = '#34d399';
+        analyticsBtn.style.background = 'transparent';
+        analyticsBtn.style.color = '#64748b';
+        analyticsSection.style.display = 'none';
+        materialsSection.style.display = 'block';
+      }
+    };
+
+    window.switchMaterialCat = function(cat) {
+      var cats = ['social', 'digital', 'print'];
+      cats.forEach(function(c) {
+        var el = document.getElementById('mat-' + c);
+        if (el) el.style.display = c === cat ? 'block' : 'none';
+      });
+      document.querySelectorAll('.mat-cat-btn').forEach(function(btn) {
+        if (btn.getAttribute('data-cat') === cat) {
+          btn.style.background = 'rgba(16,185,129,0.1)';
+          btn.style.borderColor = 'rgba(16,185,129,0.3)';
+          btn.style.color = '#34d399';
+        } else {
+          btn.style.background = 'transparent';
+          btn.style.borderColor = '#1e293b';
+          btn.style.color = '#64748b';
+        }
+      });
+    };
+
+    function renderAnalytics() {
+      var data = window._appgenAnalytics.get();
+
+      // Totals
+      var totalViews = data.views.reduce(function(s, d) { return s + d.count; }, 0);
+      var totalDownloads = data.downloads.reduce(function(s, d) { return s + d.count; }, 0);
+      document.getElementById('stat-views').textContent = totalViews.toLocaleString();
+      document.getElementById('stat-downloads').textContent = totalDownloads.toLocaleString();
+      document.getElementById('stat-sessions').textContent = (data.sessions || 0).toLocaleString();
+      document.getElementById('stat-dl-rate').textContent = totalViews > 0 ? ((totalDownloads / totalViews) * 100).toFixed(1) + '%' : '0%';
+
+      // Last 14 days charts
+      renderChart('chart-views', 'chart-views-labels', data.views, '#10b981');
+      renderChart('chart-downloads', 'chart-downloads-labels', data.downloads, '#818cf8');
+
+      // Platform bars
+      renderBarList('platform-bars', data.platforms, '#f472b6');
+
+      // Referrer bars
+      renderBarList('referrer-bars', data.referrers, '#a78bfa');
+
+      // Recent events
+      renderEvents(data.events);
+    }
+
+    function renderChart(containerId, labelsId, dayData, color) {
+      var container = document.getElementById(containerId);
+      var labelsEl = document.getElementById(labelsId);
+      container.innerHTML = '';
+      labelsEl.innerHTML = '';
+
+      // Build last 14 days
+      var days = [];
+      for (var i = 13; i >= 0; i--) {
+        var d = new Date(); d.setDate(d.getDate() - i);
+        var ds = d.toISOString().slice(0, 10);
+        var entry = dayData.find(function(x) { return x.date === ds; });
+        days.push({ date: ds, count: entry ? entry.count : 0 });
+      }
+
+      var max = Math.max.apply(null, days.map(function(d) { return d.count; }).concat([1]));
+
+      days.forEach(function(day) {
+        var pct = (day.count / max) * 100;
+        var bar = document.createElement('div');
+        bar.style.cssText = 'flex:1;border-radius:2px 2px 0 0;transition:all 0.3s;cursor:pointer;min-height:2px;background:' + color + ';height:' + Math.max(pct, 3) + '%;opacity:0.8;';
+        bar.title = day.date.slice(5) + ': ' + day.count;
+        bar.addEventListener('mouseenter', function() { bar.style.opacity = '1'; });
+        bar.addEventListener('mouseleave', function() { bar.style.opacity = '0.8'; });
+        container.appendChild(bar);
+      });
+
+      // Labels
+      var first = document.createElement('span');
+      first.textContent = days[0].date.slice(5);
+      var last = document.createElement('span');
+      last.textContent = days[days.length - 1].date.slice(5);
+      labelsEl.appendChild(first);
+      labelsEl.appendChild(last);
+    }
+
+    function renderBarList(containerId, obj, color) {
+      var container = document.getElementById(containerId);
+      container.innerHTML = '';
+
+      var entries = Object.entries(obj || {}).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 8);
+
+      if (entries.length === 0) {
+        container.innerHTML = '<div style="color:#475569;font-size:13px;">No data yet</div>';
+        return;
+      }
+
+      var max = entries[0][1] || 1;
+      entries.forEach(function(entry) {
+        var row = document.createElement('div');
+        row.style.cssText = 'margin-bottom:8px;';
+
+        var labelRow = document.createElement('div');
+        labelRow.style.cssText = 'display:flex;justify-content:space-between;font-size:13px;margin-bottom:3px;';
+        var label = document.createElement('span');
+        label.style.cssText = 'color:#cbd5e1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px;';
+        label.textContent = entry[0];
+        var count = document.createElement('span');
+        count.style.cssText = 'color:#64748b;font-family:monospace;font-size:12px;flex-shrink:0;';
+        count.textContent = entry[1].toLocaleString();
+        labelRow.appendChild(label);
+        labelRow.appendChild(count);
+
+        var barBg = document.createElement('div');
+        barBg.style.cssText = 'height:5px;border-radius:3px;background:rgba(51,65,85,0.4);overflow:hidden;';
+        var barFill = document.createElement('div');
+        barFill.style.cssText = 'height:100%;border-radius:3px;transition:width 0.5s ease;background:' + color + ';width:' + ((entry[1] / max) * 100) + '%;';
+        barBg.appendChild(barFill);
+
+        row.appendChild(labelRow);
+        row.appendChild(barBg);
+        container.appendChild(row);
+      });
+    }
+
+    function renderEvents(events) {
+      var container = document.getElementById('recent-events');
+      container.innerHTML = '';
+
+      if (!events || events.length === 0) {
+        container.innerHTML = '<div style="color:#475569;font-size:13px;">No events yet</div>';
+        return;
+      }
+
+      events.slice(0, 20).forEach(function(evt) {
+        var row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;font-size:12px;transition:background 0.2s;';
+        row.addEventListener('mouseenter', function() { row.style.background = 'rgba(30,41,59,0.5)'; });
+        row.addEventListener('mouseleave', function() { row.style.background = 'none'; });
+
+        var dot = document.createElement('div');
+        dot.style.cssText = 'width:5px;height:5px;border-radius:50%;flex-shrink:0;background:' + (evt.type === 'download' ? '#10b981' : '#818cf8') + ';';
+
+        var time = document.createElement('span');
+        time.style.cssText = 'color:#64748b;font-family:monospace;font-size:11px;width:45px;flex-shrink:0;';
+        time.textContent = evt.time || '';
+
+        var badge = document.createElement('span');
+        badge.style.cssText = 'font-family:monospace;font-size:10px;padding:2px 6px;border-radius:4px;flex-shrink:0;' + (evt.type === 'download' ? 'background:rgba(16,185,129,0.1);color:#34d399;' : 'background:rgba(99,102,241,0.1);color:#a5b4fc;');
+        badge.textContent = evt.type;
+
+        var detail = document.createElement('span');
+        detail.style.cssText = 'color:#94a3b8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;';
+        detail.textContent = evt.detail || '';
+
+        var plat = document.createElement('span');
+        plat.style.cssText = 'color:#475569;font-size:11px;flex-shrink:0;';
+        plat.textContent = evt.platform || '';
+
+        row.appendChild(dot);
+        row.appendChild(time);
+        row.appendChild(badge);
+        row.appendChild(detail);
+        row.appendChild(plat);
+        container.appendChild(row);
+      });
+    }
+  })();
+  </script>
 </body>
 </html>
