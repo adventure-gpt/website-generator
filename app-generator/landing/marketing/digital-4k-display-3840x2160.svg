@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="3840" height="2160" fill="url(#bg)"/>
+  <!-- Large decorative circles -->
+  <circle cx="3200" cy="400" r="600" fill="#34d399" opacity="0.03"/>
+  <circle cx="600" cy="1800" r="500" fill="#10b981" opacity="0.03"/>
+  <circle cx="1920" cy="1080" r="800" fill="#34d399" opacity="0.02"/>
+  <!-- Grid dots background -->
+  <g fill="#34d399" opacity="0.06">
+    <circle cx="200" cy="200" r="4"/><circle cx="400" cy="200" r="4"/><circle cx="600" cy="200" r="4"/><circle cx="800" cy="200" r="4"/>
+    <circle cx="200" cy="400" r="4"/><circle cx="400" cy="400" r="4"/><circle cx="600" cy="400" r="4"/><circle cx="800" cy="400" r="4"/>
+    <circle cx="3040" cy="200" r="4"/><circle cx="3240" cy="200" r="4"/><circle cx="3440" cy="200" r="4"/><circle cx="3640" cy="200" r="4"/>
+    <circle cx="3040" cy="400" r="4"/><circle cx="3240" cy="400" r="4"/><circle cx="3440" cy="400" r="4"/><circle cx="3640" cy="400" r="4"/>
+  </g>
+  <!-- Logo -->
+  <rect x="1620" y="450" width="600" height="600" rx="120" fill="url(#accent)"/>
+  <text x="1920" y="840" font-family="Arial, sans-serif" font-size="420" font-weight="bold" fill="#0f172a" text-anchor="middle">A</text>
+  <!-- Product name -->
+  <text x="1920" y="1220" font-family="Arial, sans-serif" font-size="140" font-weight="bold" fill="white" text-anchor="middle">App Generator</text>
+  <!-- Tagline -->
+  <text x="1920" y="1360" font-family="Arial, sans-serif" font-size="72" fill="#34d399" text-anchor="middle">Build Desktop Apps with AI</text>
+  <!-- Sub tagline -->
+  <text x="1920" y="1460" font-family="Arial, sans-serif" font-size="48" fill="#94a3b8" text-anchor="middle">Describe it. AI builds it. No coding required.</text>
+  <!-- CTA -->
+  <rect x="1620" y="1550" width="600" height="120" rx="60" fill="url(#accent)"/>
+  <text x="1920" y="1628" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#0f172a" text-anchor="middle">Download Free</text>
+  <!-- Free badge -->
+  <text x="1920" y="1750" font-family="Arial, sans-serif" font-size="40" fill="#34d399" text-anchor="middle">Free &amp; Open Source</text>
+  <!-- URL -->
+  <text x="1920" y="2050" font-family="Arial, sans-serif" font-size="48" fill="#64748b" text-anchor="middle">app.website-generator.net</text>
+</svg>

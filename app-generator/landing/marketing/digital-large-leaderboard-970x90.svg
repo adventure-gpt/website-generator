@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="970" height="90" viewBox="0 0 970 90">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="970" height="90" fill="url(#bg)"/>
+  <rect x="0" y="0" width="970" height="90" fill="none" stroke="#1e293b" stroke-width="2"/>
+  <!-- Logo -->
+  <rect x="20" y="15" width="60" height="60" rx="12" fill="url(#accent)"/>
+  <text x="50" y="56" font-family="Arial, sans-serif" font-size="42" font-weight="bold" fill="#0f172a" text-anchor="middle">A</text>
+  <!-- Text -->
+  <text x="100" y="40" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white">App Generator</text>
+  <text x="100" y="65" font-family="Arial, sans-serif" font-size="16" fill="#34d399">Describe it. AI builds it. Free &amp; open source.</text>
+  <!-- URL -->
+  <text x="620" y="52" font-family="Arial, sans-serif" font-size="14" fill="#64748b">app.website-generator.net</text>
+  <!-- CTA -->
+  <rect x="800" y="22" width="150" height="46" rx="23" fill="url(#accent)"/>
+  <text x="875" y="52" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#0f172a" text-anchor="middle">Download Free</text>
+</svg>

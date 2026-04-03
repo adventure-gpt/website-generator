@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <!-- Header -->
+  <rect x="80" y="60" width="80" height="80" rx="16" fill="url(#accent)"/>
+  <text x="120" y="115" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="#0f172a" text-anchor="middle">A</text>
+  <text x="180" y="100" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white">App Generator</text>
+  <text x="1840" y="100" font-family="Arial, sans-serif" font-size="18" fill="#64748b" text-anchor="end">app.website-generator.net</text>
+  <!-- Title -->
+  <text x="960" y="230" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="white" text-anchor="middle">Use Cases</text>
+  <rect x="860" y="250" width="200" height="4" rx="2" fill="#34d399"/>
+  <text x="960" y="295" font-family="Arial, sans-serif" font-size="24" fill="#94a3b8" text-anchor="middle">What can you build with App Generator?</text>
+
+  <!-- Use case cards: 2x3 grid -->
+  <!-- Row 1 -->
+  <rect x="120" y="340" width="530" height="170" rx="16" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <rect x="150" y="370" width="50" height="50" rx="10" fill="url(#accent)"/>
+  <text x="175" y="403" font-family="Arial, sans-serif" font-size="24" fill="#0f172a" text-anchor="middle">T</text>
+  <text x="220" y="395" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="white">Task Managers</text>
+  <text x="150" y="440" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">To-do lists, project trackers, kanban boards</text>
+  <text x="150" y="465" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">with categories, priorities, and due dates.</text>
+
+  <rect x="695" y="340" width="530" height="170" rx="16" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <rect x="725" y="370" width="50" height="50" rx="10" fill="url(#accent)"/>
+  <text x="750" y="403" font-family="Arial, sans-serif" font-size="24" fill="#0f172a" text-anchor="middle">$</text>
+  <text x="795" y="395" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="white">Finance Trackers</text>
+  <text x="725" y="440" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">Budget planners, expense trackers, invoice</text>
+  <text x="725" y="465" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">generators with charts and reports.</text>
+
+  <rect x="1270" y="340" width="530" height="170" rx="16" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <rect x="1300" y="370" width="50" height="50" rx="10" fill="url(#accent)"/>
+  <text x="1325" y="403" font-family="Arial, sans-serif" font-size="24" fill="#0f172a" text-anchor="middle">N</text>
+  <text x="1370" y="395" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="white">Note-Taking Apps</text>
+  <text x="1300" y="440" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">Rich text editors, markdown journals, personal</text>
+  <text x="1300" y="465" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">wikis with tags and search.</text>
+
+  <!-- Row 2 -->
+  <rect x="120" y="545" width="530" height="170" rx="16" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <rect x="150" y="575" width="50" height="50" rx="10" fill="url(#accent)"/>
+  <text x="175" y="608" font-family="Arial, sans-serif" font-size="24" fill="#0f172a" text-anchor="middle">I</text>
+  <text x="220" y="600" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="white">Inventory Systems</text>
+  <text x="150" y="645" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">Stock management, collections, catalogues</text>
+  <text x="150" y="670" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">with filtering, sorting, and export.</text>
+
+  <rect x="695" y="545" width="530" height="170" rx="16" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <rect x="725" y="575" width="50" height="50" rx="10" fill="url(#accent)"/>
+  <text x="750" y="608" font-family="Arial, sans-serif" font-size="24" fill="#0f172a" text-anchor="middle">H</text>
+  <text x="795" y="600" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="white">Health &amp; Fitness</text>
+  <text x="725" y="645" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">Workout loggers, meal planners, habit trackers</text>
+  <text x="725" y="670" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">with progress visualizations.</text>
+
+  <rect x="1270" y="545" width="530" height="170" rx="16" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <rect x="1300" y="575" width="50" height="50" rx="10" fill="url(#accent)"/>
+  <text x="1325" y="608" font-family="Arial, sans-serif" font-size="24" fill="#0f172a" text-anchor="middle">D</text>
+  <text x="1370" y="600" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="white">Data Dashboards</text>
+  <text x="1300" y="645" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">Analytics viewers, CSV processors, data</text>
+  <text x="1300" y="670" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">visualization tools with interactive charts.</text>
+
+  <!-- Bottom tagline -->
+  <rect x="400" y="800" width="1120" height="80" rx="16" fill="#1e293b"/>
+  <text x="960" y="850" font-family="Arial, sans-serif" font-size="24" fill="#34d399" text-anchor="middle">If you can describe it, App Generator can build it.</text>
+
+  <!-- Page indicator -->
+  <text x="960" y="1010" font-family="Arial, sans-serif" font-size="16" fill="#475569" text-anchor="middle">Use Cases</text>
+</svg>

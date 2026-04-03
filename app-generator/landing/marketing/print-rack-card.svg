@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="900" viewBox="0 0 400 900">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="900" fill="url(#bg)"/>
+  <!-- Decorative -->
+  <circle cx="340" cy="100" r="120" fill="#34d399" opacity="0.04"/>
+  <circle cx="60" cy="800" r="100" fill="#10b981" opacity="0.04"/>
+  <!-- Top accent -->
+  <rect x="0" y="0" width="400" height="8" fill="url(#accent)"/>
+  <!-- Logo -->
+  <rect x="125" y="60" width="150" height="150" rx="30" fill="url(#accent)"/>
+  <text x="200" y="165" font-family="Arial, sans-serif" font-size="105" font-weight="bold" fill="#0f172a" text-anchor="middle">A</text>
+  <!-- Title -->
+  <text x="200" y="280" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white" text-anchor="middle">App Generator</text>
+  <!-- Tagline -->
+  <text x="200" y="325" font-family="Arial, sans-serif" font-size="18" fill="#34d399" text-anchor="middle">Build Desktop Apps with AI</text>
+  <!-- Divider -->
+  <rect x="140" y="350" width="120" height="3" rx="1.5" fill="#34d399"/>
+  <!-- Description -->
+  <text x="200" y="395" font-family="Arial, sans-serif" font-size="15" fill="#94a3b8" text-anchor="middle">Transform your ideas into real</text>
+  <text x="200" y="418" font-family="Arial, sans-serif" font-size="15" fill="#94a3b8" text-anchor="middle">desktop applications using just</text>
+  <text x="200" y="441" font-family="Arial, sans-serif" font-size="15" fill="#94a3b8" text-anchor="middle">plain English descriptions.</text>
+  <!-- Steps -->
+  <text x="200" y="500" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">How It Works</text>
+  <!-- Step cards -->
+  <rect x="40" y="525" width="320" height="55" rx="8" fill="#1e293b"/>
+  <circle cx="75" cy="553" r="16" fill="url(#accent)"/>
+  <text x="75" y="559" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle">1</text>
+  <text x="105" y="548" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">Describe Your Idea</text>
+  <text x="105" y="567" font-family="Arial, sans-serif" font-size="11" fill="#94a3b8">Type what you want in plain English</text>
+  <rect x="40" y="595" width="320" height="55" rx="8" fill="#1e293b"/>
+  <circle cx="75" cy="623" r="16" fill="url(#accent)"/>
+  <text x="75" y="629" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle">2</text>
+  <text x="105" y="618" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">AI Builds Your App</text>
+  <text x="105" y="637" font-family="Arial, sans-serif" font-size="11" fill="#94a3b8">Complete code generated automatically</text>
+  <rect x="40" y="665" width="320" height="55" rx="8" fill="#1e293b"/>
+  <circle cx="75" cy="693" r="16" fill="url(#accent)"/>
+  <text x="75" y="699" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#0f172a" text-anchor="middle">3</text>
+  <text x="105" y="688" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">Download &amp; Share</text>
+  <text x="105" y="707" font-family="Arial, sans-serif" font-size="11" fill="#94a3b8">Get installers for all platforms</text>
+  <!-- CTA -->
+  <rect x="75" y="770" width="250" height="50" rx="25" fill="url(#accent)"/>
+  <text x="200" y="802" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#0f172a" text-anchor="middle">Download Free</text>
+  <!-- URL -->
+  <text x="200" y="860" font-family="Arial, sans-serif" font-size="16" fill="#64748b" text-anchor="middle">app.website-generator.net</text>
+</svg>

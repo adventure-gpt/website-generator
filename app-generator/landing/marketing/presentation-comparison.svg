@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <!-- Header -->
+  <rect x="80" y="60" width="80" height="80" rx="16" fill="url(#accent)"/>
+  <text x="120" y="115" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="#0f172a" text-anchor="middle">A</text>
+  <text x="180" y="100" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white">App Generator</text>
+  <text x="1840" y="100" font-family="Arial, sans-serif" font-size="18" fill="#64748b" text-anchor="end">app.website-generator.net</text>
+  <!-- Title -->
+  <text x="960" y="230" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="white" text-anchor="middle">Before vs After</text>
+  <rect x="860" y="250" width="200" height="4" rx="2" fill="#34d399"/>
+
+  <!-- Before column -->
+  <text x="480" y="330" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#ef4444" text-anchor="middle">Before App Generator</text>
+  <rect x="160" y="360" width="640" height="580" rx="16" fill="#1e293b" stroke="#ef4444" stroke-width="1" opacity="0.8"/>
+  <!-- Before items with X marks -->
+  <text x="210" y="420" font-family="Arial, sans-serif" font-size="24" fill="#ef4444">x</text>
+  <text x="250" y="420" font-family="Arial, sans-serif" font-size="20" fill="#94a3b8">Learn programming languages</text>
+  <text x="210" y="470" font-family="Arial, sans-serif" font-size="24" fill="#ef4444">x</text>
+  <text x="250" y="470" font-family="Arial, sans-serif" font-size="20" fill="#94a3b8">Study frameworks &amp; tooling</text>
+  <text x="210" y="520" font-family="Arial, sans-serif" font-size="24" fill="#ef4444">x</text>
+  <text x="250" y="520" font-family="Arial, sans-serif" font-size="20" fill="#94a3b8">Debug cryptic error messages</text>
+  <text x="210" y="570" font-family="Arial, sans-serif" font-size="24" fill="#ef4444">x</text>
+  <text x="250" y="570" font-family="Arial, sans-serif" font-size="20" fill="#94a3b8">Configure build systems</text>
+  <text x="210" y="620" font-family="Arial, sans-serif" font-size="24" fill="#ef4444">x</text>
+  <text x="250" y="620" font-family="Arial, sans-serif" font-size="20" fill="#94a3b8">Create installers manually</text>
+  <text x="210" y="670" font-family="Arial, sans-serif" font-size="24" fill="#ef4444">x</text>
+  <text x="250" y="670" font-family="Arial, sans-serif" font-size="20" fill="#94a3b8">Set up distribution channels</text>
+  <text x="210" y="720" font-family="Arial, sans-serif" font-size="24" fill="#ef4444">x</text>
+  <text x="250" y="720" font-family="Arial, sans-serif" font-size="20" fill="#94a3b8">Weeks or months of work</text>
+  <!-- Time estimate -->
+  <rect x="280" y="810" width="400" height="50" rx="10" fill="#0f172a"/>
+  <text x="480" y="843" font-family="Arial, sans-serif" font-size="22" fill="#ef4444" text-anchor="middle">Weeks to months</text>
+
+  <!-- Arrow -->
+  <text x="960" y="640" font-family="Arial, sans-serif" font-size="60" fill="#34d399" text-anchor="middle">--></text>
+
+  <!-- After column -->
+  <text x="1440" y="330" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#34d399" text-anchor="middle">With App Generator</text>
+  <rect x="1120" y="360" width="640" height="580" rx="16" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <!-- After items with checkmarks -->
+  <text x="1170" y="420" font-family="Arial, sans-serif" font-size="24" fill="#34d399">+</text>
+  <text x="1210" y="420" font-family="Arial, sans-serif" font-size="20" fill="white">Describe in plain English</text>
+  <text x="1170" y="470" font-family="Arial, sans-serif" font-size="24" fill="#34d399">+</text>
+  <text x="1210" y="470" font-family="Arial, sans-serif" font-size="20" fill="white">AI handles all coding</text>
+  <text x="1170" y="520" font-family="Arial, sans-serif" font-size="24" fill="#34d399">+</text>
+  <text x="1210" y="520" font-family="Arial, sans-serif" font-size="20" fill="white">Professional UI automatically</text>
+  <text x="1170" y="570" font-family="Arial, sans-serif" font-size="24" fill="#34d399">+</text>
+  <text x="1210" y="570" font-family="Arial, sans-serif" font-size="20" fill="white">Build system preconfigured</text>
+  <text x="1170" y="620" font-family="Arial, sans-serif" font-size="24" fill="#34d399">+</text>
+  <text x="1210" y="620" font-family="Arial, sans-serif" font-size="20" fill="white">Installers generated automatically</text>
+  <text x="1170" y="670" font-family="Arial, sans-serif" font-size="24" fill="#34d399">+</text>
+  <text x="1210" y="670" font-family="Arial, sans-serif" font-size="20" fill="white">Auto GitHub + landing page</text>
+  <text x="1170" y="720" font-family="Arial, sans-serif" font-size="24" fill="#34d399">+</text>
+  <text x="1210" y="720" font-family="Arial, sans-serif" font-size="20" fill="white">Done in minutes</text>
+  <!-- Time estimate -->
+  <rect x="1240" y="810" width="400" height="50" rx="10" fill="#0f172a"/>
+  <text x="1440" y="843" font-family="Arial, sans-serif" font-size="22" fill="#34d399" text-anchor="middle">Minutes, not months</text>
+
+  <!-- Page indicator -->
+  <text x="960" y="1010" font-family="Arial, sans-serif" font-size="16" fill="#475569" text-anchor="middle">Comparison</text>
+</svg>

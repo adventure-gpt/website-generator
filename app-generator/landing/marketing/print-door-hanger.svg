@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="350" height="850" viewBox="0 0 350 850">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <!-- Door hanger shape with hole -->
+  <rect width="350" height="850" rx="20" fill="url(#bg)"/>
+  <!-- Door knob hole -->
+  <circle cx="175" cy="80" r="45" fill="#0f172a" stroke="#1e293b" stroke-width="3"/>
+  <circle cx="175" cy="80" r="42" fill="url(#bg)"/>
+  <text x="175" y="86" font-family="Arial, sans-serif" font-size="10" fill="#475569" text-anchor="middle">CUT OUT</text>
+  <!-- Divider below hole -->
+  <rect x="50" y="145" width="250" height="2" rx="1" fill="#1e293b"/>
+  <!-- Logo -->
+  <rect x="110" y="180" width="130" height="130" rx="26" fill="url(#accent)"/>
+  <text x="175" y="270" font-family="Arial, sans-serif" font-size="90" font-weight="bold" fill="#0f172a" text-anchor="middle">A</text>
+  <!-- Title -->
+  <text x="175" y="365" font-family="Arial, sans-serif" font-size="30" font-weight="bold" fill="white" text-anchor="middle">App Generator</text>
+  <!-- Divider -->
+  <rect x="120" y="385" width="110" height="3" rx="1.5" fill="#34d399"/>
+  <!-- Tagline -->
+  <text x="175" y="430" font-family="Arial, sans-serif" font-size="18" fill="#34d399" text-anchor="middle">Build Desktop Apps</text>
+  <text x="175" y="455" font-family="Arial, sans-serif" font-size="18" fill="#34d399" text-anchor="middle">with AI</text>
+  <!-- Steps -->
+  <text x="175" y="510" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">How It Works</text>
+  <text x="175" y="545" font-family="Arial, sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">1. Describe your idea</text>
+  <text x="175" y="572" font-family="Arial, sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">2. AI generates the app</text>
+  <text x="175" y="599" font-family="Arial, sans-serif" font-size="13" fill="#94a3b8" text-anchor="middle">3. Download &amp; share</text>
+  <!-- Features -->
+  <rect x="40" y="640" width="270" height="50" rx="8" fill="#1e293b"/>
+  <text x="175" y="670" font-family="Arial, sans-serif" font-size="13" fill="#34d399" text-anchor="middle">Free &amp; Open Source</text>
+  <!-- CTA -->
+  <rect x="60" y="720" width="230" height="46" rx="23" fill="url(#accent)"/>
+  <text x="175" y="750" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#0f172a" text-anchor="middle">Download Now</text>
+  <!-- URL -->
+  <text x="175" y="810" font-family="Arial, sans-serif" font-size="14" fill="#64748b" text-anchor="middle">app.website-generator.net</text>
+</svg>

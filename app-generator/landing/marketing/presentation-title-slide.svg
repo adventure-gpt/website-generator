@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <!-- Background decoration -->
+  <circle cx="1600" cy="200" r="400" fill="#34d399" opacity="0.03"/>
+  <circle cx="300" cy="900" r="350" fill="#10b981" opacity="0.03"/>
+  <!-- Grid pattern -->
+  <g stroke="#34d399" stroke-width="0.5" opacity="0.05">
+    <line x1="0" y1="200" x2="1920" y2="200"/><line x1="0" y1="400" x2="1920" y2="400"/>
+    <line x1="0" y1="600" x2="1920" y2="600"/><line x1="0" y1="800" x2="1920" y2="800"/>
+    <line x1="400" y1="0" x2="400" y2="1080"/><line x1="800" y1="0" x2="800" y2="1080"/>
+    <line x1="1200" y1="0" x2="1200" y2="1080"/><line x1="1600" y1="0" x2="1600" y2="1080"/>
+  </g>
+  <!-- Left side: Content -->
+  <rect x="120" y="300" width="160" height="160" rx="32" fill="url(#accent)"/>
+  <text x="200" y="415" font-family="Arial, sans-serif" font-size="112" font-weight="bold" fill="#0f172a" text-anchor="middle">A</text>
+  <text x="120" y="540" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="white">App Generator</text>
+  <text x="120" y="610" font-family="Arial, sans-serif" font-size="36" fill="#34d399">Build Desktop Apps with AI</text>
+  <text x="120" y="680" font-family="Arial, sans-serif" font-size="24" fill="#94a3b8">Describe it. AI builds it. No coding required.</text>
+  <text x="120" y="780" font-family="Arial, sans-serif" font-size="22" fill="#64748b">app.website-generator.net</text>
+  <!-- Free badge -->
+  <rect x="120" y="810" width="200" height="44" rx="22" fill="url(#accent)" opacity="0.15"/>
+  <text x="220" y="839" font-family="Arial, sans-serif" font-size="18" fill="#34d399" text-anchor="middle">Free &amp; Open Source</text>
+  <!-- Right side: App mockup -->
+  <rect x="1050" y="160" width="740" height="760" rx="20" fill="#1e293b" stroke="#34d399" stroke-width="2"/>
+  <rect x="1075" y="185" width="690" height="40" rx="8" fill="#0f172a"/>
+  <circle cx="1100" cy="205" r="8" fill="#ef4444"/>
+  <circle cx="1125" cy="205" r="8" fill="#eab308"/>
+  <circle cx="1150" cy="205" r="8" fill="#22c55e"/>
+  <text x="1420" y="210" font-family="Arial, sans-serif" font-size="14" fill="#475569" text-anchor="middle">App Generator</text>
+  <!-- Sidebar -->
+  <rect x="1075" y="240" width="200" height="655" rx="4" fill="#0f172a"/>
+  <rect x="1095" y="270" width="160" height="14" rx="2" fill="#34d399" opacity="0.5"/>
+  <rect x="1095" y="300" width="130" height="10" rx="2" fill="#475569"/>
+  <rect x="1095" y="325" width="150" height="10" rx="2" fill="#475569"/>
+  <rect x="1095" y="350" width="120" height="10" rx="2" fill="#475569"/>
+  <rect x="1095" y="375" width="140" height="10" rx="2" fill="#475569"/>
+  <rect x="1095" y="400" width="110" height="10" rx="2" fill="#475569"/>
+  <!-- Main content area -->
+  <rect x="1290" y="240" width="475" height="655" rx="4" fill="#0f172a"/>
+  <rect x="1315" y="270" width="250" height="18" rx="2" fill="#34d399" opacity="0.4"/>
+  <rect x="1315" y="310" width="420" height="10" rx="2" fill="#475569"/>
+  <rect x="1315" y="335" width="400" height="10" rx="2" fill="#475569"/>
+  <rect x="1315" y="360" width="380" height="10" rx="2" fill="#475569"/>
+  <!-- Chat input mockup -->
+  <rect x="1315" y="430" width="425" height="120" rx="10" fill="#1e293b"/>
+  <rect x="1335" y="450" width="300" height="12" rx="2" fill="#475569" opacity="0.5"/>
+  <rect x="1335" y="475" width="250" height="12" rx="2" fill="#475569" opacity="0.5"/>
+  <!-- Generate button -->
+  <rect x="1315" y="580" width="180" height="44" rx="10" fill="url(#accent)"/>
+  <text x="1405" y="608" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#0f172a" text-anchor="middle">Generate App</text>
+</svg>

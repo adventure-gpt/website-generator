@@ -835,7 +835,7 @@
 
         <!-- Actions -->
         <div style="display:flex;gap:8px;margin-bottom:16px;">
-          <button onclick="clearAnalytics()" style="flex:1;padding:10px;border-radius:10px;background:#1e293b;border:1px solid #334155;color:#94a3b8;font-size:13px;cursor:pointer;">Clear Data</button>
+          <button onclick="fetchServerAnalytics()" style="flex:1;padding:10px;border-radius:10px;background:#1e293b;border:1px solid #334155;color:#94a3b8;font-size:13px;cursor:pointer;">Refresh</button>
           <a href="https://dash.cloudflare.com" target="_blank" rel="noopener" style="flex:1;padding:10px;border-radius:10px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#34d399;font-size:13px;text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:4px;">
             CF Dashboard
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
@@ -843,8 +843,8 @@
         </div>
 
         <div style="font-size:11px;color:#475569;text-align:center;line-height:1.6;">
-          Data stored locally in your browser via localStorage.<br>
-          For server-side analytics, use the Cloudflare Dashboard.
+          Server-side analytics via Cloudflare D1.<br>
+          Tracking all visitors across pageviews and downloads.
         </div>
       </div>
 
@@ -854,7 +854,7 @@
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
           <button class="mat-cat-btn" data-cat="social" onclick="switchMaterialCat('social')" style="padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid rgba(16,185,129,0.3);background:rgba(16,185,129,0.1);color:#34d399;cursor:pointer;display:flex;align-items:center;gap:4px;">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            Social Media
+            Social
           </button>
           <button class="mat-cat-btn" data-cat="digital" onclick="switchMaterialCat('digital')" style="padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid #1e293b;background:transparent;color:#64748b;cursor:pointer;display:flex;align-items:center;gap:4px;">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
@@ -864,142 +864,18 @@
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             Print
           </button>
+          <button class="mat-cat-btn" data-cat="presentations" onclick="switchMaterialCat('presentations')" style="padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid #1e293b;background:transparent;color:#64748b;cursor:pointer;display:flex;align-items:center;gap:4px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></svg>
+            Slides
+          </button>
+          <button class="mat-cat-btn" data-cat="text" onclick="switchMaterialCat('text')" style="padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid #1e293b;background:transparent;color:#64748b;cursor:pointer;display:flex;align-items:center;gap:4px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            Text
+          </button>
         </div>
 
-        <!-- Social Media materials -->
-        <div id="mat-social" class="mat-cat-content">
-          <div style="display:flex;flex-direction:column;gap:12px;">
-            <div style="border-radius:12px;background:#111827;border:1px solid #1e293b;overflow:hidden;">
-              <div style="aspect-ratio:1/1;background:#0a0d12;padding:12px;display:flex;align-items:center;justify-content:center;">
-                <img src="marketing/social-instagram-square.svg" alt="Instagram Post" style="width:100%;height:100%;object-fit:contain;" loading="lazy">
-              </div>
-              <div style="padding:12px;">
-                <div style="font-size:13px;font-weight:600;color:white;margin-bottom:4px;">Instagram Square Post</div>
-                <div style="font-size:11px;color:#64748b;margin-bottom:8px;">1080x1080 — Feed posts &amp; carousels</div>
-                <div style="display:flex;align-items:center;justify-content:space-between;">
-                  <div style="display:flex;gap:4px;">
-                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:#1e293b;color:#94a3b8;">1080x1080</span>
-                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:rgba(16,185,129,0.1);color:#34d399;">SVG</span>
-                  </div>
-                  <a href="marketing/social-instagram-square.svg" download style="font-size:11px;font-weight:600;color:#34d399;text-decoration:none;display:flex;align-items:center;gap:4px;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Download
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div style="border-radius:12px;background:#111827;border:1px solid #1e293b;overflow:hidden;">
-              <div style="aspect-ratio:3/1;background:#0a0d12;padding:8px;display:flex;align-items:center;justify-content:center;">
-                <img src="marketing/social-twitter-banner.svg" alt="Twitter Banner" style="width:100%;height:100%;object-fit:contain;" loading="lazy">
-              </div>
-              <div style="padding:12px;">
-                <div style="font-size:13px;font-weight:600;color:white;margin-bottom:4px;">Twitter/X Banner</div>
-                <div style="font-size:11px;color:#64748b;margin-bottom:8px;">1500x500 — Profile header image</div>
-                <div style="display:flex;align-items:center;justify-content:space-between;">
-                  <div style="display:flex;gap:4px;">
-                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:#1e293b;color:#94a3b8;">1500x500</span>
-                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:rgba(16,185,129,0.1);color:#34d399;">SVG</span>
-                  </div>
-                  <a href="marketing/social-twitter-banner.svg" download style="font-size:11px;font-weight:600;color:#34d399;text-decoration:none;display:flex;align-items:center;gap:4px;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Download
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div style="border-radius:12px;background:#111827;border:1px solid #1e293b;overflow:hidden;">
-              <div style="aspect-ratio:1200/630;background:#0a0d12;padding:8px;display:flex;align-items:center;justify-content:center;">
-                <img src="marketing/social-facebook-post.svg" alt="Facebook Post" style="width:100%;height:100%;object-fit:contain;" loading="lazy">
-              </div>
-              <div style="padding:12px;">
-                <div style="font-size:13px;font-weight:600;color:white;margin-bottom:4px;">Facebook Post Image</div>
-                <div style="font-size:11px;color:#64748b;margin-bottom:8px;">1200x630 — Optimized for feed sharing</div>
-                <div style="display:flex;align-items:center;justify-content:space-between;">
-                  <div style="display:flex;gap:4px;">
-                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:#1e293b;color:#94a3b8;">1200x630</span>
-                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:rgba(16,185,129,0.1);color:#34d399;">SVG</span>
-                  </div>
-                  <a href="marketing/social-facebook-post.svg" download style="font-size:11px;font-weight:600;color:#34d399;text-decoration:none;display:flex;align-items:center;gap:4px;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Download
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Digital materials -->
-        <div id="mat-digital" class="mat-cat-content" style="display:none;">
-          <div style="display:flex;flex-direction:column;gap:12px;">
-            <div style="border-radius:12px;background:#111827;border:1px solid #1e293b;overflow:hidden;">
-              <div style="aspect-ratio:728/90;background:#0a0d12;padding:8px;display:flex;align-items:center;justify-content:center;">
-                <img src="marketing/digital-banner-728x90.svg" alt="Leaderboard Banner" style="width:100%;height:100%;object-fit:contain;" loading="lazy">
-              </div>
-              <div style="padding:12px;">
-                <div style="font-size:13px;font-weight:600;color:white;margin-bottom:4px;">Leaderboard Banner</div>
-                <div style="font-size:11px;color:#64748b;margin-bottom:8px;">728x90 — Standard web banner format</div>
-                <div style="display:flex;align-items:center;justify-content:space-between;">
-                  <div style="display:flex;gap:4px;">
-                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:#1e293b;color:#94a3b8;">728x90</span>
-                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:rgba(34,211,238,0.1);color:#22d3ee;">SVG</span>
-                  </div>
-                  <a href="marketing/digital-banner-728x90.svg" download style="font-size:11px;font-weight:600;color:#34d399;text-decoration:none;display:flex;align-items:center;gap:4px;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Download
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div style="border-radius:12px;background:#111827;border:1px solid #1e293b;overflow:hidden;">
-              <div style="aspect-ratio:16/9;background:#0a0d12;padding:8px;display:flex;align-items:center;justify-content:center;">
-                <img src="marketing/digital-screen-1920x1080.svg" alt="Full HD Screen" style="width:100%;height:100%;object-fit:contain;" loading="lazy">
-              </div>
-              <div style="padding:12px;">
-                <div style="font-size:13px;font-weight:600;color:white;margin-bottom:4px;">Full HD Display</div>
-                <div style="font-size:11px;color:#64748b;margin-bottom:8px;">1920x1080 — Digital signage &amp; screens</div>
-                <div style="display:flex;align-items:center;justify-content:space-between;">
-                  <div style="display:flex;gap:4px;">
-                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:#1e293b;color:#94a3b8;">1920x1080</span>
-                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:rgba(34,211,238,0.1);color:#22d3ee;">SVG</span>
-                  </div>
-                  <a href="marketing/digital-screen-1920x1080.svg" download style="font-size:11px;font-weight:600;color:#34d399;text-decoration:none;display:flex;align-items:center;gap:4px;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Download
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Print materials -->
-        <div id="mat-print" class="mat-cat-content" style="display:none;">
-          <div style="display:flex;flex-direction:column;gap:12px;">
-            <div style="border-radius:12px;background:#111827;border:1px solid #1e293b;overflow:hidden;">
-              <div style="aspect-ratio:816/1056;max-height:300px;background:#0a0d12;padding:8px;display:flex;align-items:center;justify-content:center;">
-                <img src="marketing/print-flyer-letter.svg" alt="Letter Flyer" style="width:100%;height:100%;object-fit:contain;" loading="lazy">
-              </div>
-              <div style="padding:12px;">
-                <div style="font-size:13px;font-weight:600;color:white;margin-bottom:4px;">Letter Flyer</div>
-                <div style="font-size:11px;color:#64748b;margin-bottom:8px;">8.5x11" — Single-page promotional flyer</div>
-                <div style="display:flex;align-items:center;justify-content:space-between;">
-                  <div style="display:flex;gap:4px;">
-                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:#1e293b;color:#94a3b8;">8.5x11 in</span>
-                    <span style="font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:rgba(244,114,182,0.1);color:#f472b6;">SVG</span>
-                  </div>
-                  <a href="marketing/print-flyer-letter.svg" download style="font-size:11px;font-weight:600;color:#34d399;text-decoration:none;display:flex;align-items:center;gap:4px;">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Download
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Materials content rendered by JS -->
+        <div id="mat-content"></div>
 
         <!-- Usage note -->
         <div style="margin-top:16px;padding:12px;border-radius:10px;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.1);">
@@ -1431,117 +1307,42 @@
     runDemo().catch(function(e) { console.error('Demo error:', e); });
   })();
 
-  // ==================== ANALYTICS TRACKING ====================
+  // ==================== ANALYTICS TRACKING (server-side) ====================
   (function() {
-    var STORAGE_KEY = 'appgen_analytics';
-    var SESSION_KEY = 'appgen_session';
-
-    function getAnalytics() {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || createEmpty(); }
-      catch(e) { return createEmpty(); }
+    var sessionId = sessionStorage.getItem('appgen_sid');
+    if (!sessionId) {
+      sessionId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      sessionStorage.setItem('appgen_sid', sessionId);
     }
 
-    function createEmpty() {
-      return { views: [], downloads: [], platforms: {}, referrers: {}, events: [], sessions: 0 };
+    function track(type, path) {
+      fetch('/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: type,
+          path: path || window.location.pathname,
+          referrer: document.referrer || null,
+          screenWidth: window.screen.width,
+          screenHeight: window.screen.height,
+          language: navigator.language,
+          sessionId: sessionId,
+        }),
+      }).catch(function() {});
     }
 
-    function saveAnalytics(data) {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
-    }
+    track('pageview', window.location.pathname);
 
-    function todayStr() {
-      return new Date().toISOString().slice(0, 10);
-    }
-
-    function timeStr() {
-      return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-
-    function detectPlatformName() {
-      var ua = navigator.userAgent;
-      if (ua.includes('Mac')) return 'macOS';
-      if (ua.includes('Linux') && !ua.includes('Android')) return 'Linux';
-      if (ua.includes('Android')) return 'Android';
-      if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
-      if (ua.includes('Windows')) return 'Windows';
-      return 'Other';
-    }
-
-    function getReferrerDomain() {
-      if (!document.referrer) return 'Direct';
-      try {
-        var url = new URL(document.referrer);
-        if (url.hostname === location.hostname) return 'Direct';
-        return url.hostname.replace('www.', '');
-      } catch(e) { return 'Other'; }
-    }
-
-    function trackEvent(type, detail) {
-      var data = getAnalytics();
-      var today = todayStr();
-      var platform = detectPlatformName();
-
-      // Count by day
-      var arr = type === 'download' ? data.downloads : data.views;
-      var dayEntry = arr.find(function(d) { return d.date === today; });
-      if (dayEntry) { dayEntry.count++; }
-      else { arr.push({ date: today, count: 1 }); }
-
-      // Keep only last 90 days
-      var cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 90);
-      var cutoffStr = cutoff.toISOString().slice(0, 10);
-      if (type === 'download') { data.downloads = data.downloads.filter(function(d) { return d.date >= cutoffStr; }); }
-      else { data.views = data.views.filter(function(d) { return d.date >= cutoffStr; }); }
-
-      // Platform
-      data.platforms[platform] = (data.platforms[platform] || 0) + 1;
-
-      // Referrer (only on pageview)
-      if (type === 'pageview') {
-        var ref = getReferrerDomain();
-        data.referrers[ref] = (data.referrers[ref] || 0) + 1;
-      }
-
-      // Recent events (keep last 50)
-      data.events.unshift({ type: type, detail: detail || '', time: timeStr(), date: today, platform: platform });
-      if (data.events.length > 50) data.events = data.events.slice(0, 50);
-
-      // Session tracking
-      if (!sessionStorage.getItem(SESSION_KEY)) {
-        sessionStorage.setItem(SESSION_KEY, '1');
-        data.sessions = (data.sessions || 0) + 1;
-      }
-
-      saveAnalytics(data);
-    }
-
-    // Track pageview on load
-    trackEvent('pageview', location.pathname);
-
-    // Track download clicks
-    function trackDownloadClick(e) {
-      var a = e.target.closest('a');
-      if (a && a.href && (a.href.includes('/download/') || a.href.includes('releases'))) {
-        var label = a.href.split('/').pop() || 'unknown';
-        trackEvent('download', label);
-      }
-    }
-    document.addEventListener('click', trackDownloadClick);
-
-    // Expose for admin panel
-    window._appgenAnalytics = {
-      get: getAnalytics,
-      save: saveAnalytics,
-      clear: function() { localStorage.removeItem(STORAGE_KEY); }
-    };
+    document.addEventListener('click', function(e) {
+      var a = e.target.closest('a[download], a[href*="releases"], a[href$=".exe"], a[href$=".dmg"], a[href$=".AppImage"]');
+      if (a) track('download', a.getAttribute('href'));
+    });
   })();
 
   // ==================== SECRET ADMIN PANEL ====================
   (function() {
     var clickCount = 0;
     var clickTimer = null;
-    // SHA-256 hash of the admin password
-    var ADMIN_HASH = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'; // "admin"
 
     var logoIcon = document.getElementById('logo-icon');
     if (logoIcon) {
@@ -1570,21 +1371,20 @@
       });
     }
 
-    async function hashPassword(pw) {
-      var data = new TextEncoder().encode(pw);
-      var buf = await crypto.subtle.digest('SHA-256', data);
-      return Array.from(new Uint8Array(buf)).map(function(b) { return b.toString(16).padStart(2, '0'); }).join('');
-    }
 
     window.openAdmin = function() {
       var panel = document.getElementById('admin-panel');
       var overlay = document.getElementById('admin-overlay');
       panel.style.display = 'block';
       overlay.style.display = 'block';
-      // Check if already authed this session
-      if (sessionStorage.getItem('appgen_admin_authed')) {
-        showAnalytics();
-      }
+      // Check if already authed via cookie by hitting the API
+      fetch('/api/admin-analytics?range=7d')
+        .then(function(r) { if (r.ok) { return r.json(); } throw 'no'; })
+        .then(function(data) {
+          showAnalytics();
+          renderServerAnalytics(data);
+        })
+        .catch(function() {});
       requestAnimationFrame(function() {
         overlay.style.opacity = '1';
         panel.style.right = '0px';
@@ -1604,21 +1404,26 @@
 
     window.attemptAdminLogin = async function() {
       var pw = document.getElementById('admin-password').value;
-      var hash = await hashPassword(pw);
-      if (hash === ADMIN_HASH) {
-        sessionStorage.setItem('appgen_admin_authed', '1');
-        document.getElementById('admin-login-error').style.display = 'none';
-        showAnalytics();
-      } else {
+      try {
+        var res = await fetch('/api/admin-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw })
+        });
+        if (res.ok) {
+          sessionStorage.setItem('appgen_admin_authed', '1');
+          document.getElementById('admin-login-error').style.display = 'none';
+          showAnalytics();
+        } else {
+          document.getElementById('admin-login-error').style.display = 'block';
+        }
+      } catch {
         document.getElementById('admin-login-error').style.display = 'block';
       }
     };
 
     window.clearAnalytics = function() {
-      if (confirm('Clear all locally stored analytics data?')) {
-        window._appgenAnalytics.clear();
-        showAnalytics();
-      }
+      alert('Analytics are stored server-side in D1. Use the Cloudflare Dashboard to manage data.');
     };
 
     function showAnalytics() {
@@ -1626,7 +1431,16 @@
       document.getElementById('admin-tabs').style.display = 'block';
       document.getElementById('admin-analytics-section').style.display = 'block';
       document.getElementById('admin-materials-section').style.display = 'none';
-      renderAnalytics();
+      fetchServerAnalytics();
+    }
+
+    var currentRange = '7d';
+
+    function fetchServerAnalytics() {
+      fetch('/api/admin-analytics?range=' + currentRange)
+        .then(function(r) { if (!r.ok) throw 'err'; return r.json(); })
+        .then(function(data) { renderServerAnalytics(data); })
+        .catch(function() {});
     }
 
     window.switchAdminTab = function(tab) {
@@ -1651,12 +1465,163 @@
       }
     };
 
-    window.switchMaterialCat = function(cat) {
-      var cats = ['social', 'digital', 'print'];
-      cats.forEach(function(c) {
-        var el = document.getElementById('mat-' + c);
-        if (el) el.style.display = c === cat ? 'block' : 'none';
+    var MAT_DATA = {
+      social: [
+        {t:'Instagram Square',d:'1080x1080',f:'marketing/social-instagram-square.svg',s:'1080x1080'},
+        {t:'Instagram Story',d:'1080x1920',f:'marketing/social-instagram-story.svg',s:'1080x1920'},
+        {t:'Twitter/X Banner',d:'1500x500',f:'marketing/social-twitter-banner.svg',s:'1500x500'},
+        {t:'Twitter/X Post',d:'1600x900',f:'marketing/social-twitter-post.svg',s:'1600x900'},
+        {t:'Facebook Post',d:'1200x630',f:'marketing/social-facebook-post.svg',s:'1200x630'},
+        {t:'Facebook Cover',d:'820x312',f:'marketing/social-facebook-cover.svg',s:'820x312'},
+        {t:'LinkedIn Post',d:'1200x627',f:'marketing/social-linkedin-post.svg',s:'1200x627'},
+        {t:'Pinterest Pin',d:'1000x1500',f:'marketing/social-pinterest-pin.svg',s:'1000x1500'},
+        {t:'YouTube Thumbnail',d:'1280x720',f:'marketing/social-youtube-thumbnail.svg',s:'1280x720'},
+        {t:'WhatsApp Status',d:'1080x1920',f:'marketing/social-whatsapp-status.svg',s:'1080x1920'},
+      ],
+      digital: [
+        {t:'Leaderboard',d:'728x90',f:'marketing/digital-banner-728x90.svg',s:'728x90'},
+        {t:'Large Leaderboard',d:'970x90',f:'marketing/digital-large-leaderboard-970x90.svg',s:'970x90'},
+        {t:'Medium Rectangle',d:'300x250',f:'marketing/digital-banner-300x250.svg',s:'300x250'},
+        {t:'Large Rectangle',d:'336x280',f:'marketing/digital-large-rectangle-336x280.svg',s:'336x280'},
+        {t:'Skyscraper',d:'160x600',f:'marketing/digital-skyscraper-160x600.svg',s:'160x600'},
+        {t:'Half Page',d:'300x600',f:'marketing/digital-half-page-300x600.svg',s:'300x600'},
+        {t:'Billboard',d:'970x250',f:'marketing/digital-billboard-970x250.svg',s:'970x250'},
+        {t:'Mobile Banner',d:'320x50',f:'marketing/digital-mobile-banner-320x50.svg',s:'320x50'},
+        {t:'Full HD Screen',d:'1920x1080',f:'marketing/digital-screen-1920x1080.svg',s:'1920x1080'},
+        {t:'4K Display',d:'3840x2160',f:'marketing/digital-4k-display-3840x2160.svg',s:'3840x2160'},
+      ],
+      print: [
+        {t:'Letter Flyer',d:'8.5x11"',f:'marketing/print-flyer-letter.svg',s:'8.5x11'},
+        {t:'A4 Flyer',d:'210x297mm',f:'marketing/print-a4-flyer.svg',s:'A4'},
+        {t:'Postcard',d:'6x4"',f:'marketing/print-postcard-6x4.svg',s:'6x4'},
+        {t:'Business Card',d:'3.5x2"',f:'marketing/print-business-card.svg',s:'3.5x2'},
+        {t:'Poster',d:'24x36"',f:'marketing/print-poster-24x36.svg',s:'24x36'},
+        {t:'Bookmark',d:'2x6"',f:'marketing/print-bookmark.svg',s:'2x6'},
+        {t:'Rack Card',d:'4x9"',f:'marketing/print-rack-card.svg',s:'4x9'},
+        {t:'Door Hanger',d:'3.5x8.5"',f:'marketing/print-door-hanger.svg',s:'3.5x8.5'},
+        {t:'Circle Sticker',d:'4" dia',f:'marketing/print-sticker-circle.svg',s:'4 dia'},
+        {t:'Table Tent',d:'5x3.5"',f:'marketing/print-table-tent.svg',s:'5x3.5'},
+      ],
+      presentations: [
+        {t:'Title Slide',d:'Opening',f:'marketing/presentation-title-slide.svg',s:'16:9'},
+        {t:'Features',d:'Key features',f:'marketing/presentation-features.svg',s:'16:9'},
+        {t:'How It Works',d:'3-step',f:'marketing/presentation-how-it-works.svg',s:'16:9'},
+        {t:'Key Stats',d:'Metrics',f:'marketing/presentation-stats.svg',s:'16:9'},
+        {t:'Call to Action',d:'CTA',f:'marketing/presentation-cta.svg',s:'16:9'},
+        {t:'Comparison',d:'vs Traditional',f:'marketing/presentation-comparison.svg',s:'16:9'},
+        {t:'Use Cases',d:'Examples',f:'marketing/presentation-use-cases.svg',s:'16:9'},
+        {t:'Tech Stack',d:'Architecture',f:'marketing/presentation-tech.svg',s:'16:9'},
+        {t:'Testimonial',d:'Review',f:'marketing/presentation-testimonial.svg',s:'16:9'},
+        {t:'Thank You',d:'Closing',f:'marketing/presentation-thankyou.svg',s:'16:9'},
+      ],
+      text: [
+        {t:'Tweet — Launch',tx:'Just discovered App Generator \u2014 describe a desktop app in plain English, AI builds and packages it. No coding needed. Free and open source. app.website-generator.net'},
+        {t:'Tweet — Feature',tx:'App Generator now has conversation branching. Edit any message, explore alternate app designs, switch between versions instantly. app.website-generator.net'},
+        {t:'Tweet — Social Proof',tx:'Built a complete task manager app in 5 minutes using App Generator. Described what I wanted, AI built it, packaged it as an installer. For free. app.website-generator.net'},
+        {t:'LinkedIn Post',tx:'Excited to share App Generator \u2014 a free, open-source desktop app that turns plain English into real desktop applications.\n\nNo coding required. No complex toolchain setup.\n\nHow it works:\n1. Describe your app in everyday language\n2. Watch AI build it in real-time\n3. Package as an installer for Windows, macOS, Linux\n\nFree download: app.website-generator.net'},
+        {t:'Product Hunt Tagline',tx:'App Generator \u2014 Describe a desktop app in plain English. AI builds, packages, and distributes it. Free, open source.'},
+        {t:'Email Subject Lines',tx:'Build a desktop app in 5 minutes \u2014 no coding\nYour app is one conversation away\nFree tool: AI builds desktop apps from plain English\nStop hiring developers for simple tools'},
+        {t:'Email Announcement',tx:'Hi there,\n\nI wanted to share something I have been working on: App Generator.\n\nIt is a free desktop app that lets you describe a desktop application in plain English and have AI build and package it for you. No coding, no toolchain setup, no monthly fees.\n\nDownload at app.website-generator.net\n\nBest,\nBryan'},
+        {t:'Reddit Post',tx:'I built a free desktop app that turns plain English into real desktop applications.\n\nDescribe an app, watch AI build it, then package and distribute it.\n\nFeatures:\n- Real-time code generation\n- Auto-packaging for Windows, macOS, Linux\n- GitHub Releases distribution\n- Conversation branching\n- Open source (MIT)\n\nDownload: app.website-generator.net'},
+        {t:'Short Description',tx:'App Generator is a free desktop app that turns plain English into real desktop applications. Describe what you want, watch AI build it, and package it for any platform. No coding required.'},
+        {t:'Long Description',tx:'App Generator is a free, open-source desktop application that makes software development accessible to everyone. Describe what you want in everyday language, the AI builds it in real-time, and packages it as a Windows exe, macOS dmg, or Linux AppImage. Open source under MIT. Download free at app.website-generator.net.'},
+        {t:'Press Release',tx:'App Generator, a free open-source desktop application, enables anyone to create professional desktop applications using natural language. Available for Windows, macOS, and Linux at app.website-generator.net.'},
+        {t:'App Store Description',tx:'Turn words into apps. App Generator is a free desktop app that builds and packages real desktop applications from plain English descriptions. No coding skills needed. No monthly fees.'},
+      ]
+    };
+
+    function renderMatCards(cat) {
+      var container = document.getElementById('mat-content');
+      if (!container) return;
+      while (container.firstChild) container.removeChild(container.firstChild);
+      var items = MAT_DATA[cat] || [];
+      var wrapper = document.createElement('div');
+      wrapper.style.cssText = 'display:flex;flex-direction:column;gap:12px;';
+
+      items.forEach(function(item) {
+        var card = document.createElement('div');
+        card.style.cssText = 'border-radius:12px;background:#111827;border:1px solid #1e293b;overflow:hidden;padding:12px;';
+
+        if (item.tx) {
+          var header = document.createElement('div');
+          header.style.cssText = 'display:flex;justify-content:space-between;align-items:start;margin-bottom:6px;';
+          var title = document.createElement('div');
+          title.style.cssText = 'font-size:13px;font-weight:600;color:white;';
+          title.textContent = item.t;
+          var badge = document.createElement('span');
+          badge.style.cssText = 'font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:rgba(167,139,250,0.1);color:#a78bfa;flex-shrink:0;margin-left:8px;';
+          badge.textContent = item.tx.length + ' chars';
+          header.appendChild(title);
+          header.appendChild(badge);
+          card.appendChild(header);
+
+          var body = document.createElement('div');
+          body.style.cssText = 'font-size:11px;color:#94a3b8;line-height:1.6;white-space:pre-line;max-height:120px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#334155 transparent;margin-bottom:8px;';
+          body.textContent = item.tx;
+          card.appendChild(body);
+
+          var btn = document.createElement('button');
+          btn.style.cssText = 'font-size:11px;font-weight:600;color:#34d399;background:none;border:none;cursor:pointer;padding:0;';
+          btn.textContent = 'Copy Text';
+          btn.addEventListener('click', function() {
+            navigator.clipboard.writeText(item.tx).then(function() {
+              btn.textContent = 'Copied!';
+              setTimeout(function() { btn.textContent = 'Copy Text'; }, 2000);
+            });
+          });
+          card.appendChild(btn);
+        } else {
+          card.style.padding = '0';
+          var imgWrap = document.createElement('div');
+          imgWrap.style.cssText = 'aspect-ratio:16/9;max-height:200px;background:#0a0d12;padding:8px;display:flex;align-items:center;justify-content:center;';
+          var img = document.createElement('img');
+          img.src = item.f;
+          img.alt = item.t;
+          img.loading = 'lazy';
+          img.style.cssText = 'width:100%;height:100%;object-fit:contain;';
+          imgWrap.appendChild(img);
+          card.appendChild(imgWrap);
+
+          var info = document.createElement('div');
+          info.style.cssText = 'padding:12px;';
+          var t2 = document.createElement('div');
+          t2.style.cssText = 'font-size:13px;font-weight:600;color:white;margin-bottom:4px;';
+          t2.textContent = item.t;
+          var d2 = document.createElement('div');
+          d2.style.cssText = 'font-size:11px;color:#64748b;margin-bottom:8px;';
+          d2.textContent = item.d;
+          info.appendChild(t2);
+          info.appendChild(d2);
+
+          var row = document.createElement('div');
+          row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;';
+          var badges = document.createElement('div');
+          badges.style.cssText = 'display:flex;gap:4px;';
+          var sb = document.createElement('span');
+          sb.style.cssText = 'font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:#1e293b;color:#94a3b8;';
+          sb.textContent = item.s;
+          var fb = document.createElement('span');
+          fb.style.cssText = 'font-size:9px;font-family:monospace;padding:2px 6px;border-radius:20px;background:rgba(16,185,129,0.1);color:#34d399;';
+          fb.textContent = 'SVG';
+          badges.appendChild(sb);
+          badges.appendChild(fb);
+          row.appendChild(badges);
+
+          var dl = document.createElement('a');
+          dl.href = item.f;
+          dl.download = '';
+          dl.style.cssText = 'font-size:11px;font-weight:600;color:#34d399;text-decoration:none;';
+          dl.textContent = 'Download';
+          row.appendChild(dl);
+          info.appendChild(row);
+          card.appendChild(info);
+        }
+        wrapper.appendChild(card);
       });
+      container.appendChild(wrapper);
+    }
+
+    window.switchMaterialCat = function(cat) {
       document.querySelectorAll('.mat-cat-btn').forEach(function(btn) {
         if (btn.getAttribute('data-cat') === cat) {
           btn.style.background = 'rgba(16,185,129,0.1)';
@@ -1668,31 +1633,47 @@
           btn.style.color = '#64748b';
         }
       });
+      renderMatCards(cat);
     };
 
-    function renderAnalytics() {
-      var data = window._appgenAnalytics.get();
+    var origSwitchTab = window.switchAdminTab;
+    window.switchAdminTab = function(tab) {
+      origSwitchTab(tab);
+      if (tab === 'materials' && !document.getElementById('mat-content').hasChildNodes()) {
+        renderMatCards('social');
+      }
+    };
 
-      // Totals
-      var totalViews = data.views.reduce(function(s, d) { return s + d.count; }, 0);
-      var totalDownloads = data.downloads.reduce(function(s, d) { return s + d.count; }, 0);
-      document.getElementById('stat-views').textContent = totalViews.toLocaleString();
-      document.getElementById('stat-downloads').textContent = totalDownloads.toLocaleString();
-      document.getElementById('stat-sessions').textContent = (data.sessions || 0).toLocaleString();
-      document.getElementById('stat-dl-rate').textContent = totalViews > 0 ? ((totalDownloads / totalViews) * 100).toFixed(1) + '%' : '0%';
+    function renderServerAnalytics(data) {
+      var t = data.totals || {};
+      document.getElementById('stat-views').textContent = (t.total_pageviews || 0).toLocaleString();
+      document.getElementById('stat-downloads').textContent = (t.total_downloads || 0).toLocaleString();
+      document.getElementById('stat-sessions').textContent = (t.unique_sessions || 0).toLocaleString();
+      document.getElementById('stat-dl-rate').textContent = t.total_pageviews ? ((t.total_downloads / t.total_pageviews) * 100).toFixed(1) + '%' : '0%';
 
-      // Last 14 days charts
-      renderChart('chart-views', 'chart-views-labels', data.views, '#10b981');
-      renderChart('chart-downloads', 'chart-downloads-labels', data.downloads, '#818cf8');
+      renderChart('chart-views', 'chart-views-labels', data.pageviewsOverTime || [], '#10b981');
+      renderChart('chart-downloads', 'chart-downloads-labels', data.downloadsOverTime || [], '#818cf8');
 
-      // Platform bars
-      renderBarList('platform-bars', data.platforms, '#f472b6');
+      // Platform bars from OS data
+      var platformObj = {};
+      (data.osSplit || []).forEach(function(d) { platformObj[d.os || 'Unknown'] = d.count; });
+      renderBarList('platform-bars', platformObj, '#f472b6');
 
       // Referrer bars
-      renderBarList('referrer-bars', data.referrers, '#a78bfa');
+      var refObj = {};
+      (data.topReferrers || []).forEach(function(d) { refObj[d.referrer || 'Direct'] = d.count; });
+      renderBarList('referrer-bars', refObj, '#a78bfa');
 
       // Recent events
-      renderEvents(data.events);
+      var events = (data.recentEvents || []).map(function(e) {
+        return {
+          type: e.type,
+          detail: e.path || '/',
+          time: e.created_at ? new Date(e.created_at + 'Z').toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '',
+          platform: e.os || ''
+        };
+      });
+      renderEvents(events);
     }
 
     function renderChart(containerId, labelsId, dayData, color) {

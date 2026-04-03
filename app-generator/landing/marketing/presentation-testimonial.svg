@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <!-- Large decorative quotes -->
+  <text x="200" y="350" font-family="Georgia, serif" font-size="300" fill="#34d399" opacity="0.08">"</text>
+  <!-- Header -->
+  <rect x="80" y="60" width="80" height="80" rx="16" fill="url(#accent)"/>
+  <text x="120" y="115" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="#0f172a" text-anchor="middle">A</text>
+  <text x="180" y="100" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white">App Generator</text>
+  <text x="1840" y="100" font-family="Arial, sans-serif" font-size="18" fill="#64748b" text-anchor="end">app.website-generator.net</text>
+  <!-- Title -->
+  <text x="960" y="230" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="white" text-anchor="middle">What People Are Saying</text>
+  <rect x="860" y="250" width="200" height="4" rx="2" fill="#34d399"/>
+
+  <!-- Testimonial 1 -->
+  <rect x="120" y="320" width="800" height="260" rx="16" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <text x="170" y="380" font-family="Georgia, serif" font-size="60" fill="#34d399" opacity="0.4">"</text>
+  <text x="200" y="400" font-family="Arial, sans-serif" font-size="20" fill="white" font-style="italic">I had an idea for a project management tool but</text>
+  <text x="200" y="430" font-family="Arial, sans-serif" font-size="20" fill="white" font-style="italic">no coding experience. App Generator turned my</text>
+  <text x="200" y="460" font-family="Arial, sans-serif" font-size="20" fill="white" font-style="italic">description into a working app in minutes.</text>
+  <!-- Avatar placeholder -->
+  <circle cx="200" cy="530" r="25" fill="url(#accent)"/>
+  <text x="200" y="538" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#0f172a" text-anchor="middle">S</text>
+  <text x="240" y="525" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">Sarah M.</text>
+  <text x="240" y="548" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8">Small Business Owner</text>
+
+  <!-- Testimonial 2 -->
+  <rect x="1000" y="320" width="800" height="260" rx="16" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <text x="1050" y="380" font-family="Georgia, serif" font-size="60" fill="#34d399" opacity="0.4">"</text>
+  <text x="1080" y="400" font-family="Arial, sans-serif" font-size="20" fill="white" font-style="italic">The quality of the generated apps is incredible.</text>
+  <text x="1080" y="430" font-family="Arial, sans-serif" font-size="20" fill="white" font-style="italic">Dark mode, keyboard shortcuts, data persistence</text>
+  <text x="1080" y="460" font-family="Arial, sans-serif" font-size="20" fill="white" font-style="italic">-- all built in automatically.</text>
+  <circle cx="1080" cy="530" r="25" fill="url(#accent)"/>
+  <text x="1080" y="538" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#0f172a" text-anchor="middle">J</text>
+  <text x="1120" y="525" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">James R.</text>
+  <text x="1120" y="548" font-family="Arial, sans-serif" font-size="14" fill="#94a3b8">Product Designer</text>
+
+  <!-- Testimonial 3 -->
+  <rect x="400" y="640" width="1120" height="260" rx="16" fill="#1e293b" stroke="#34d399" stroke-width="2"/>
+  <text x="450" y="700" font-family="Georgia, serif" font-size="60" fill="#34d399" opacity="0.4">"</text>
+  <text x="480" y="720" font-family="Arial, sans-serif" font-size="22" fill="white" font-style="italic">I've been a developer for 15 years and I use App Generator</text>
+  <text x="480" y="755" font-family="Arial, sans-serif" font-size="22" fill="white" font-style="italic">to rapidly prototype ideas. It handles all the boilerplate</text>
+  <text x="480" y="790" font-family="Arial, sans-serif" font-size="22" fill="white" font-style="italic">so I can focus on what makes my app unique.</text>
+  <circle cx="520" cy="855" r="28" fill="url(#accent)"/>
+  <text x="520" y="864" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#0f172a" text-anchor="middle">A</text>
+  <text x="565" y="850" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">Alex K.</text>
+  <text x="565" y="875" font-family="Arial, sans-serif" font-size="15" fill="#94a3b8">Senior Software Engineer</text>
+
+  <!-- Page indicator -->
+  <text x="960" y="1010" font-family="Arial, sans-serif" font-size="16" fill="#475569" text-anchor="middle">Testimonials</text>
+</svg>

@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <!-- Decorative -->
+  <circle cx="1700" cy="150" r="300" fill="#34d399" opacity="0.03"/>
+  <!-- Header -->
+  <rect x="80" y="60" width="80" height="80" rx="16" fill="url(#accent)"/>
+  <text x="120" y="115" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="#0f172a" text-anchor="middle">A</text>
+  <text x="180" y="100" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white">App Generator</text>
+  <text x="1840" y="100" font-family="Arial, sans-serif" font-size="18" fill="#64748b" text-anchor="end">app.website-generator.net</text>
+  <!-- Title -->
+  <text x="960" y="230" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="white" text-anchor="middle">Features Overview</text>
+  <rect x="860" y="250" width="200" height="4" rx="2" fill="#34d399"/>
+  <!-- Feature grid: 3x2 -->
+  <!-- Row 1 -->
+  <rect x="120" y="310" width="530" height="220" rx="16" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <circle cx="180" cy="370" r="30" fill="url(#accent)"/>
+  <text x="180" y="380" font-family="Arial, sans-serif" font-size="28" fill="#0f172a" text-anchor="middle">AI</text>
+  <text x="230" y="375" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">AI-Powered Generation</text>
+  <text x="150" y="420" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">Describe your app in plain English and watch</text>
+  <text x="150" y="445" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">as AI generates a complete, functional desktop</text>
+  <text x="150" y="470" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">application with all the features you described.</text>
+
+  <rect x="695" y="310" width="530" height="220" rx="16" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <circle cx="755" cy="370" r="30" fill="url(#accent)"/>
+  <text x="755" y="378" font-family="Arial, sans-serif" font-size="22" fill="#0f172a" text-anchor="middle">3x</text>
+  <text x="805" y="375" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">Cross-Platform</text>
+  <text x="725" y="420" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">Build apps that run on Windows, macOS, and</text>
+  <text x="725" y="445" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">Linux. Generate installers for all platforms</text>
+  <text x="725" y="470" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">from a single project.</text>
+
+  <rect x="1270" y="310" width="530" height="220" rx="16" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <circle cx="1330" cy="370" r="30" fill="url(#accent)"/>
+  <text x="1330" y="380" font-family="Arial, sans-serif" font-size="24" fill="#0f172a" text-anchor="middle">$0</text>
+  <text x="1380" y="375" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">Free &amp; Open Source</text>
+  <text x="1300" y="420" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">Completely free to use. Open source under MIT</text>
+  <text x="1300" y="445" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">license. No hidden fees, no subscriptions,</text>
+  <text x="1300" y="470" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">no limitations.</text>
+
+  <!-- Row 2 -->
+  <rect x="120" y="570" width="530" height="220" rx="16" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <circle cx="180" cy="630" r="30" fill="url(#accent)"/>
+  <text x="180" y="638" font-family="Arial, sans-serif" font-size="20" fill="#0f172a" text-anchor="middle">DB</text>
+  <text x="230" y="635" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">Persistent Storage</text>
+  <text x="150" y="680" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">Built-in SQLite database and key-value store.</text>
+  <text x="150" y="705" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">Your apps save and load data automatically,</text>
+  <text x="150" y="730" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">persisting across restarts.</text>
+
+  <rect x="695" y="570" width="530" height="220" rx="16" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <circle cx="755" cy="630" r="30" fill="url(#accent)"/>
+  <text x="755" y="640" font-family="Arial, sans-serif" font-size="26" fill="#0f172a" text-anchor="middle">UI</text>
+  <text x="805" y="635" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">Professional UI</text>
+  <text x="725" y="680" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">Modern, polished interfaces with dark mode,</text>
+  <text x="725" y="705" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">animations, keyboard shortcuts, and native</text>
+  <text x="725" y="730" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">desktop feel out of the box.</text>
+
+  <rect x="1270" y="570" width="530" height="220" rx="16" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <circle cx="1330" cy="630" r="30" fill="url(#accent)"/>
+  <text x="1330" y="640" font-family="Arial, sans-serif" font-size="20" fill="#0f172a" text-anchor="middle">GH</text>
+  <text x="1380" y="635" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white">Auto Distribution</text>
+  <text x="1300" y="680" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">Automatic GitHub releases, landing pages,</text>
+  <text x="1300" y="705" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">and auto-update support. Share your apps</text>
+  <text x="1300" y="730" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8">with a download link instantly.</text>
+
+  <!-- Bottom bar -->
+  <rect x="120" y="850" width="1680" height="60" rx="12" fill="#1e293b"/>
+  <text x="960" y="888" font-family="Arial, sans-serif" font-size="20" fill="#34d399" text-anchor="middle">Electron + React + Tailwind + Vite + SQLite + Auto-Updates</text>
+
+  <!-- Page indicator -->
+  <text x="960" y="1010" font-family="Arial, sans-serif" font-size="16" fill="#475569" text-anchor="middle">Features</text>
+</svg>

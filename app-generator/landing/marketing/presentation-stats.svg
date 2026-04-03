@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <!-- Header -->
+  <rect x="80" y="60" width="80" height="80" rx="16" fill="url(#accent)"/>
+  <text x="120" y="115" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="#0f172a" text-anchor="middle">A</text>
+  <text x="180" y="100" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white">App Generator</text>
+  <text x="1840" y="100" font-family="Arial, sans-serif" font-size="18" fill="#64748b" text-anchor="end">app.website-generator.net</text>
+  <!-- Title -->
+  <text x="960" y="230" font-family="Arial, sans-serif" font-size="56" font-weight="bold" fill="white" text-anchor="middle">Key Stats</text>
+  <rect x="860" y="250" width="200" height="4" rx="2" fill="#34d399"/>
+  <!-- Stats grid: 2x2 -->
+  <!-- Stat 1 -->
+  <rect x="200" y="340" width="350" height="280" rx="20" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <text x="375" y="440" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="#34d399" text-anchor="middle">$0</text>
+  <text x="375" y="490" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">Always Free</text>
+  <text x="375" y="530" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8" text-anchor="middle">No subscriptions, no hidden</text>
+  <text x="375" y="555" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8" text-anchor="middle">fees, no limitations</text>
+
+  <!-- Stat 2 -->
+  <rect x="600" y="340" width="350" height="280" rx="20" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <text x="775" y="440" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="#34d399" text-anchor="middle">3</text>
+  <text x="775" y="490" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">Platforms</text>
+  <text x="775" y="530" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8" text-anchor="middle">Windows, macOS, and Linux</text>
+  <text x="775" y="555" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8" text-anchor="middle">from a single project</text>
+
+  <!-- Stat 3 -->
+  <rect x="1000" y="340" width="350" height="280" rx="20" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <text x="1175" y="440" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="#34d399" text-anchor="middle">0</text>
+  <text x="1175" y="490" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">Lines of Code</text>
+  <text x="1175" y="530" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8" text-anchor="middle">Written by you. AI handles</text>
+  <text x="1175" y="555" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8" text-anchor="middle">all the programming</text>
+
+  <!-- Stat 4 -->
+  <rect x="1400" y="340" width="350" height="280" rx="20" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <text x="1575" y="440" font-family="Arial, sans-serif" font-size="64" font-weight="bold" fill="#34d399" text-anchor="middle">MIT</text>
+  <text x="1575" y="490" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">Open Source</text>
+  <text x="1575" y="530" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8" text-anchor="middle">Fully open source. Inspect,</text>
+  <text x="1575" y="555" font-family="Arial, sans-serif" font-size="16" fill="#94a3b8" text-anchor="middle">modify, contribute</text>
+
+  <!-- Bottom highlight -->
+  <rect x="300" y="720" width="1320" height="120" rx="16" fill="#1e293b"/>
+  <text x="960" y="775" font-family="Arial, sans-serif" font-size="28" fill="white" text-anchor="middle">From idea to installable desktop app in minutes</text>
+  <text x="960" y="810" font-family="Arial, sans-serif" font-size="18" fill="#34d399" text-anchor="middle">Powered by AI. Built with modern web technologies.</text>
+
+  <!-- Page indicator -->
+  <text x="960" y="1010" font-family="Arial, sans-serif" font-size="16" fill="#475569" text-anchor="middle">Key Stats</text>
+</svg>

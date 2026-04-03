@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <!-- Large decorative glows -->
+  <circle cx="960" cy="540" r="400" fill="#34d399" opacity="0.03"/>
+  <circle cx="960" cy="540" r="250" fill="#34d399" opacity="0.03"/>
+  <circle cx="1600" cy="200" r="300" fill="#10b981" opacity="0.02"/>
+  <circle cx="300" cy="900" r="300" fill="#34d399" opacity="0.02"/>
+  <!-- Logo centered -->
+  <rect x="810" y="200" width="300" height="300" rx="60" fill="url(#accent)"/>
+  <text x="960" y="400" font-family="Arial, sans-serif" font-size="210" font-weight="bold" fill="#0f172a" text-anchor="middle">A</text>
+  <!-- Thank you text -->
+  <text x="960" y="600" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="white" text-anchor="middle">Thank You</text>
+  <!-- App name -->
+  <text x="960" y="670" font-family="Arial, sans-serif" font-size="36" fill="#34d399" text-anchor="middle">App Generator</text>
+  <!-- Divider -->
+  <rect x="860" y="700" width="200" height="4" rx="2" fill="#34d399"/>
+  <!-- Contact/links -->
+  <text x="960" y="770" font-family="Arial, sans-serif" font-size="28" fill="white" text-anchor="middle">Download for free today</text>
+  <!-- URL prominent -->
+  <rect x="660" y="810" width="600" height="70" rx="35" fill="url(#accent)"/>
+  <text x="960" y="856" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#0f172a" text-anchor="middle">app.website-generator.net</text>
+  <!-- Platforms -->
+  <text x="960" y="940" font-family="Arial, sans-serif" font-size="22" fill="#94a3b8" text-anchor="middle">Available for Windows, macOS, and Linux</text>
+  <!-- Free badge -->
+  <text x="960" y="980" font-family="Arial, sans-serif" font-size="20" fill="#34d399" text-anchor="middle">Free &amp; Open Source</text>
+  <!-- Page indicator -->
+  <text x="960" y="1050" font-family="Arial, sans-serif" font-size="16" fill="#475569" text-anchor="middle">Thank You</text>
+</svg>

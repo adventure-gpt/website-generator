@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="970" height="250" viewBox="0 0 970 250">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="970" height="250" fill="url(#bg)"/>
+  <rect x="0" y="0" width="970" height="250" fill="none" stroke="#1e293b" stroke-width="2"/>
+  <!-- Background glow -->
+  <circle cx="850" cy="50" r="180" fill="#34d399" opacity="0.04"/>
+  <!-- Logo -->
+  <rect x="50" y="65" width="120" height="120" rx="24" fill="url(#accent)"/>
+  <text x="110" y="149" font-family="Arial, sans-serif" font-size="84" font-weight="bold" fill="#0f172a" text-anchor="middle">A</text>
+  <!-- Content -->
+  <text x="200" y="110" font-family="Arial, sans-serif" font-size="40" font-weight="bold" fill="white">App Generator</text>
+  <text x="200" y="148" font-family="Arial, sans-serif" font-size="22" fill="#34d399">Describe it. AI builds it. No coding required.</text>
+  <text x="200" y="180" font-family="Arial, sans-serif" font-size="16" fill="#64748b">app.website-generator.net</text>
+  <!-- CTA -->
+  <rect x="750" y="90" width="180" height="50" rx="25" fill="url(#accent)"/>
+  <text x="840" y="122" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#0f172a" text-anchor="middle">Download Free</text>
+  <!-- Free label -->
+  <text x="840" y="165" font-family="Arial, sans-serif" font-size="14" fill="#34d399" text-anchor="middle">Free &amp; Open Source</text>
+</svg>

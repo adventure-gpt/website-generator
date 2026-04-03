@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1080" viewBox="0 0 720 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="1080" fill="url(#bg)"/>
+  <!-- Decorative -->
+  <circle cx="600" cy="150" r="250" fill="#34d399" opacity="0.04"/>
+  <circle cx="120" cy="900" r="200" fill="#10b981" opacity="0.04"/>
+  <!-- Large logo -->
+  <rect x="210" y="100" width="300" height="300" rx="60" fill="url(#accent)"/>
+  <text x="360" y="300" font-family="Arial, sans-serif" font-size="210" font-weight="bold" fill="#0f172a" text-anchor="middle">A</text>
+  <!-- Title -->
+  <text x="360" y="500" font-family="Arial, sans-serif" font-size="64" font-weight="bold" fill="white" text-anchor="middle">App Generator</text>
+  <!-- Tagline -->
+  <text x="360" y="570" font-family="Arial, sans-serif" font-size="32" fill="#34d399" text-anchor="middle">Describe it. AI builds it.</text>
+  <!-- Description -->
+  <text x="360" y="660" font-family="Arial, sans-serif" font-size="22" fill="#94a3b8" text-anchor="middle">Turn your ideas into real desktop applications</text>
+  <text x="360" y="695" font-family="Arial, sans-serif" font-size="22" fill="#94a3b8" text-anchor="middle">using natural language. No coding required.</text>
+  <!-- Feature boxes -->
+  <rect x="60" y="750" width="180" height="100" rx="12" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <text x="150" y="800" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#34d399" text-anchor="middle">Free</text>
+  <text x="150" y="825" font-family="Arial, sans-serif" font-size="12" fill="#94a3b8" text-anchor="middle">Always free to use</text>
+  <rect x="270" y="750" width="180" height="100" rx="12" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <text x="360" y="800" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#34d399" text-anchor="middle">Cross-Platform</text>
+  <text x="360" y="825" font-family="Arial, sans-serif" font-size="12" fill="#94a3b8" text-anchor="middle">Win / Mac / Linux</text>
+  <rect x="480" y="750" width="180" height="100" rx="12" fill="#1e293b" stroke="#34d399" stroke-width="1"/>
+  <text x="570" y="800" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#34d399" text-anchor="middle">Open Source</text>
+  <text x="570" y="825" font-family="Arial, sans-serif" font-size="12" fill="#94a3b8" text-anchor="middle">MIT licensed</text>
+  <!-- CTA -->
+  <rect x="210" y="910" width="300" height="60" rx="30" fill="url(#accent)"/>
+  <text x="360" y="948" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#0f172a" text-anchor="middle">Download Now</text>
+  <!-- URL -->
+  <text x="360" y="1030" font-family="Arial, sans-serif" font-size="22" fill="#64748b" text-anchor="middle">app.website-generator.net</text>
+</svg>

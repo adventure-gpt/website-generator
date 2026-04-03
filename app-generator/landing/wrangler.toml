@@ -1,0 +1,7 @@
+name = "app-generator-app"
+compatibility_date = "2024-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "app-generator-analytics"
+database_id = "2e5b0f42-e120-4474-bfd6-84317f7de1d3"
