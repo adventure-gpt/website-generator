@@ -54,74 +54,61 @@ class AppLauncher {
 
     onEvent({ type: 'status', projectName, message: 'Launching app...' });
 
-    // Prefer spawning the real Electron binary directly so we track the
-    // actual app process, not a shell wrapper that exits immediately.
+    // Spawn the generated app as a FULLY DETACHED process. This is critical:
+    // 1. The child runs completely independently of the parent (App Generator)
+    // 2. We unref() it so the parent can quit without killing the child
+    // 3. We don't listen for 'close' events because on Windows, spawning a GUI
+    //    process from another GUI process can produce spurious immediate exit
+    //    events even when the real app is running fine. We only surface spawn
+    //    errors (which fire before the process starts).
+    // 4. We still track the PID so stop() can kill it if the user clicks stop.
     const electronBin = this._findElectronBinary(projectPath);
     let child;
-    let usedDirectBinary = false;
 
     if (electronBin) {
       try {
         child = spawn(electronBin, ['.'], {
           cwd: projectPath,
           env: { ...process.env, NODE_ENV: 'development' },
-          stdio: ['ignore', 'pipe', 'pipe'],
+          detached: true,
+          stdio: 'ignore',
         });
-        usedDirectBinary = true;
       } catch {
         child = null;
       }
     }
 
-    // Fallback: npx wrapper (only if direct binary spawn failed)
+    // Fallback: npx wrapper if direct binary not found
     if (!child) {
-      child = spawn('npx', ['electron', '.'], {
-        cwd: projectPath,
-        shell: true,
-        env: { ...process.env, NODE_ENV: 'development' },
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
+      try {
+        child = spawn('npx', ['electron', '.'], {
+          cwd: projectPath,
+          shell: true,
+          env: { ...process.env, NODE_ENV: 'development' },
+          detached: true,
+          stdio: 'ignore',
+        });
+      } catch (err) {
+        onEvent({ type: 'error', projectName, message: 'Failed to spawn: ' + err.message });
+        return null;
+      }
     }
 
-    const launchedAt = Date.now();
-    this.runningApps.set(projectName, { process: child, projectPath, launchedAt });
+    // Let the child run independently — parent can exit without killing it.
+    if (child.unref) child.unref();
 
-    child.stdout.on('data', (data) => {
-      const text = data.toString().trim();
-      if (text) {
-        onEvent({ type: 'stdout', projectName, message: text });
-      }
-    });
-
-    child.stderr.on('data', (data) => {
-      const text = data.toString().trim();
-      if (text && !text.includes('ExperimentalWarning') && !text.includes('Debugger')) {
-        onEvent({ type: 'stderr', projectName, message: text });
-      }
-    });
-
-    child.on('close', (code) => {
-      if (this.runningApps.get(projectName)?.process === child) {
-        this.runningApps.delete(projectName);
-      }
-      const elapsed = Date.now() - launchedAt;
-      // If the fallback npx wrapper was used, the "close" fires as soon as
-      // the wrapper exits — which can be immediate even though the real
-      // Electron app is still running in the background. Suppress the
-      // spurious close event in that case. Direct-binary launches don't
-      // hit this path because the child IS the real process.
-      if (!usedDirectBinary && elapsed < 5000 && (code === 0 || code === null)) {
-        return; // suppress — wrapper exited cleanly, real app is detached
-      }
-      onEvent({ type: 'closed', projectName, code });
-    });
-
+    // Only track error events (spawn failures). Do NOT listen for 'close' —
+    // with detached + stdio:'ignore', close events are unreliable on Windows
+    // and can fire spuriously even when the real app is running.
     child.on('error', (err) => {
       if (this.runningApps.get(projectName)?.process === child) {
         this.runningApps.delete(projectName);
       }
       onEvent({ type: 'error', projectName, message: err.message });
     });
+
+    const launchedAt = Date.now();
+    this.runningApps.set(projectName, { process: child, projectPath, launchedAt, pid: child.pid });
 
     onEvent({ type: 'launched', projectName });
     return child;
