@@ -84,7 +84,7 @@ class AIBackend {
     // System instructions — placed FIRST so the AI sees them before anything else
     const systemRules = `=== YOUR ENVIRONMENT — APP GENERATOR DESKTOP APP ===
 
-You are running inside the "App Generator" desktop app — an Electron application with a chat panel (where you talk to the user), a live preview panel (where the user sees their app's renderer UI), and a sidebar (where they switch between projects).
+You are running inside the "App Generator" desktop app — an Electron application with a chat panel (where you talk to the user) and a sidebar (where they switch between projects). There is NO preview panel — desktop apps can't be iframed, so when you finish writing code, the app launches the generated Electron app in its own window for the user to test. Never tell the user to "check the preview" or describe a preview panel — it doesn't exist.
 
 You are building ELECTRON DESKTOP APPS, not websites.
 

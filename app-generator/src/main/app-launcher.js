@@ -4,12 +4,33 @@ const fs = require('fs');
 
 class AppLauncher {
   constructor() {
-    this.runningApps = new Map(); // projectName -> { process, projectPath }
+    this.runningApps = new Map(); // projectName -> { process, projectPath, launchedAt }
+  }
+
+  /**
+   * Resolve the Electron binary path inside the project's node_modules.
+   * Spawning this directly (instead of via `npx electron .`) means the
+   * child process IS the actual app — so we get accurate close events
+   * instead of the shell wrapper exiting immediately after launch.
+   */
+  _findElectronBinary(projectPath) {
+    const base = path.join(projectPath, 'node_modules', 'electron', 'dist');
+    if (!fs.existsSync(base)) return null;
+    if (process.platform === 'win32') {
+      const p = path.join(base, 'electron.exe');
+      return fs.existsSync(p) ? p : null;
+    }
+    if (process.platform === 'darwin') {
+      const p = path.join(base, 'Electron.app', 'Contents', 'MacOS', 'Electron');
+      return fs.existsSync(p) ? p : null;
+    }
+    // Linux
+    const p = path.join(base, 'electron');
+    return fs.existsSync(p) ? p : null;
   }
 
   /**
    * Launch a generated Electron app for native feature testing.
-   * Spawns `npx electron .` inside the project directory.
    */
   launch(projectPath, projectName, onEvent) {
     // Stop existing instance for this project
@@ -27,20 +48,43 @@ class AppLauncher {
     // Verify node_modules exist
     const nodeModulesPath = path.join(projectPath, 'node_modules');
     if (!fs.existsSync(nodeModulesPath)) {
-      onEvent({ type: 'error', projectName, message: 'Dependencies not installed. The app will install them automatically.' });
+      onEvent({ type: 'error', projectName, message: 'Dependencies not installed yet.' });
       return null;
     }
 
     onEvent({ type: 'status', projectName, message: 'Launching app...' });
 
-    const child = spawn('npx', ['electron', '.'], {
-      cwd: projectPath,
-      shell: true,
-      env: { ...process.env, NODE_ENV: 'development' },
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
+    // Prefer spawning the real Electron binary directly so we track the
+    // actual app process, not a shell wrapper that exits immediately.
+    const electronBin = this._findElectronBinary(projectPath);
+    let child;
+    let usedDirectBinary = false;
 
-    this.runningApps.set(projectName, { process: child, projectPath });
+    if (electronBin) {
+      try {
+        child = spawn(electronBin, ['.'], {
+          cwd: projectPath,
+          env: { ...process.env, NODE_ENV: 'development' },
+          stdio: ['ignore', 'pipe', 'pipe'],
+        });
+        usedDirectBinary = true;
+      } catch {
+        child = null;
+      }
+    }
+
+    // Fallback: npx wrapper (only if direct binary spawn failed)
+    if (!child) {
+      child = spawn('npx', ['electron', '.'], {
+        cwd: projectPath,
+        shell: true,
+        env: { ...process.env, NODE_ENV: 'development' },
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+    }
+
+    const launchedAt = Date.now();
+    this.runningApps.set(projectName, { process: child, projectPath, launchedAt });
 
     child.stdout.on('data', (data) => {
       const text = data.toString().trim();
@@ -59,6 +103,15 @@ class AppLauncher {
     child.on('close', (code) => {
       if (this.runningApps.get(projectName)?.process === child) {
         this.runningApps.delete(projectName);
+      }
+      const elapsed = Date.now() - launchedAt;
+      // If the fallback npx wrapper was used, the "close" fires as soon as
+      // the wrapper exits — which can be immediate even though the real
+      // Electron app is still running in the background. Suppress the
+      // spurious close event in that case. Direct-binary launches don't
+      // hit this path because the child IS the real process.
+      if (!usedDirectBinary && elapsed < 5000 && (code === 0 || code === null)) {
+        return; // suppress — wrapper exited cleanly, real app is detached
       }
       onEvent({ type: 'closed', projectName, code });
     });

@@ -8,13 +8,13 @@ Build me a download page for "App Generator" — a desktop app that lets anyone 
 
 - You describe what you want in plain English in a chat interface
 - The AI builds the entire Electron desktop app for you in real-time
-- You see a live preview of your app's UI as it's being built
+- When the build is done, the generated app launches automatically so you can test it
 - When you're happy, click Distribute and get a download link to share
 - It handles everything: packaging, installers, auto-updates, GitHub releases
 
 Key features to highlight:
 - Chat-based interface — just describe what you want
-- Live preview panel showing your app updating in real-time
+- Auto-launches the generated app in its own window for instant testing
 - Supports both Claude (Anthropic) and Codex (OpenAI) as AI backends
 - Builds cross-platform Electron apps (Windows, macOS, Linux)
 - One-click distribution via GitHub Releases with auto-updater built in
