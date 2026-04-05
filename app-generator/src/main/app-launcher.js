@@ -44,13 +44,10 @@ class AppLauncher {
       }
     }
 
-    // Strategy 3: .bin shim (npm-installed CLI entry point)
-    const binDir = path.join(projectPath, 'node_modules', '.bin');
-    if (process.platform === 'win32') {
-      const p = path.join(binDir, 'electron.cmd');
-      if (fs.existsSync(p)) return p;
-    } else {
-      const p = path.join(binDir, 'electron');
+    // Strategy 3: .bin shim (Unix only — .cmd files on Windows can't be
+    // spawned without shell:true which opens a console window)
+    if (process.platform !== 'win32') {
+      const p = path.join(projectPath, 'node_modules', '.bin', 'electron');
       if (fs.existsSync(p)) return p;
     }
 
