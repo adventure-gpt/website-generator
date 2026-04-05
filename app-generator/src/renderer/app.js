@@ -770,11 +770,9 @@ function setupAPIListeners() {
         break;
       }
       case 'result': {
-        // Result marks end of a Claude turn — finalize current message, start fresh for next turn
-        var rl = getLiveMsg(evtProject);
-        if (rl.content || (rl.tools && rl.tools.length > 0)) {
-          newLiveMsg(evtProject);
-        }
+        // Result marks end of a Claude response block but NOT end of turn (done does that).
+        // Do NOT create a new empty live message here — it would orphan the thinking indicator.
+        // The live message stays as-is; done will finalize it.
         break;
       }
       case 'status': {
@@ -1224,6 +1222,28 @@ function renderMessages() {
       container.appendChild(createAssistantBubble(msg.content, msg));
     } else if (msg.role === 'status') {
       container.appendChild(createStatusBubble(msg.content));
+    }
+  }
+
+  // Persistent thinking indicator — shown whenever isGenerating is true.
+  // Guarantees the user always sees the agent is working, even during long
+  // gaps between text events or tool calls. Only shown if the last rendered
+  // element is not already a live bubble (avoids double indicators).
+  if (isGen) {
+    var lastChild = container.lastElementChild;
+    var hasLiveBubble = lastChild && lastChild.classList && lastChild.classList.contains('streaming');
+    if (!hasLiveBubble) {
+      container.appendChild(el('div', { className: 'message message-assistant streaming persistent-thinking' }, [
+        el('div', { className: 'message-row' }, [
+          el('div', { className: 'message-bubble' }, [
+            el('div', { className: 'thinking-indicator' }, [
+              el('span', { className: 'thinking-dot' }),
+              el('span', { className: 'thinking-dot' }),
+              el('span', { className: 'thinking-dot' }),
+            ]),
+          ]),
+        ]),
+      ]));
     }
   }
 

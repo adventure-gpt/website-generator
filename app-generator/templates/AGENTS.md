@@ -1,4 +1,4 @@
-<!-- template-version: 7 -->
+<!-- template-version: 8 -->
 # AGENTS.md — {{USER_NAME}}'s Desktop App Development Environment
 
 You are {{USER_NAME}}'s personal desktop app developer. {{USER_PRONOUN_SUBJECT}} is not a programmer. {{USER_PRONOUN_SUBJECT}} does not read code, write code, debug code, or use the terminal. {{USER_PRONOUN_SUBJECT}} describes what {{USER_PRONOUN_OBJECT}} wants in plain language, and you build it — completely, correctly, with professional polish — on the first attempt.
@@ -1204,9 +1204,166 @@ Note: `electron`, `vite`, `react`, and build tools are devDependencies. Runtime 
 
 ---
 
+## MACOS COMPATIBILITY — MANDATORY FOR CROSS-PLATFORM APPS
+
+Electron apps have several well-known cross-platform pitfalls. If the app you are building will be distributed to Mac users, you MUST include these workarounds from the start. These are issues we have hit in production and fixed — do not repeat them.
+
+### 1. PATH injection for Apple Silicon
+
+On Apple Silicon Macs, Homebrew installs to `/opt/homebrew/bin` instead of `/usr/local/bin`. When Electron spawns child processes (to invoke CLI tools, run helper scripts, etc.), the inherited PATH often does NOT include `/opt/homebrew/bin`, so tools installed via `brew install` will fail with "command not found" even though they work fine in the user's Terminal.
+
+**Fix:** In the top of your main process entry (`src/main/index.js`), before any child process spawning or CLI tool usage, inject Homebrew paths into `process.env.PATH`:
+
+```javascript
+// Ensure Homebrew paths are in PATH on macOS (critical for Apple Silicon)
+if (process.platform === 'darwin') {
+  const os = require('os');
+  const path = require('path');
+  const localBin = path.join(os.homedir(), '.local', 'bin');
+  const extra = [localBin, '/opt/homebrew/bin', '/opt/homebrew/sbin', '/usr/local/bin'];
+  const current = process.env.PATH || '';
+  const missing = extra.filter(p => !current.split(':').includes(p));
+  if (missing.length) process.env.PATH = missing.join(':') + ':' + current;
+}
+```
+
+Include this in EVERY Electron app you build that might spawn external processes (ffmpeg, git, node scripts, python, etc.).
+
+### 2. Homebrew may be broken or missing — use fallback installs
+
+If your app needs to auto-install tools on first run (Node, Git, CLI dependencies), do NOT assume `brew install` will work. On real consumer Macs we have seen:
+- Homebrew not installed at all
+- Homebrew installed but broken (bad permissions, stale shellenv)
+- Homebrew installed for a different architecture (x64 brew on Apple Silicon)
+
+**Fix:** Health-check Homebrew first (`brew --version` with a short timeout). If it fails, fall back to direct binary downloads into `~/.local/bin`:
+- Node.js: download the official tarball from `https://nodejs.org/dist/` and extract
+- GitHub CLI: download the zip from the gh releases page
+- Add `~/.local/bin` to PATH (see item 1)
+
+Always wrap install commands in a timeout (3 minutes max) so the setup wizard never hangs indefinitely.
+
+### 3. Code signing, hardened runtime, and entitlements
+
+For Mac distribution via electron-builder, you MUST configure the mac section with:
+
+```yaml
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  category: public.app-category.developer-tools
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+dmg:
+  sign: false
+```
+
+Create `build/entitlements.mac.plist` with at minimum:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>com.apple.security.cs.allow-jit</key>
+  <true/>
+  <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+  <true/>
+  <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+  <true/>
+  <key>com.apple.security.network.client</key>
+  <true/>
+  <key>com.apple.security.files.user-selected.read-write</key>
+  <true/>
+</dict>
+</plist>
+```
+
+Without these, Mac users will see "App is damaged and can't be opened" or the app will crash on launch due to JIT restrictions. Build for BOTH `x64` and `arm64` — universal builds are not needed but both architectures are.
+
+### 4. Gatekeeper quarantine
+
+Unsigned apps (i.e., anything without a paid Apple Developer certificate) will be quarantined on first download. Users will see "App is damaged" errors. Document the workaround in your landing page and release notes:
+
+```
+xattr -cr /Applications/YourApp.app
+```
+
+Or right-click → Open → Open anyway. This is unavoidable without paying for an Apple Developer account ($99/year).
+
+### 5. Child process spawning with `shell: true`
+
+When using `child_process.spawn` with `shell: true` on macOS, ensure the PATH fix above is in place. Otherwise `spawn('claude', ...)` or similar will silently fail because the shell can't find the binary.
+
+### 6. Window title bar differences
+
+macOS uses native traffic lights (close/minimize/maximize). Do NOT use `titleBarOverlay` on Mac — it is Windows-only. Use conditional config:
+
+```javascript
+titleBarStyle: 'hidden',
+titleBarOverlay: process.platform === 'win32' ? {
+  color: '#0f172a',
+  symbolColor: '#ffffff',
+  height: 40
+} : undefined,
+```
+
+Also handle the Mac dock behavior: when the window is closed on macOS, the app should stay in the dock rather than quit:
+
+```javascript
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit();
+});
+```
+
+And implement the full macOS app menu (About, Services, Hide, Quit) — Mac users expect it.
+
+### 7. Native modules on arm64
+
+If your app uses `better-sqlite3` or other native modules, they MUST be rebuilt for the target Electron version and architecture. The `"postinstall": "electron-builder install-app-deps"` script handles this, but it only rebuilds for the CURRENT architecture. For cross-arch builds, use GitHub Actions with matching runners (macOS runners for Mac builds, etc.).
+
+### 8. GitHub Actions for cross-platform builds
+
+Single-machine builds cannot produce signed Mac dmgs from Windows/Linux. Use a GitHub Actions workflow that builds on `macos-latest`, `windows-latest`, and `ubuntu-latest` in a matrix, then uploads all artifacts to a single GitHub Release. Template workflow:
+
+```yaml
+name: Build
+on:
+  push:
+    tags: ['v*']
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --legacy-peer-deps
+      - run: npm run build
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}
+          path: dist/
+```
+
+**When to apply these:** If {{USER_NAME}} says "make it work on Mac" or the app is intended for cross-platform distribution, apply ALL of items 1, 3, 4, 6 automatically. Items 2 and 5 apply only if your app spawns child processes or auto-installs tools. Items 7 and 8 apply if you use native modules or need automated cross-platform releases.
+
+---
+
 ## CRITICAL RULES — NEVER VIOLATE
 
-1. **Never start dev servers or launch Electron.** The App Generator application handles running and displaying the app. You only write code and commit to git.
+1. **You MAY launch the app to test it, but NEVER block on it.** The App Generator application also auto-launches apps for the user, so launching is optional. If you do launch it (e.g., `npm run dev` or `npm start`), you MUST run it in the background and NEVER wait for it to exit — it is a GUI app and will only exit when the user closes the window, which would hang your turn forever. Use a detached/background process, then immediately continue with your next step. If you only need to verify the code compiles, prefer `npm run build` (which exits on its own) over launching the app. Rule of thumb: if the command would normally stay running until Ctrl+C, run it backgrounded and move on.
 2. **Always use `npm install --legacy-peer-deps`.** Electron's dependency tree frequently has peer dependency conflicts.
 3. **Always `git init && git add -A && git commit` after creating or modifying a project.**
 4. **Always include `"postinstall": "electron-builder install-app-deps"` in package.json scripts.** This ensures native modules like better-sqlite3 are compiled for the correct Electron version.

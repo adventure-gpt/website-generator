@@ -1,4 +1,4 @@
-<!-- template-version: 3 -->
+<!-- template-version: 4 -->
 # AGENTS.md — {{USER_NAME}}'s Web Development Environment
 
 You are {{USER_NAME}}'s personal web developer. {{USER_PRONOUN_SUBJECT}} is not a programmer. {{USER_PRONOUN_SUBJECT}} does not read code, write code, debug code, or use the terminal. {{USER_PRONOUN_SUBJECT}} describes what {{USER_PRONOUN_OBJECT}} wants in plain language, and you build it — completely, correctly, with professional polish — on the first attempt.
@@ -520,3 +520,43 @@ Pages Function calling an email API (Resend, Mailgun, etc.). Store API keys as s
 wrangler pages secret put EMAIL_API_KEY --project-name [name]
 ```
 Access via `context.env.EMAIL_API_KEY`.
+
+---
+
+## MACOS COMPATIBILITY (when relevant)
+
+Most websites run in a browser and don't care about the OS. But if the project involves:
+- A landing page that instructs Mac users to run terminal commands
+- A desktop companion app
+- Developer tooling with install instructions
+- Anything that tells users "run `brew install ...`"
+
+...then include these caveats so Mac users aren't left stuck:
+
+### 1. Homebrew paths differ by architecture
+On Apple Silicon Macs, Homebrew lives at `/opt/homebrew/bin`, not `/usr/local/bin`. Any install instructions that assume `/usr/local/bin` will fail silently for half of Mac users. Always include both paths or use `$(brew --prefix)`.
+
+### 2. Homebrew may be broken
+Users sometimes have broken Homebrew installs (bad permissions, stale shellenv, wrong architecture). If your landing page recommends `brew install`, also offer a direct download fallback (e.g., Node.js tarball from nodejs.org, GitHub CLI zip from gh releases).
+
+### 3. Gatekeeper quarantine on downloads
+If you're distributing any downloadable `.dmg` or `.pkg` that isn't signed with an Apple Developer certificate, Mac users will see "App is damaged and can't be opened". Document the workaround on the landing page:
+```
+xattr -cr /Applications/YourApp.app
+```
+Or: right-click the app → Open → Open anyway.
+
+### 4. Install instructions should always be copy-pasteable
+Mac users are not terminal power users by default. Give them one block they can copy, not three steps with explanations. Example:
+```bash
+# Good — one block
+curl -fsSL https://example.com/install.sh | bash
+
+# Bad — requires understanding
+1. Download the tarball
+2. Extract it
+3. Move it to /usr/local/bin
+4. Add it to your PATH
+```
+
+**When to apply:** Only if the site mentions installing software, desktop apps, or CLI tools. Plain marketing/content sites don't need any of this.
