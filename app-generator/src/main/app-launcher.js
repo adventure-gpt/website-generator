@@ -105,7 +105,6 @@ class AppLauncher {
         cwd: projectPath,
         env: { ...process.env, NODE_ENV: 'development' },
         stdio: ['ignore', 'pipe', 'pipe'],
-        windowsHide: true,
       });
     } catch (err) {
       onEvent({ type: 'error', projectName, message: 'Failed to spawn Electron: ' + err.message });
@@ -125,10 +124,14 @@ class AppLauncher {
       }
     });
 
-    // Silently clean up tracking when process exits — no user-facing message.
-    child.on('close', () => {
+    // Clean up tracking when process exits. Only show a message if it
+    // crashed (non-zero exit code). Normal exits are silent.
+    child.on('close', (code) => {
       if (this.runningApps.get(projectName)?.process === child) {
         this.runningApps.delete(projectName);
+      }
+      if (code && code !== 0) {
+        onEvent({ type: 'error', projectName, message: 'App exited with code ' + code });
       }
     });
 
