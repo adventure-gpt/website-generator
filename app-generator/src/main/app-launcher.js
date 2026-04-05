@@ -93,22 +93,18 @@ class AppLauncher {
 
     onEvent({ type: 'status', projectName, message: 'Launching app...' });
 
-    // Spawn the Electron binary DIRECTLY with no shell and windowsHide:true.
-    // - No shell means no console window appears on Windows.
-    // - windowsHide:true ensures no console is created even if Windows would
-    //   normally show one for a subprocess.
-    // - detached:true + unref() makes the child fully independent so it
-    //   keeps running after the parent quits and produces no spurious close
-    //   events when the parent is busy.
-    // - stdio:'ignore' disconnects all streams so Windows doesn't keep the
-    //   parent attached via pipes.
+    // Spawn the Electron binary directly — no shell (avoids console window),
+    // no detached (which can prevent GUI windows from appearing on Windows).
+    // We pipe stdout/stderr so we can capture crash output, but we never
+    // emit 'closed' events to the renderer because on Windows the close
+    // event fires spuriously for shell-wrapped processes. Users can see the
+    // app window on their screen — they don't need a status message for it.
     let child;
     try {
       child = spawn(electronBin, ['.'], {
         cwd: projectPath,
         env: { ...process.env, NODE_ENV: 'development' },
-        detached: true,
-        stdio: 'ignore',
+        stdio: ['ignore', 'pipe', 'pipe'],
         windowsHide: true,
       });
     } catch (err) {
@@ -116,18 +112,26 @@ class AppLauncher {
       return null;
     }
 
-    // Verify the spawn succeeded — if pid is undefined, the process didn't start.
     if (!child || !child.pid) {
       onEvent({ type: 'error', projectName, message: 'Electron process did not start.' });
       return null;
     }
 
-    // Let the child run independently — parent can exit without killing it.
-    child.unref();
+    // Capture stderr for crash diagnostics but don't spam the user
+    child.stderr.on('data', (data) => {
+      const text = data.toString().trim();
+      if (text && !text.includes('ExperimentalWarning') && !text.includes('Debugger') && !text.includes('DevTools')) {
+        onEvent({ type: 'stderr', projectName, message: text });
+      }
+    });
 
-    // Only track 'error' events (spawn failures). Do NOT listen for 'close' —
-    // with detached + stdio:'ignore', close events are unreliable and fire
-    // spuriously on Windows even when the real app is running fine.
+    // Silently clean up tracking when process exits — no user-facing message.
+    child.on('close', () => {
+      if (this.runningApps.get(projectName)?.process === child) {
+        this.runningApps.delete(projectName);
+      }
+    });
+
     child.on('error', (err) => {
       if (this.runningApps.get(projectName)?.process === child) {
         this.runningApps.delete(projectName);
