@@ -156,16 +156,34 @@ var chatCallbacks = {
       // Create a sibling branch with the edited content
       store.tree.editMessage(nodeId, contentBlocks);
       window.api.clearAIHistory(projectName);
+
+      // Build prompt for the backend (include attachment context)
+      var promptParts = [];
+      for (var pi = 0; pi < editAttachments.length; pi++) {
+        var patt = editAttachments[pi];
+        if (patt.type === 'image' && patt.dataUrl) {
+          promptParts.push('[Attached image: ' + (patt.name || 'image') + ']');
+        } else if (patt.type === 'file' && patt.content) {
+          promptParts.push('[Attached file: ' + patt.name + ']\n```\n' + patt.content + '\n```');
+        }
+      }
+      if (newText) promptParts.push(newText);
+      var editPrompt = promptParts.join('\n\n');
+
+      // Transition turn state and render (message node already created by editMessage)
+      store.turnState.transition('user_send');
       chatManager.saveToDisk(projectName);
       ChatRenderer.renderFullChat(store.tree, store.turnState, projectName, chatCallbacks);
 
-      // Set up pending attachments from edit for the send
-      pendingAttachments = editAttachments.slice();
+      // Clear input
+      pendingAttachments = [];
       renderAttachmentPreview();
+      $('#chat-input').value = '';
+      restoreProjectUI(store.turnState);
 
-      // Send the edited message
-      $('#chat-input').value = newText || '';
-      sendMessage();
+      // Send directly to backend — don't go through sendMessage() which would create a duplicate node
+      getPS(projectName)._lastEventTime = Date.now();
+      window.api.sendMessage(editPrompt, projectName);
     });
   },
 
