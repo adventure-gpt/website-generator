@@ -1193,6 +1193,9 @@ async function selectProject(name) {
     }
   } catch (e) { /* no settings yet */ }
 
+  // Clear preview from previous project before loading new one
+  hidePreview();
+
   // Load chat from disk via chatManager (handles migration automatically)
   var store = chatManager.getOrCreate(name);
   await chatManager.loadFromDisk(name);

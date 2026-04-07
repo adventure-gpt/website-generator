@@ -343,9 +343,30 @@ ipcMain.handle('ai:send', (_event, message, projectName) => {
     codexModel: projectSettings.codexModel || undefined,
   };
 
-  const chatHistory = chatStore.loadMessages(project.path)
-    .filter(m => m.role === 'user' || m.role === 'assistant')
-    .slice(-20);
+  // Load chat history for AI context. Handle both old (flat array) and new (tree) formats.
+  let rawChat = chatStore.loadMessages(project.path);
+  let chatHistory = [];
+  if (Array.isArray(rawChat)) {
+    chatHistory = rawChat.filter(m => m.role === 'user' || m.role === 'assistant').slice(-20);
+  } else if (rawChat && rawChat._format === 'chat-tree-v1' && rawChat.nodes) {
+    // Extract messages from tree format's active path
+    const nodes = rawChat.nodes;
+    const rootIds = rawChat.rootIds || [];
+    const activeMap = rawChat.activeChildMap || {};
+    const msgs = [];
+    let currentId = rootIds[activeMap['__root__'] !== undefined ? activeMap['__root__'] : rootIds.length - 1];
+    while (currentId && nodes[currentId]) {
+      const n = nodes[currentId];
+      if (n.role === 'user' || n.role === 'assistant') {
+        const text = (n.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+        if (text) msgs.push({ role: n.role, content: text });
+      }
+      if (!n.children || n.children.length === 0) break;
+      const activeIdx = activeMap[currentId] !== undefined ? activeMap[currentId] : n.children.length - 1;
+      currentId = n.children[activeIdx];
+    }
+    chatHistory = msgs.slice(-20);
+  }
 
   aiBackend
     .send(message, project.path, pName, (evt) => {

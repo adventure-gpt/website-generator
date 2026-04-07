@@ -1,6 +1,6 @@
 {
   "name": "app-generator",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "AI-powered desktop app builder — chat to create Electron apps, preview live, distribute instantly",
   "author": {
     "name": "App Generator",

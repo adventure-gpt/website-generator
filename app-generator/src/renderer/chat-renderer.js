@@ -46,18 +46,24 @@
     if (c) requestAnimationFrame(function () { c.scrollTop = c.scrollHeight; });
   }
 
-  function svgIcon(pathD, cls) {
+  function svgIcon(paths, cls) {
     var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('width', '16');
+    svg.setAttribute('height', '16');
     svg.setAttribute('fill', 'none');
     svg.setAttribute('stroke', 'currentColor');
     svg.setAttribute('stroke-width', '2');
     svg.setAttribute('stroke-linecap', 'round');
     svg.setAttribute('stroke-linejoin', 'round');
     if (cls) svg.setAttribute('class', cls);
-    var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    p.setAttribute('d', pathD);
-    svg.appendChild(p);
+    // Support single path string or array of path strings
+    var pathArr = Array.isArray(paths) ? paths : [paths];
+    for (var pi = 0; pi < pathArr.length; pi++) {
+      var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', pathArr[pi]);
+      svg.appendChild(p);
+    }
     return svg;
   }
 
@@ -276,14 +282,14 @@
     var actions = el('div', { className: 'message-actions' });
 
     var editBtn = el('button', { className: 'message-action-btn', title: 'Edit & resend' });
-    editBtn.appendChild(svgIcon('M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7', 'action-icon'));
+    editBtn.appendChild(svgIcon(['M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z', 'M15 5l4 4'], 'action-icon'));
     editBtn.addEventListener('click', function () {
       if (callbacks && callbacks.onEdit) callbacks.onEdit(node.id, text);
     });
     actions.appendChild(editBtn);
 
     var copyBtn = el('button', { className: 'message-action-btn', title: 'Copy' });
-    copyBtn.appendChild(svgIcon('M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2', 'action-icon'));
+    copyBtn.appendChild(svgIcon(['M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2Z', 'M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'], 'action-icon'));
     copyBtn.addEventListener('click', function () { navigator.clipboard.writeText(text); });
     actions.appendChild(copyBtn);
 
@@ -299,7 +305,7 @@
     var actions = el('div', { className: 'message-actions' });
     if (text) {
       var copyBtn = el('button', { className: 'message-action-btn', title: 'Copy' });
-      copyBtn.appendChild(svgIcon('M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2', 'action-icon'));
+      copyBtn.appendChild(svgIcon(['M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2Z', 'M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'], 'action-icon'));
       copyBtn.addEventListener('click', function () { navigator.clipboard.writeText(text); });
       actions.appendChild(copyBtn);
     }
