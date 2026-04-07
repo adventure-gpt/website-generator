@@ -30,14 +30,13 @@ contextBridge.exposeInMainWorld('api', {
 
   // Chat persistence
   loadChat: (projectName) => ipcRenderer.invoke('chat:load', projectName),
-  saveChat: (projectName, messages) => ipcRenderer.invoke('chat:save', projectName, messages),
-  appendChat: (projectName, message) => ipcRenderer.invoke('chat:append', projectName, message),
+  saveChat: (projectName, data) => ipcRenderer.invoke('chat:save', projectName, data),
+  loadForksLegacy: (projectName) => ipcRenderer.invoke('chat:load-forks-legacy', projectName),
+  backupChat: (projectName) => ipcRenderer.invoke('chat:backup', projectName),
   detectChatImports: () => ipcRenderer.invoke('chat:detect-imports'),
   importChats: (claudeDir, sessionFiles) => ipcRenderer.invoke('chat:import', claudeDir, sessionFiles),
   detectProjectChatImport: (projectName) => ipcRenderer.invoke('chat:detect-project-import', projectName),
   importProjectChats: (projectName) => ipcRenderer.invoke('chat:import-project', projectName),
-  loadForks: (projectName) => ipcRenderer.invoke('chat:load-forks', projectName),
-  saveForks: (projectName, forks) => ipcRenderer.invoke('chat:save-forks', projectName, forks),
   clearAIHistory: (projectName) => ipcRenderer.invoke('ai:clear-history', projectName),
 
   // Project settings

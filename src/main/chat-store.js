@@ -42,31 +42,11 @@ class ChatStore {
   }
 
   /**
-   * Append a single message and save.
+   * Load legacy forks file (for migration from old format).
    */
-  appendMessage(projectDir, message) {
-    const messages = this.loadMessages(projectDir);
-    messages.push(message);
-    this.saveMessages(projectDir, messages);
-    return messages;
-  }
-
-  /**
-   * Returns the forks file path for a project.
-   */
-  forksPath(projectDir) {
+  loadForksLegacy(projectDir) {
     const webgenDir = path.join(projectDir, '.webgen');
-    if (!fs.existsSync(webgenDir)) {
-      fs.mkdirSync(webgenDir, { recursive: true });
-    }
-    return path.join(webgenDir, 'forks.json');
-  }
-
-  /**
-   * Load fork points for a project.
-   */
-  loadForks(projectDir) {
-    const file = this.forksPath(projectDir);
+    const file = path.join(webgenDir, 'forks.json');
     try {
       const data = JSON.parse(fs.readFileSync(file, 'utf8'));
       return data.forkPoints || {};
@@ -76,11 +56,21 @@ class ChatStore {
   }
 
   /**
-   * Save fork points for a project.
+   * Create a timestamped backup of the chat file before migration.
    */
-  saveForks(projectDir, forks) {
-    const file = this.forksPath(projectDir);
-    fs.writeFileSync(file, JSON.stringify({ version: 1, forkPoints: forks }, null, 2));
+  backupChat(projectDir) {
+    const file = this.chatPath(projectDir);
+    if (!fs.existsSync(file)) return;
+    const ts = Date.now();
+    try {
+      fs.copyFileSync(file, file + '.backup-' + ts);
+      // Also backup forks if present
+      const webgenDir = path.join(projectDir, '.webgen');
+      const forksFile = path.join(webgenDir, 'forks.json');
+      if (fs.existsSync(forksFile)) {
+        fs.copyFileSync(forksFile, forksFile + '.backup-' + ts);
+      }
+    } catch { /* best effort */ }
   }
 
   // ── Claude Code CLI Import ──────────────────────────────────

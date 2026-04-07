@@ -253,6 +253,7 @@ THE MOST COMMON MISTAKE: Sending messages like "Now let me also check the..." or
 
       let buffer = '';
       let fullText = '';
+      let lastResultData = null;
 
       child.stdout.on('data', (data) => {
         buffer += data.toString();
@@ -293,6 +294,9 @@ THE MOST COMMON MISTAKE: Sending messages like "Now let me also check the..." or
           const parsed = this.parseClaudeEvent(buffer);
           if (parsed) {
             if (parsed.type === 'text') fullText += parsed.text;
+            if (parsed.type === 'result') {
+              lastResultData = { cost: parsed.cost, duration: parsed.duration };
+            }
             onEvent(parsed);
           }
         }
@@ -303,7 +307,7 @@ THE MOST COMMON MISTAKE: Sending messages like "Now let me also check the..." or
         if (code === 0) {
           this.sessionStarted.add(projectName);
         }
-        onEvent({ type: 'done', code });
+        onEvent({ type: 'done', code, cost: lastResultData?.cost, duration: lastResultData?.duration });
         resolve(code);
       });
 

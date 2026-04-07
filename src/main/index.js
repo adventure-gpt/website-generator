@@ -531,10 +531,16 @@ ipcMain.handle('chat:save', (_event, projectName, messages) => {
   chatStore.saveMessages(project.path, messages);
 });
 
-ipcMain.handle('chat:append', (_event, projectName, message) => {
+ipcMain.handle('chat:load-forks-legacy', (_event, projectName) => {
+  const project = projectManager.getProjectByName(projectName);
+  if (!project) return {};
+  return chatStore.loadForksLegacy(project.path);
+});
+
+ipcMain.handle('chat:backup', (_event, projectName) => {
   const project = projectManager.getProjectByName(projectName);
   if (!project) return;
-  chatStore.appendMessage(project.path, message);
+  chatStore.backupChat(project.path);
 });
 
 ipcMain.handle('chat:detect-imports', () => {
@@ -565,17 +571,7 @@ ipcMain.handle('chat:import-project', (_event, projectName) => {
   return { totalMessages: totalImported };
 });
 
-ipcMain.handle('chat:load-forks', (_event, projectName) => {
-  const project = projectManager.getProjectByName(projectName);
-  if (!project) return {};
-  return chatStore.loadForks(project.path);
-});
-
-ipcMain.handle('chat:save-forks', (_event, projectName, forks) => {
-  const project = projectManager.getProjectByName(projectName);
-  if (!project) return;
-  chatStore.saveForks(project.path, forks);
-});
+// Legacy fork handlers removed — fork data is now embedded in the chat tree.
 
 ipcMain.handle('ai:clear-history', (_event, projectName) => {
   aiBackend.clearHistory(projectName);
