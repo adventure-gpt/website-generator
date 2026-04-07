@@ -537,12 +537,6 @@ ipcMain.handle('chat:save', (_event, projectName, messages) => {
   chatStore.saveMessages(project.path, messages);
 });
 
-ipcMain.handle('chat:append', (_event, projectName, message) => {
-  const project = projectManager.getProjectByName(projectName);
-  if (!project) return;
-  chatStore.appendMessage(project.path, message);
-});
-
 ipcMain.handle('chat:detect-imports', () => {
   const workspacePath = projectManager.getWorkspacePath();
   return chatStore.getImportableChats(workspacePath);
@@ -571,16 +565,16 @@ ipcMain.handle('chat:import-project', (_event, projectName) => {
   return { totalMessages: totalImported };
 });
 
-ipcMain.handle('chat:load-forks', (_event, projectName) => {
+ipcMain.handle('chat:load-forks-legacy', (_event, projectName) => {
   const project = projectManager.getProjectByName(projectName);
   if (!project) return {};
-  return chatStore.loadForks(project.path);
+  return chatStore.loadForksLegacy(project.path);
 });
 
-ipcMain.handle('chat:save-forks', (_event, projectName, forks) => {
+ipcMain.handle('chat:backup', (_event, projectName) => {
   const project = projectManager.getProjectByName(projectName);
   if (!project) return;
-  chatStore.saveForks(project.path, forks);
+  chatStore.backupChat(project.path);
 });
 
 ipcMain.handle('ai:clear-history', (_event, projectName) => {
