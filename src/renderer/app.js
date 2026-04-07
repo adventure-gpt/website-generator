@@ -1458,12 +1458,24 @@ async function sendMessage() {
     store.messageQueue.push(text);
     input.value = '';
     input.style.height = '';
-    // Show a transient status in the DOM (don't add to tree — message will be properly added when dequeued)
+    // Show the queued message in the chat so the user can see what they typed
     var container = $('#chat-messages');
     if (container) {
-      container.appendChild(el('div', { className: 'message message-status' }, [
-        el('span', { textContent: 'Queued — will send after current response' }),
-      ]));
+      var queuedBubble = el('div', { className: 'message message-user queued-message' }, [
+        el('div', { className: 'message-row' }, [
+          el('div', { className: 'message-bubble' }, [
+            el('div', { textContent: text }),
+            el('div', { className: 'queued-label', textContent: 'Queued — will send after current response' }),
+          ]),
+        ]),
+      ]);
+      // Insert before the streaming/thinking indicator
+      var thinkingEl = container.querySelector('.streaming, .persistent-thinking');
+      if (thinkingEl) {
+        container.insertBefore(queuedBubble, thinkingEl);
+      } else {
+        container.appendChild(queuedBubble);
+      }
       scrollToBottom();
     }
     return;

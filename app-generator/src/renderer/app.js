@@ -1388,9 +1388,26 @@ async function sendMessage() {
   // Queue message if currently generating
   if (store.turnState.isGenerating()) {
     store.messageQueue.push(text);
-    addStatusMessage('Queued — will send after current response');
     input.value = '';
     input.style.height = '';
+    var container = $('#chat-messages');
+    if (container) {
+      var queuedBubble = el('div', { className: 'message message-user queued-message' }, [
+        el('div', { className: 'message-row' }, [
+          el('div', { className: 'message-bubble' }, [
+            el('div', { textContent: text }),
+            el('div', { className: 'queued-label', textContent: 'Queued — will send after current response' }),
+          ]),
+        ]),
+      ]);
+      var thinkingEl = container.querySelector('.streaming, .persistent-thinking');
+      if (thinkingEl) {
+        container.insertBefore(queuedBubble, thinkingEl);
+      } else {
+        container.appendChild(queuedBubble);
+      }
+      ChatRenderer.scrollToBottom();
+    }
     return;
   }
 
