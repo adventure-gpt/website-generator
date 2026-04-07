@@ -6,85 +6,204 @@
 var state = {
   projects: [],
   activeProject: null,
-  messages: {},
-  forks: {},
   backend: 'claude',
   projectState: {},  // projectName → per-project state
+};
+
+var chatManager = null;  // ChatStateManager instance, initialized in enterMainApp()
+var ChatState = window.ChatState;
+var ChatRenderer = window.ChatRenderer;
+
+var chatCallbacks = {
+  onEdit: function (nodeId, oldText) {
+    if (!state.activeProject) return;
+    var store = chatManager.getOrCreate(state.activeProject);
+    if (store.turnState.isGenerating()) return;
+
+    // Find the message element in DOM
+    var msgEl = document.querySelector('[data-msg-id="' + nodeId + '"]');
+    if (!msgEl) return;
+
+    var bubble = msgEl.querySelector('.message-bubble');
+    if (!bubble) return;
+
+    // Expand bubble to max width while editing
+    msgEl.classList.add('editing');
+
+    // Replace bubble content with a textarea
+    var textarea = el('textarea', { className: 'edit-textarea' });
+    textarea.value = oldText;
+
+    // Attachment preview area for edit mode
+    var editAttachments = [];
+    var editAttachPreview = el('div', { className: 'edit-attach-preview' });
+
+    // Carry over existing attachments from the original message node
+    var node = store.tree.getNode(nodeId);
+    if (node && node.content) {
+      for (var ei = 0; ei < node.content.length; ei++) {
+        var block = node.content[ei];
+        if (block.type === 'attachment') {
+          editAttachments.push({
+            type: block.attachType || 'file',
+            name: block.name || 'file',
+            dataUrl: block.dataUrl || null,
+            content: block.content || null,
+          });
+        }
+      }
+    }
+
+    function renderEditAttachments() {
+      editAttachPreview.textContent = '';
+      for (var i = 0; i < editAttachments.length; i++) {
+        (function (idx) {
+          var att = editAttachments[idx];
+          var tag = el('span', { className: 'edit-attach-tag' });
+          if (att.type === 'image' && att.dataUrl) {
+            var thumb = el('img', { src: att.dataUrl, className: 'edit-attach-thumb' });
+            tag.appendChild(thumb);
+          }
+          tag.appendChild(el('span', { textContent: att.name || 'image' }));
+          var removeBtn = el('button', { className: 'edit-attach-remove', textContent: '\u00d7' });
+          removeBtn.addEventListener('click', function () {
+            editAttachments.splice(idx, 1);
+            renderEditAttachments();
+          });
+          tag.appendChild(removeBtn);
+          editAttachPreview.appendChild(tag);
+        })(i);
+      }
+    }
+    renderEditAttachments();
+
+    var attachBtn = el('button', { className: 'btn btn-ghost btn-sm', textContent: '+ Image' });
+    attachBtn.addEventListener('click', async function () {
+      var files = await window.api.selectFiles();
+      if (!files) return;
+      for (var fi = 0; fi < files.length; fi++) {
+        var f = files[fi];
+        if (f.dataUrl) {
+          editAttachments.push({ type: 'image', name: f.name, dataUrl: f.dataUrl });
+        }
+      }
+      renderEditAttachments();
+    });
+
+    var saveBtn = el('button', { className: 'btn btn-primary btn-sm', textContent: 'Save & Resend' });
+    var cancelBtn = el('button', { className: 'btn btn-ghost btn-sm', textContent: 'Cancel' });
+    var btnRow = el('div', { className: 'edit-actions' }, [attachBtn, cancelBtn, saveBtn]);
+
+    bubble.textContent = '';
+    bubble.appendChild(textarea);
+    bubble.appendChild(editAttachPreview);
+    bubble.appendChild(btnRow);
+    textarea.focus();
+    textarea.style.height = textarea.scrollHeight + 'px';
+
+    textarea.addEventListener('input', function () {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    });
+
+    // Handle paste images into edit textarea
+    textarea.addEventListener('paste', function (e) {
+      var items = e.clipboardData && e.clipboardData.items;
+      if (!items) return;
+      for (var pi = 0; pi < items.length; pi++) {
+        if (items[pi].type.indexOf('image') !== -1) {
+          e.preventDefault();
+          var blob = items[pi].getAsFile();
+          var reader = new FileReader();
+          reader.onload = function (ev) {
+            editAttachments.push({ type: 'image', name: 'pasted-image.png', dataUrl: ev.target.result });
+            renderEditAttachments();
+          };
+          reader.readAsDataURL(blob);
+          return;
+        }
+      }
+    });
+
+    cancelBtn.addEventListener('click', function () {
+      msgEl.classList.remove('editing');
+      // Re-render full chat to restore the bubble
+      ChatRenderer.renderFullChat(store.tree, store.turnState, state.activeProject, chatCallbacks);
+    });
+
+    saveBtn.addEventListener('click', function () {
+      var newText = textarea.value.trim();
+      if (!newText && editAttachments.length === 0) return;
+
+      msgEl.classList.remove('editing');
+
+      var projectName = state.activeProject;
+
+      // Build content blocks for the new (edited) message
+      var contentBlocks = [];
+      for (var ai = 0; ai < editAttachments.length; ai++) {
+        var att = editAttachments[ai];
+        contentBlocks.push({
+          type: 'attachment',
+          attachType: att.type || 'file',
+          name: att.name || 'file',
+          dataUrl: att.dataUrl || null,
+          content: att.content || null,
+        });
+      }
+      if (newText) contentBlocks.push(ChatState.textBlock(newText));
+
+      // Create a sibling branch with the edited content
+      store.tree.editMessage(nodeId, contentBlocks);
+      window.api.clearAIHistory(projectName);
+      chatManager.saveToDisk(projectName);
+      ChatRenderer.renderFullChat(store.tree, store.turnState, projectName, chatCallbacks);
+
+      // Set up pending attachments from edit for the send
+      pendingAttachments = editAttachments.slice();
+      renderAttachmentPreview();
+
+      // Send the edited message
+      $('#chat-input').value = newText || '';
+      sendMessage();
+    });
+  },
+
+  onSwitchBranch: function (parentId, childIndex) {
+    if (!state.activeProject) return;
+    var store = chatManager.getOrCreate(state.activeProject);
+    if (store.turnState.isGenerating()) return;
+
+    store.tree.switchBranch(parentId, childIndex);
+    window.api.clearAIHistory(state.activeProject);
+    chatManager.saveToDisk(state.activeProject);
+    ChatRenderer.renderFullChat(store.tree, store.turnState, state.activeProject, chatCallbacks);
+  },
+
+  onChipClick: function (chipText) {
+    $('#chat-input').value = chipText;
+    $('#send-btn').disabled = false;
+    sendMessage();
+  },
 };
 
 function getPS(projectName) {
   if (!state.projectState[projectName]) {
     state.projectState[projectName] = {
-      isGenerating: false,
-      currentStream: null,  // DOM refs only — data is in state.messages
       devServerUrl: null,
       devServerStarting: false,
       deployedUrl: null,
       customDomain: null,
-      messageQueue: [],
     };
   }
   return state.projectState[projectName];
 }
 
-/** Get or create the live assistant message for a project. Returns the message object in state.messages[]. */
-function getLiveMsg(projectName) {
-  if (!state.messages[projectName]) state.messages[projectName] = [];
-  var msgs = state.messages[projectName];
-  var last = msgs.length > 0 ? msgs[msgs.length - 1] : null;
-  if (last && last._live) return last;
-  // Create new live message
-  var msg = { role: 'assistant', content: '', tools: [], timestamp: Date.now(), _live: true };
-  msgs.push(msg);
-  return msg;
-}
-
-/** Finalize the live message — remove _live flag, save to disk */
-function finalizeLiveMsg(projectName) {
-  if (!state.messages[projectName]) return;
-  var msgs = state.messages[projectName];
-  for (var i = msgs.length - 1; i >= 0; i--) {
-    if (msgs[i]._live) {
-      delete msgs[i]._live;
-      // Remove empty live messages
-      if (!msgs[i].content && msgs[i].tools.length === 0) {
-        msgs.splice(i, 1);
-      } else if (msgs[i].tools.length === 0) {
-        delete msgs[i].tools;
-      }
-      break;
-    }
-  }
-  window.api.saveChat(projectName, msgs);
-}
-
-/** Start a new live message (finalizes the current one if it has content) */
-function newLiveMsg(projectName) {
-  if (!state.messages[projectName]) state.messages[projectName] = [];
-  var msgs = state.messages[projectName];
-  var last = msgs.length > 0 ? msgs[msgs.length - 1] : null;
-  if (last && last._live) {
-    if (last.content || last.tools.length > 0) {
-      delete last._live;
-      if (last.tools.length === 0) delete last.tools;
-    } else {
-      // Empty live msg — reuse it
-      return last;
-    }
-  }
-  var msg = { role: 'assistant', content: '', tools: [], timestamp: Date.now(), _live: true };
-  msgs.push(msg);
-  return msg;
-}
-
 var _nullPS = {
-  isGenerating: false,
-  currentStream: null,
   devServerUrl: null,
   devServerStarting: false,
   deployedUrl: null,
   customDomain: null,
-  messageQueue: [],
 };
 
 function aps() {
@@ -579,6 +698,10 @@ async function enterMainApp() {
   $('#setup-screen').classList.add('hidden');
   $('#main-screen').classList.remove('hidden');
 
+  if (!chatManager) {
+    chatManager = new ChatState.ChatStateManager();
+  }
+
   var settings = await window.api.getSettings();
   state.backend = settings.backend || 'claude';
   updateBackendLabel();
@@ -722,91 +845,134 @@ function setupMenuListener() {
 function setupAPIListeners() {
   window.api.onAIEvent(function (event) {
     var evtProject = event.project;
-    if (!evtProject) return;
+    if (!evtProject || !chatManager) return;
     var isActive = (evtProject === state.activeProject);
     var ps = getPS(evtProject);
+    var store = chatManager.getOrCreate(evtProject);
 
     // Reset safety timer on every event
     ps._lastEventTime = Date.now();
 
-    // ═══ STEP 1: Always update DATA regardless of which project is active ═══
     switch (event.type) {
       case 'text': {
-        var live = getLiveMsg(evtProject);
-        live.content += event.text;
-        live.timestamp = Date.now();
+        store.turnState.transition('text');
+        var streamNode = store.tree.getStreamingNode();
+        if (!streamNode) {
+          var parentId = store.tree.getActiveLeafId();
+          streamNode = store.tree.addMessage(parentId, 'assistant', [], 'streaming');
+        }
+        store.tree.appendTextDelta(streamNode.id, event.text);
+        if (isActive) ChatRenderer.renderDelta(streamNode.id, store.tree, store.turnState, chatCallbacks);
         break;
       }
       case 'codex_message': {
-        // Append to current live message — keep everything in one turn
-        var cm = getLiveMsg(evtProject);
-        if (cm.content) cm.content += '\n\n---\n\n';
-        cm.content += event.text;
-        cm.timestamp = Date.now();
+        store.turnState.transition('text');
+        var cmNode = store.tree.getStreamingNode();
+        if (!cmNode) {
+          var cmParent = store.tree.getActiveLeafId();
+          cmNode = store.tree.addMessage(cmParent, 'assistant', [], 'streaming');
+        }
+        // Append with separator for multi-step codex responses
+        var cmText = event.text || '';
+        var existingText = ChatState.getTextContent(cmNode.content);
+        if (existingText) {
+          store.tree.appendTextDelta(cmNode.id, '\n\n---\n\n' + cmText);
+        } else {
+          store.tree.appendTextDelta(cmNode.id, cmText);
+        }
+        if (isActive) ChatRenderer.renderDelta(cmNode.id, store.tree, store.turnState, chatCallbacks);
         break;
       }
       case 'tool':
       case 'tool_use': {
-        var tl = getLiveMsg(evtProject);
-        tl.tools.push({ name: event.name || 'tool', detail: event.text || event.input || '' });
+        store.turnState.transition('tool_use');
+        var sn = store.tree.getStreamingNode();
+        if (!sn) {
+          var pid = store.tree.getActiveLeafId();
+          sn = store.tree.addMessage(pid, 'assistant', [], 'streaming');
+        }
+        store.tree.appendContentBlock(sn.id, ChatState.toolBlock(event.name || 'tool', event.text || event.input || ''));
+        if (isActive) ChatRenderer.renderDelta(sn.id, store.tree, store.turnState, chatCallbacks);
         break;
       }
       case 'done': {
-        finalizeLiveMsg(evtProject);
-        ps.isGenerating = false;
+        store.turnState.transition('done');
+        var dn = store.tree.getStreamingNode();
+        if (dn) {
+          if (event.cost) dn.metadata.cost_usd = event.cost;
+          if (event.duration) dn.metadata.duration_ms = event.duration;
+          store.tree.finalizeNode(dn.id);
+        }
         if (!isActive) ps.hasNewActivity = true;
+        chatManager.saveToDisk(evtProject);
+
+        // Detect deploy URLs from the finalized node
+        if (dn) {
+          var doneText = ChatState.getTextContent(dn.content);
+          if (doneText) detectDeployUrl(doneText);
+        }
+
+        if (isActive) {
+          ChatRenderer.renderFullChat(store.tree, store.turnState, evtProject, chatCallbacks);
+          restoreProjectUI(store.turnState);
+          // Only check dev server if we don't already have one running
+          if (!ps.devServerUrl) checkDevServer();
+        }
         // Process queue
-        if (ps.messageQueue.length > 0) {
-          var nextMsg = ps.messageQueue.shift();
-          ps.isGenerating = true;
-          window.api.sendMessage(nextMsg, evtProject);
+        if (store.messageQueue.length > 0) {
+          var next = store.messageQueue.shift();
+          // Add user message node for the queued text
+          var queueParentId = store.tree.getActiveLeafId();
+          store.tree.addMessage(queueParentId, 'user', [ChatState.textBlock(next)], 'complete');
+          store.turnState.transition('user_send');
+          chatManager.saveToDisk(evtProject);
+          if (isActive) {
+            ChatRenderer.renderFullChat(store.tree, store.turnState, evtProject, chatCallbacks);
+          }
+          window.api.sendMessage(next, evtProject);
         }
         break;
       }
       case 'error': {
-        var errLive = getLiveMsg(evtProject);
-        errLive.content += (errLive.content ? '\n\n' : '') + 'Error: ' + (event.text || 'Unknown error');
-        finalizeLiveMsg(evtProject);
-        ps.isGenerating = false;
+        store.turnState.transition('error');
+        var errNode = store.tree.getStreamingNode();
+        if (errNode) {
+          store.tree.appendContentBlock(errNode.id, ChatState.errorBlock(event.text || 'Unknown error'));
+          store.tree.finalizeNode(errNode.id, 'error');
+        } else {
+          // Create an error node if there's no streaming node
+          var errParent = store.tree.getActiveLeafId();
+          var newErrNode = store.tree.addMessage(errParent, 'assistant', [ChatState.errorBlock(event.text || 'Unknown error')], 'error');
+        }
         if (!isActive) ps.hasNewActivity = true;
+        chatManager.saveToDisk(evtProject);
+        if (isActive) {
+          ChatRenderer.renderFullChat(store.tree, store.turnState, evtProject, chatCallbacks);
+          restoreProjectUI(store.turnState);
+        }
         break;
       }
       case 'result': {
         // Result marks end of a Claude response block but NOT end of turn (done does that).
-        // Do NOT create a new empty live message here — it would orphan the thinking indicator.
-        // The live message stays as-is; done will finalize it.
+        store.turnState.transition('result');
         break;
       }
       case 'status': {
-        var sl = getLiveMsg(evtProject);
-        sl.tools.push({ name: 'system', detail: event.text || '' });
+        var statusNode = store.tree.getStreamingNode();
+        if (statusNode) {
+          store.tree.appendContentBlock(statusNode.id, ChatState.statusBlock(event.text || ''));
+          if (isActive) ChatRenderer.renderDelta(statusNode.id, store.tree, store.turnState, chatCallbacks);
+        }
         break;
       }
       case 'rate_limit': {
         // Don't put rate limit text into the chat — show a banner instead
         showRateLimitBanner(evtProject, event.resetInfo);
-        return; // Skip rendering — nothing changed in data
+        break;
       }
     }
 
-    // ═══ STEP 2: Update DOM — always re-render from data (single source of truth) ═══
-    if (!isActive) {
-      renderProjectList();
-      return;
-    }
-
-    // Always clear DOM stream refs before re-rendering (data is source of truth)
-    ps.currentStream = null;
-
-    if (event.type === 'done') {
-      renderMessages();
-      restoreProjectUI(ps);
-      // Only check dev server if we don't already have one running
-      if (!ps.devServerUrl) checkDevServer();
-    } else {
-      renderMessages();
-    }
-    scrollToBottom();
+    // Update project list indicators
     renderProjectList();
   });
 
@@ -894,10 +1060,11 @@ function renderProjectList() {
     var project = state.projects[i];
     var isActive = state.activeProject === project.name;
     var ps = getPS(project.name);
+    var projectStore = chatManager ? chatManager.getOrCreate(project.name) : null;
     var cls = 'project-item';
     if (isActive) {
       cls += ' active';
-    } else if (ps.isGenerating) {
+    } else if (projectStore && projectStore.turnState.isGenerating()) {
       cls += ' bg-generating';
     } else if (ps.hasNewActivity) {
       cls += ' has-activity';
@@ -1009,11 +1176,6 @@ async function createProject() {
 }
 
 async function selectProject(name) {
-  // Detach DOM refs from old project (data is already in state.messages via live msgs)
-  if (state.activeProject && aps().currentStream) {
-    aps().currentStream = null;
-  }
-
   state.activeProject = name;
   await window.api.setActiveProject(name);
 
@@ -1031,57 +1193,51 @@ async function selectProject(name) {
     }
   } catch (e) { /* no settings yet */ }
 
-  // Load from disk only on first visit — in-memory is authoritative after that
-  if (!state.messages[name]) {
-    try {
-      var saved = await window.api.loadChat(name);
-      state.messages[name] = saved || [];
-    } catch (e) {
-      state.messages[name] = [];
-    }
-  }
-
-  // Load forks from disk on first visit
-  if (!state.forks[name]) {
-    try {
-      state.forks[name] = await window.api.loadForks(name);
-    } catch (e) {
-      state.forks[name] = {};
-    }
-  }
+  // Load chat from disk via chatManager (handles migration automatically)
+  var store = chatManager.getOrCreate(name);
+  await chatManager.loadFromDisk(name);
 
   // Scan recent messages for deploy URLs before rendering
   if (!ps.deployedUrl) {
-    var recent = (state.messages[name] || []).slice(-10);
-    for (var ri = 0; ri < recent.length; ri++) {
-      if (recent[ri].role === 'assistant' && recent[ri].content) {
-        var urlMatch = recent[ri].content.match(/https:\/\/[a-z0-9][-a-z0-9]*\.pages\.dev/i);
-        if (urlMatch) ps.deployedUrl = urlMatch[0].replace(/[.,!;:]+$/, '');
+    var activePath = store.tree.getActivePath();
+    var recentNodes = activePath.slice(-10);
+    for (var ri = 0; ri < recentNodes.length; ri++) {
+      if (recentNodes[ri].role === 'assistant') {
+        var nodeText = ChatState.getTextContent(recentNodes[ri].content);
+        if (nodeText) {
+          var urlMatch = nodeText.match(/https:\/\/[a-z0-9][-a-z0-9]*\.pages\.dev/i);
+          if (urlMatch) ps.deployedUrl = urlMatch[0].replace(/[.,!;:]+$/, '');
+        }
       }
     }
   }
 
-  renderMessages();
-  restoreProjectUI(ps);
+  ChatRenderer.renderFullChat(store.tree, store.turnState, name, chatCallbacks);
+  restoreProjectUI(store.turnState);
   renderProjectList();
   checkDevServer();
   updateDeployButton(aps().deployedUrl || null);
 
+  // Check for importable chat history for this project
+  if (store.tree.getActivePath().length === 0) {
+    checkProjectImport();
+  }
+
   $('#chat-input').focus();
 }
 
-/** Restore all UI elements to match the given project's state */
-function restoreProjectUI(ps) {
+/** Restore all UI elements to match the given project's turn state */
+function restoreProjectUI(turnState) {
   var input = $('#chat-input');
   var sendBtn = $('#send-btn');
   var stopBtn = $('#stop-btn');
   var deployBtn = $('#deploy-btn');
+  var ps = aps();
 
-  if (ps.isGenerating) {
+  if (turnState && turnState.isGenerating()) {
     input.disabled = false;
     stopBtn.classList.remove('hidden');
     deployBtn.disabled = true;
-    // Live message in state.messages already renders with dots via createLiveBubble
   } else {
     input.disabled = false;
     stopBtn.classList.add('hidden');
@@ -1106,8 +1262,7 @@ async function deleteProject(name) {
   if (!confirm('Delete project "' + name + '"? This cannot be undone.')) return;
   try {
     await window.api.deleteProject(name);
-    delete state.messages[name];
-    delete state.forks[name];
+    if (chatManager) chatManager.remove(name);
     delete state.projectState[name];
     if (state.activeProject === name) {
       state.activeProject = null;
@@ -1120,118 +1275,7 @@ async function deleteProject(name) {
   }
 }
 
-// ── Chat Messages ────────────────────────────────────────────
-
-/**
- * Detect compaction/system messages that should not be shown as user messages.
- */
-function isCompactionMessage(text) {
-  if (!text) return false;
-  if (text.startsWith('This session is being continued from a previous conversation')) return true;
-  if (text.startsWith('Continue the conversation from where')) return true;
-  if (/^(Summary|Note|Result of calling|Called the Read tool|Called the Write tool|Called the Edit tool|Called the Glob tool|Called the Grep tool|Called the Bash tool)/.test(text) && text.length > 2000) return true;
-  // System reminder blocks that got through as user text
-  if (text.startsWith('Note:') && text.includes('was read before the last conversation was summarized')) return true;
-  if (text.startsWith('Called the') && text.includes('tool with the following input')) return true;
-  return false;
-}
-
-function renderMessages() {
-  var container = $('#chat-messages');
-  container.textContent = '';
-
-  var rawMessages = state.messages[state.activeProject] || [];
-  var isGen = state.activeProject && getPS(state.activeProject).isGenerating;
-
-  // Build a filtered view for rendering (don't mutate the source array)
-  var messages = [];
-  var rawIndexMap = [];
-  var lastLiveIndex = -1;
-
-  // Find the last _live message index
-  for (var fi = rawMessages.length - 1; fi >= 0; fi--) {
-    if (rawMessages[fi]._live) { lastLiveIndex = fi; break; }
-  }
-
-  for (var ri = 0; ri < rawMessages.length; ri++) {
-    var m = rawMessages[ri];
-    var hasContent = m.content && m.content.trim();
-    var hasTools = m.tools && m.tools.length > 0;
-
-    // Skip empty non-live assistant messages
-    if (m.role === 'assistant' && !hasContent && !hasTools && !m._live) continue;
-
-    // If not generating, treat _live as regular messages
-    if (!isGen && m._live) {
-      if (!hasContent && !hasTools) continue; // skip empty
-      messages.push(m); // render as normal (createAssistantBubble handles it)
-      rawIndexMap.push(ri);
-      continue;
-    }
-
-    // If generating, only show the LAST _live message as live
-    if (m._live && ri !== lastLiveIndex) {
-      if (hasContent || hasTools) { messages.push(m); rawIndexMap.push(ri); }
-      continue;
-    }
-
-    messages.push(m);
-    rawIndexMap.push(ri);
-  }
-
-  if (messages.length === 0) {
-    container.appendChild(createWelcome());
-    // Check for importable chat history for this project
-    checkProjectImport();
-    return;
-  }
-
-  var projectForks = state.forks[state.activeProject] || {};
-  for (var i = 0; i < messages.length; i++) {
-    var msg = messages[i];
-    var rawIdx = rawIndexMap[i];
-    // Filter out compaction/system artifacts that may have been imported
-    if (msg.role === 'user' && msg.content && isCompactionMessage(msg.content)) continue;
-    if (msg.role === 'user') {
-      container.appendChild(createUserBubble(msg.content, msg, rawIdx));
-      // Show fork navigator if this message has multiple branches
-      if (projectForks[rawIdx] && projectForks[rawIdx].branches.length > 1) {
-        container.appendChild(createForkNavigator(rawIdx, projectForks[rawIdx]));
-      }
-    } else if (msg.role === 'assistant' && msg._live) {
-      // Live message — render with streaming indicators
-      container.appendChild(createLiveBubble(msg));
-    } else if (msg.role === 'assistant') {
-      container.appendChild(createAssistantBubble(msg.content, msg));
-    } else if (msg.role === 'status') {
-      container.appendChild(createStatusBubble(msg.content));
-    }
-  }
-
-  // Persistent thinking indicator — shown whenever isGenerating is true.
-  // Guarantees the user always sees the agent is working, even during long
-  // gaps between text events or tool calls. Only shown if the last rendered
-  // element is not already a live bubble (avoids double indicators).
-  if (isGen) {
-    var lastChild = container.lastElementChild;
-    var hasLiveBubble = lastChild && lastChild.classList && lastChild.classList.contains('streaming');
-    if (!hasLiveBubble) {
-      container.appendChild(el('div', { className: 'message message-assistant streaming persistent-thinking' }, [
-        el('div', { className: 'message-row' }, [
-          el('div', { className: 'message-bubble' }, [
-            el('div', { className: 'thinking-indicator' }, [
-              el('span', { className: 'thinking-dot' }),
-              el('span', { className: 'thinking-dot' }),
-              el('span', { className: 'thinking-dot' }),
-            ]),
-          ]),
-        ]),
-      ]));
-    }
-  }
-
-  scrollToBottom();
-}
+// ── Chat Import ─────────────────────────────────────────────
 
 async function checkProjectImport() {
   if (!state.activeProject) return;
@@ -1241,7 +1285,7 @@ async function checkProjectImport() {
     if (state.activeProject !== projectName) return; // user switched
     if (!info || !info.available) return;
 
-    var welcome = document.getElementById('chat-welcome');
+    var welcome = document.querySelector('.welcome-container');
     if (!welcome) return;
 
     // Check if import prompt already exists
@@ -1256,11 +1300,12 @@ async function checkProjectImport() {
       try {
         var result = await window.api.importProjectChats(projectName);
         if (result.totalMessages > 0) {
-          // Reload messages from disk
-          var saved = await window.api.loadChat(projectName);
-          state.messages[projectName] = saved || [];
+          // Invalidate and reload from disk
+          chatManager.invalidate(projectName);
+          var store = chatManager.getOrCreate(projectName);
+          await chatManager.loadFromDisk(projectName);
           if (state.activeProject === projectName) {
-            renderMessages();
+            ChatRenderer.renderFullChat(store.tree, store.turnState, projectName, chatCallbacks);
             addStatusMessage('Imported ' + result.totalMessages + ' messages from Claude Code');
           }
         } else {
@@ -1275,609 +1320,6 @@ async function checkProjectImport() {
     welcome.appendChild(importDiv);
   } catch (e) {
     // No imports available — that's fine
-  }
-}
-
-function createWelcome() {
-  var div = el('div', { className: 'chat-welcome', id: 'chat-welcome' }, [
-    el('h3', { textContent: 'What would you like to build?' }),
-    el('p', { textContent: 'Describe a website in plain English and the AI will build it for you.' }),
-  ]);
-  var chipsEl = el('div', { className: 'prompt-chips' });
-  var examples = [
-    { label: 'Recipe organizer', prompt: 'A recipe organizer where I can save recipes by category and generate a grocery list' },
-    { label: 'Portfolio site', prompt: 'A personal portfolio website with an about page, project gallery, and contact form' },
-    { label: 'Todo app', prompt: 'A to-do list app with due dates, priority levels, and a done archive' },
-    { label: 'Workout tracker', prompt: 'A workout tracker that logs exercises with sets, reps, and weight, and shows progress charts' },
-  ];
-  for (var i = 0; i < examples.length; i++) {
-    (function (ex) {
-      var chip = el('button', { className: 'chip', textContent: ex.label });
-      chip.addEventListener('click', function () {
-        $('#chat-input').value = ex.prompt;
-        $('#send-btn').disabled = false;
-        sendMessage();
-      });
-      chipsEl.appendChild(chip);
-    })(examples[i]);
-  }
-  div.appendChild(chipsEl);
-  return div;
-}
-
-function createUserBubble(text, msg, msgIndex) {
-  var bubble = el('div', { className: 'message-bubble' });
-  // Render user text with URLs clickable too
-  renderInline(text, bubble);
-
-  var actions = createMessageActions(text);
-
-  // Edit button for user messages
-  if (typeof msgIndex === 'number') {
-    var editBtn = el('button', { className: 'message-action-btn', title: 'Edit & resend' });
-    editBtn.appendChild(editIcon());
-    editBtn.addEventListener('click', function () {
-      startEditMessage(wrapper, bubble, text, msgIndex);
-    });
-    actions.insertBefore(editBtn, actions.firstChild);
-  }
-
-  var wrapper = el('div', { className: 'message message-user' }, [actions, bubble]);
-
-  // Attachments
-  if (msg && msg.attachments && msg.attachments.length > 0) {
-    var attachEl = el('div', { className: 'message-attachments' });
-    for (var i = 0; i < msg.attachments.length; i++) {
-      var att = msg.attachments[i];
-      if (att.type === 'image' && att.dataUrl) {
-        var img = el('img', { src: att.dataUrl, className: 'message-image', title: att.name });
-        attachEl.appendChild(img);
-      } else {
-        attachEl.appendChild(el('span', { className: 'message-file-badge', textContent: att.name }));
-      }
-    }
-    wrapper.insertBefore(attachEl, bubble);
-  }
-
-  // Timestamp
-  if (msg && msg.timestamp) {
-    wrapper.appendChild(createTimestamp(msg.timestamp));
-  }
-
-  return wrapper;
-}
-
-function createAssistantBubble(text, msg) {
-  var wrapper = el('div', { className: 'message message-assistant' });
-
-  // Only show text bubble if there's actual content
-  var hasText = text && text.trim();
-  if (hasText) {
-    var bubble = el('div', { className: 'message-bubble' });
-    bubble.appendChild(renderMarkdown(text));
-    var actions = createMessageActions(text);
-    var row = el('div', { className: 'message-row' }, [bubble, actions]);
-    wrapper.appendChild(row);
-  }
-
-  // Show tool usage from imported messages
-  if (msg && msg.tools && msg.tools.length > 0) {
-    var toolsSummary = el('summary', { className: 'activity-summary' }, [
-      el('span', { className: 'activity-spinner done' }),
-      el('span', { className: 'activity-label', textContent: msg.tools.length + ' tool' + (msg.tools.length > 1 ? 's' : '') + ' used' }),
-    ]);
-    var toolsList = el('ul', { className: 'activity-list' });
-    for (var i = 0; i < msg.tools.length; i++) {
-      toolsList.appendChild(el('li', { className: 'activity-entry' }, [
-        el('span', { className: 'activity-dot' }),
-        el('span', { className: 'activity-name', textContent: msg.tools[i].name }),
-      ]));
-    }
-    var toolsBlock = el('details', { className: 'activity-block' }, [toolsSummary, toolsList]);
-    // Insert tools before the text row (if it exists), or just append
-    if (wrapper.firstChild) {
-      wrapper.insertBefore(toolsBlock, wrapper.firstChild);
-    } else {
-      wrapper.appendChild(toolsBlock);
-    }
-  }
-
-  // Timestamp
-  if (msg && msg.timestamp) {
-    wrapper.appendChild(createTimestamp(msg.timestamp));
-  }
-
-  return wrapper;
-}
-
-/** Render a live (in-progress) assistant message with tools and thinking indicator */
-function createLiveBubble(msg) {
-  var wrapper = el('div', { className: 'message message-assistant streaming' });
-
-  // Show tool usage if any
-  if (msg.tools && msg.tools.length > 0) {
-    var toolsSummary = el('summary', { className: 'activity-summary' }, [
-      el('span', { className: 'activity-spinner' }),
-      el('span', { className: 'activity-label', textContent: 'Working... (' + msg.tools.length + ' step' + (msg.tools.length > 1 ? 's' : '') + ')' }),
-    ]);
-    var toolsList = el('ul', { className: 'activity-list' });
-    for (var ti = 0; ti < msg.tools.length; ti++) {
-      var dotClass = (ti === msg.tools.length - 1) ? 'activity-dot spinning' : 'activity-dot done';
-      toolsList.appendChild(el('li', { className: 'activity-entry' }, [
-        el('span', { className: dotClass }),
-        el('span', { className: 'activity-name', textContent: msg.tools[ti].name }),
-      ]));
-    }
-    var toolsBlock = el('details', { className: 'activity-block', open: true }, [toolsSummary, toolsList]);
-    wrapper.appendChild(toolsBlock);
-  }
-
-  // Content or thinking dots
-  var bubble = el('div', { className: 'message-bubble' });
-  if (msg.content) {
-    bubble.appendChild(renderMarkdown(msg.content));
-  }
-  // Always show thinking dots on live messages
-  bubble.appendChild(el('div', { className: 'thinking-indicator' }, [
-    el('span', { className: 'thinking-dot' }),
-    el('span', { className: 'thinking-dot' }),
-    el('span', { className: 'thinking-dot' }),
-  ]));
-
-  var row = el('div', { className: 'message-row' }, [bubble]);
-  wrapper.appendChild(row);
-  return wrapper;
-}
-
-function createStatusBubble(text) {
-  return el('div', { className: 'message message-status' }, [
-    el('span', { textContent: text }),
-  ]);
-}
-
-function createMessageActions(text) {
-  var actions = el('div', { className: 'message-actions' });
-  var copyBtn = el('button', { className: 'message-action-btn', title: 'Copy message' });
-  copyBtn.appendChild(copyIcon());
-  copyBtn.addEventListener('click', function () {
-    navigator.clipboard.writeText(text).then(function () {
-      while (copyBtn.firstChild) copyBtn.removeChild(copyBtn.firstChild);
-      copyBtn.appendChild(checkIcon());
-      setTimeout(function () {
-        while (copyBtn.firstChild) copyBtn.removeChild(copyBtn.firstChild);
-        copyBtn.appendChild(copyIcon());
-      }, 1500);
-    });
-  });
-  actions.appendChild(copyBtn);
-  return actions;
-}
-
-function createTimestamp(ts) {
-  var date = new Date(ts);
-  var now = new Date();
-  var label;
-  if (date.toDateString() === now.toDateString()) {
-    label = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  } else {
-    label = date.toLocaleDateString([], { month: 'short', day: 'numeric' }) +
-      ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
-  return el('span', { className: 'message-timestamp', textContent: label });
-}
-
-// ── Edit Message ─────────────────────────────────────────────
-function createForkNavigator(rawIndex, forkPoint) {
-  var isGen = state.activeProject && getPS(state.activeProject).isGenerating;
-  var activeBranch = forkPoint.activeBranch || 0;
-  var total = forkPoint.branches.length;
-
-  var leftBtn = el('button', { className: 'fork-nav-btn', textContent: '\u25C0' });
-  leftBtn.disabled = activeBranch === 0 || isGen;
-  leftBtn.addEventListener('click', function () {
-    switchBranch(rawIndex, activeBranch - 1);
-  });
-
-  var label = el('span', { className: 'fork-nav-label', textContent: (activeBranch + 1) + ' / ' + total });
-
-  var rightBtn = el('button', { className: 'fork-nav-btn', textContent: '\u25B6' });
-  rightBtn.disabled = activeBranch === total - 1 || isGen;
-  rightBtn.addEventListener('click', function () {
-    switchBranch(rawIndex, activeBranch + 1);
-  });
-
-  return el('div', { className: 'fork-navigator' }, [leftBtn, label, rightBtn]);
-}
-
-function switchBranch(forkIndex, newBranchIndex) {
-  if (!state.activeProject) return;
-  var projectName = state.activeProject;
-  if (getPS(projectName).isGenerating) return;
-
-  if (!state.forks[projectName]) state.forks[projectName] = {};
-  var projectForks = state.forks[projectName];
-  var fork = projectForks[forkIndex];
-  if (!fork) return;
-
-  var oldBranchIndex = fork.activeBranch || 0;
-  if (oldBranchIndex === newBranchIndex) return;
-
-  var msgs = state.messages[projectName] || [];
-
-  // Save current continuation (from forkIndex onward) into the active branch slot
-  var currentContinuation = msgs.slice(forkIndex);
-  // Collect sub-forks that belong to this continuation
-  var subForks = {};
-  var forkKeys = Object.keys(projectForks);
-  for (var ki = 0; ki < forkKeys.length; ki++) {
-    var k = parseInt(forkKeys[ki], 10);
-    if (k > forkIndex) {
-      subForks[k] = projectForks[k];
-    }
-  }
-  fork.branches[oldBranchIndex] = { messages: currentContinuation, forks: subForks };
-
-  // Remove sub-forks from the main forks object
-  for (var ki2 = 0; ki2 < forkKeys.length; ki2++) {
-    var k2 = parseInt(forkKeys[ki2], 10);
-    if (k2 > forkIndex) {
-      delete projectForks[k2];
-    }
-  }
-
-  // Load the selected branch
-  var selectedBranch = fork.branches[newBranchIndex];
-  if (selectedBranch && selectedBranch.messages) {
-    state.messages[projectName] = msgs.slice(0, forkIndex).concat(selectedBranch.messages);
-    // Restore sub-forks from the selected branch
-    if (selectedBranch.forks) {
-      var restoreKeys = Object.keys(selectedBranch.forks);
-      for (var rki = 0; rki < restoreKeys.length; rki++) {
-        projectForks[restoreKeys[rki]] = selectedBranch.forks[restoreKeys[rki]];
-      }
-    }
-  } else {
-    state.messages[projectName] = msgs.slice(0, forkIndex);
-  }
-
-  fork.activeBranch = newBranchIndex;
-
-  // Persist
-  window.api.saveChat(projectName, state.messages[projectName]);
-  window.api.saveForks(projectName, projectForks);
-  window.api.clearAIHistory(projectName);
-
-  renderMessages();
-}
-
-function startEditMessage(wrapper, bubble, originalText, msgIndex) {
-  if (aps().isGenerating) return;
-
-  // Expand bubble to max width while editing
-  wrapper.classList.add('editing');
-
-  // Replace bubble content with a textarea
-  var textarea = el('textarea', { className: 'edit-textarea' });
-  textarea.value = originalText;
-
-  // Attachment preview area for edit mode
-  var editAttachments = [];
-  var editAttachPreview = el('div', { className: 'edit-attach-preview' });
-
-  // Carry over existing attachments from the original message
-  var messages = state.messages[state.activeProject] || [];
-  var originalMsg = messages[msgIndex];
-  if (originalMsg && originalMsg.attachments) {
-    for (var ei = 0; ei < originalMsg.attachments.length; ei++) {
-      editAttachments.push(originalMsg.attachments[ei]);
-    }
-  }
-
-  function renderEditAttachments() {
-    editAttachPreview.textContent = '';
-    for (var i = 0; i < editAttachments.length; i++) {
-      (function (idx) {
-        var att = editAttachments[idx];
-        var tag = el('span', { className: 'edit-attach-tag' });
-        if (att.type === 'image' && att.dataUrl) {
-          var thumb = el('img', { src: att.dataUrl, className: 'edit-attach-thumb' });
-          tag.appendChild(thumb);
-        }
-        tag.appendChild(el('span', { textContent: att.name || 'image' }));
-        var removeBtn = el('button', { className: 'edit-attach-remove', textContent: '\u00d7' });
-        removeBtn.addEventListener('click', function () {
-          editAttachments.splice(idx, 1);
-          renderEditAttachments();
-        });
-        tag.appendChild(removeBtn);
-        editAttachPreview.appendChild(tag);
-      })(i);
-    }
-  }
-  renderEditAttachments();
-
-  var attachBtn = el('button', { className: 'btn btn-ghost btn-sm', textContent: '+ Image' });
-  attachBtn.addEventListener('click', async function () {
-    var files = await window.api.selectFiles();
-    if (!files) return;
-    for (var fi = 0; fi < files.length; fi++) {
-      var f = files[fi];
-      if (f.dataUrl) {
-        editAttachments.push({ type: 'image', name: f.name, dataUrl: f.dataUrl });
-      }
-    }
-    renderEditAttachments();
-  });
-
-  var saveBtn = el('button', { className: 'btn btn-primary btn-sm', textContent: 'Save & Resend' });
-  var cancelBtn = el('button', { className: 'btn btn-ghost btn-sm', textContent: 'Cancel' });
-  var btnRow = el('div', { className: 'edit-actions' }, [attachBtn, cancelBtn, saveBtn]);
-
-  bubble.textContent = '';
-  bubble.appendChild(textarea);
-  bubble.appendChild(editAttachPreview);
-  bubble.appendChild(btnRow);
-  textarea.focus();
-  textarea.style.height = textarea.scrollHeight + 'px';
-
-  textarea.addEventListener('input', function () {
-    textarea.style.height = 'auto';
-    textarea.style.height = textarea.scrollHeight + 'px';
-  });
-
-  // Handle paste images into edit textarea
-  textarea.addEventListener('paste', function (e) {
-    var items = e.clipboardData && e.clipboardData.items;
-    if (!items) return;
-    for (var pi = 0; pi < items.length; pi++) {
-      if (items[pi].type.indexOf('image') !== -1) {
-        e.preventDefault();
-        var blob = items[pi].getAsFile();
-        var reader = new FileReader();
-        reader.onload = function (ev) {
-          editAttachments.push({ type: 'image', name: 'pasted-image.png', dataUrl: ev.target.result });
-          renderEditAttachments();
-        };
-        reader.readAsDataURL(blob);
-        return;
-      }
-    }
-  });
-
-  cancelBtn.addEventListener('click', function () {
-    wrapper.classList.remove('editing');
-    bubble.textContent = '';
-    renderInline(originalText, bubble);
-  });
-
-  saveBtn.addEventListener('click', function () {
-    var newText = textarea.value.trim();
-    if (!newText && editAttachments.length === 0) return;
-
-    wrapper.classList.remove('editing');
-
-    var projectName = state.activeProject;
-    var msgs = state.messages[projectName] || [];
-    if (!state.forks[projectName]) state.forks[projectName] = {};
-    var projectForks = state.forks[projectName];
-
-    // Save the old continuation as a branch before truncating
-    var oldContinuation = msgs.slice(msgIndex);
-    // Collect sub-forks belonging to this continuation
-    var subForks = {};
-    var forkKeys = Object.keys(projectForks);
-    for (var fki = 0; fki < forkKeys.length; fki++) {
-      var fk = parseInt(forkKeys[fki], 10);
-      if (fk > msgIndex) {
-        subForks[fk] = projectForks[fk];
-      }
-    }
-
-    if (projectForks[msgIndex]) {
-      // Fork already exists — save current branch, add new one
-      var existingFork = projectForks[msgIndex];
-      var activeBr = existingFork.activeBranch || 0;
-      existingFork.branches[activeBr] = { messages: oldContinuation, forks: subForks };
-      existingFork.branches.push({ messages: [], forks: {} });
-      existingFork.activeBranch = existingFork.branches.length - 1;
-    } else {
-      // Create new fork: old continuation is branch 0, new empty is branch 1
-      projectForks[msgIndex] = {
-        activeBranch: 1,
-        branches: [
-          { messages: oldContinuation, forks: subForks },
-          { messages: [], forks: {} }
-        ]
-      };
-    }
-
-    // Remove sub-forks from main forks object (they're saved in the branch)
-    for (var fki2 = 0; fki2 < forkKeys.length; fki2++) {
-      var fk2 = parseInt(forkKeys[fki2], 10);
-      if (fk2 > msgIndex) {
-        delete projectForks[fk2];
-      }
-    }
-
-    // Truncate messages
-    state.messages[projectName] = msgs.slice(0, msgIndex);
-    window.api.saveChat(projectName, state.messages[projectName]);
-    window.api.saveForks(projectName, projectForks);
-    window.api.clearAIHistory(projectName);
-
-    // Set up pending attachments from edit
-    pendingAttachments = editAttachments.slice();
-    renderAttachmentPreview();
-
-    // Re-render and send
-    renderMessages();
-    $('#chat-input').value = newText || '';
-    sendMessage();
-  });
-}
-
-// ── Streaming ────────────────────────────────────────────────
-function startAssistantMessage() {
-  var container = $('#chat-messages');
-
-  var welcome = document.getElementById('chat-welcome');
-  if (welcome) welcome.remove();
-
-  var contentEl = el('span', { className: 'message-content' });
-  var thinkingEl = el('div', { className: 'thinking-indicator' }, [
-    el('span', { className: 'thinking-dot' }),
-    el('span', { className: 'thinking-dot' }),
-    el('span', { className: 'thinking-dot' }),
-  ]);
-  var bubble = el('div', { className: 'message-bubble' }, [thinkingEl, contentEl]);
-  var msgEl = el('div', { className: 'message message-assistant streaming' }, [bubble]);
-
-  container.appendChild(msgEl);
-  aps().currentStream = {
-    element: msgEl,
-    contentEl: contentEl,
-    fullText: '',
-    tools: [],            // Collected tool usages for persistence
-    activityEl: null,    // The <details> activity container
-    activityList: null,   // The <ul> inside it
-    activityCount: 0,
-    lastToolName: null,
-  };
-  scrollToBottom();
-}
-
-function appendStreamChunk(text) {
-  if (!aps().currentStream) startAssistantMessage();
-  aps().currentStream.fullText += text;
-  aps().currentStream.contentEl.textContent = aps().currentStream.fullText;
-  scrollToBottom();
-}
-
-/**
- * Add a tool activity entry to the collapsible "Working..." section.
- * Creates the section if needed, appends entries, and updates the summary count.
- */
-function addToolActivity(toolName, detail) {
-  if (!aps().currentStream) startAssistantMessage();
-  var stream = aps().currentStream;
-  var container = $('#chat-messages');
-
-  // Create the activity container if it doesn't exist
-  if (!stream.activityEl) {
-    var summaryEl = el('summary', { className: 'activity-summary' }, [
-      el('span', { className: 'activity-spinner' }),
-      el('span', { className: 'activity-label', textContent: 'Working...' }),
-    ]);
-    var listEl = el('ul', { className: 'activity-list' });
-    var details = el('details', { className: 'activity-block' }, [summaryEl, listEl]);
-    // Insert before the assistant message bubble
-    container.insertBefore(details, stream.element);
-    stream.activityEl = details;
-    stream.activityList = listEl;
-    stream.activityCount = 0;
-  }
-
-  // Track tool for persistence
-  stream.tools.push({ name: toolName, detail: detail || '' });
-
-  // Add the entry
-  stream.activityCount++;
-  var label = toolName === 'system' ? (detail || 'Processing...') : toolName;
-  if (detail && toolName !== 'system') {
-    label = toolName;
-  }
-  // Mark previous last entry's dot as done (checkmark)
-  var prevEntries = stream.activityList.querySelectorAll('.activity-entry');
-  if (prevEntries.length > 0) {
-    var prevDot = prevEntries[prevEntries.length - 1].querySelector('.activity-dot');
-    if (prevDot) { prevDot.classList.remove('spinning'); prevDot.classList.add('done'); }
-  }
-  var entry = el('li', { className: 'activity-entry' }, [
-    el('span', { className: 'activity-dot spinning' }),
-    el('span', { className: 'activity-name', textContent: label }),
-  ]);
-  stream.activityList.appendChild(entry);
-
-  // Update the summary label
-  var summaryLabel = stream.activityEl.querySelector('.activity-label');
-  if (summaryLabel) {
-    summaryLabel.textContent = 'Working... (' + stream.activityCount + ' step' + (stream.activityCount > 1 ? 's' : '') + ')';
-  }
-  stream.lastToolName = toolName;
-
-  scrollToBottom();
-}
-
-/**
- * Show cost/duration metadata after stream completes.
- */
-function addResultMeta(cost, duration) {
-  if (cost == null && duration == null) return;
-  var parts = [];
-  if (cost != null) parts.push('$' + cost.toFixed(4));
-  if (duration != null) parts.push((duration / 1000).toFixed(1) + 's');
-  if (parts.length === 0) return;
-
-  var container = $('#chat-messages');
-  var meta = el('div', { className: 'message message-meta' }, [
-    el('span', { textContent: parts.join(' · ') }),
-  ]);
-  container.appendChild(meta);
-  scrollToBottom();
-}
-
-/**
- * Finalize the current message bubble (render markdown, save) without ending generation.
- * Used between multi-step codex responses so each message appears as its own bubble.
- */
-function finalizeCurrentBubble() {
-  if (!aps().currentStream || !aps().currentStream.fullText) return;
-
-  var fullText = aps().currentStream.fullText;
-  var element = aps().currentStream.element;
-
-  var bubble = element.querySelector('.message-bubble');
-  if (bubble) {
-    bubble.textContent = '';
-    bubble.appendChild(renderMarkdown(fullText));
-  }
-  element.classList.remove('streaming');
-
-  // Data already in state.messages via live msg — just clear DOM stream
-  aps().currentStream = null;
-  scrollToBottom();
-}
-
-function finishStream() {
-  // Data already saved by event handler (finalizeLiveMsg) — just update DOM
-  aps().isGenerating = false;
-  aps().currentStream = null;
-
-  // Re-render from data to show finalized state (tools with checkmarks, no dots)
-  renderMessages();
-
-  // Restore UI controls
-  $('#stop-btn').classList.add('hidden');
-  $('#deploy-btn').disabled = false;
-  $('#chat-input').disabled = false;
-  $('#send-btn').disabled = !$('#chat-input').value.trim();
-
-  // Detect deploy URLs from recent messages
-  if (state.activeProject && state.messages[state.activeProject]) {
-    var recent = state.messages[state.activeProject].slice(-5);
-    for (var ri = 0; ri < recent.length; ri++) {
-      if (recent[ri].role === 'assistant') detectDeployUrl(recent[ri].content);
-    }
-  }
-
-  scrollToBottom();
-  $('#chat-input').focus();
-
-  // Process queued messages
-  if (aps().messageQueue.length > 0) {
-    var nextMsg = aps().messageQueue.shift();
-    $('#chat-input').value = nextMsg;
-    sendMessage();
   }
 }
 
@@ -1987,31 +1429,28 @@ async function sendMessage() {
   var hasAttachments = pendingAttachments.length > 0;
   if ((!text && !hasAttachments) || !state.activeProject) return;
 
+  var project = state.activeProject;
+  var store = chatManager.getOrCreate(project);
+
   // Queue message if currently generating
-  if (aps().isGenerating) {
-    var queuedText = text;
-    aps().messageQueue.push(queuedText);
-    // Show queued message in chat immediately
-    var container = $('#chat-messages');
-    var queuedMsg = { role: 'user', content: queuedText, timestamp: Date.now() };
-    container.appendChild(createUserBubble(queuedText, queuedMsg));
-    if (!state.messages[state.activeProject]) state.messages[state.activeProject] = [];
-    state.messages[state.activeProject].push(queuedMsg);
-    window.api.saveChat(state.activeProject, state.messages[state.activeProject]);
-    addStatusMessage('Queued — will send after current response');
+  if (store.turnState.isGenerating()) {
+    store.messageQueue.push(text);
     input.value = '';
     input.style.height = '';
-    scrollToBottom();
+    // Show a transient status in the DOM (don't add to tree — message will be properly added when dequeued)
+    var container = $('#chat-messages');
+    if (container) {
+      container.appendChild(el('div', { className: 'message message-status' }, [
+        el('span', { textContent: 'Queued — will send after current response' }),
+      ]));
+      scrollToBottom();
+    }
     return;
   }
 
-  var container = $('#chat-messages');
-  var welcome = document.getElementById('chat-welcome');
-  if (welcome) welcome.remove();
-
   // Build the prompt text — include file contents
   var promptParts = [];
-  var messageAttachments = [];
+  var contentBlocks = [];
 
   if (hasAttachments) {
     for (var i = 0; i < pendingAttachments.length; i++) {
@@ -2019,29 +1458,45 @@ async function sendMessage() {
       if (att.type === 'image') {
         // Save image to project and reference it
         try {
-          var saved = await window.api.saveAttachment(state.activeProject, att.name, att.dataUrl);
+          var saved = await window.api.saveAttachment(project, att.name, att.dataUrl);
           promptParts.push('[Attached image: ' + saved.relativePath + ']');
-          messageAttachments.push({ type: 'image', name: att.name, dataUrl: att.dataUrl, path: saved.relativePath });
+          contentBlocks.push({
+            type: 'attachment',
+            attachType: 'image',
+            name: att.name,
+            dataUrl: att.dataUrl,
+          });
         } catch (e) {
           promptParts.push('[Failed to save image: ' + att.name + ']');
         }
       } else if (att.type === 'file') {
         promptParts.push('[Attached file: ' + att.name + ']\n```\n' + att.content + '\n```');
-        messageAttachments.push({ type: 'file', name: att.name });
+        contentBlocks.push({
+          type: 'attachment',
+          attachType: 'file',
+          name: att.name,
+          content: att.content,
+        });
       }
     }
   }
   if (text) promptParts.push(text);
   var fullPrompt = promptParts.join('\n\n');
 
-  // Show in chat
-  var userMsg = { role: 'user', content: text || ('Attached ' + pendingAttachments.length + ' file(s)'), timestamp: Date.now() };
-  if (messageAttachments.length > 0) userMsg.attachments = messageAttachments;
-  container.appendChild(createUserBubble(userMsg.content, userMsg));
+  // Add text content block
+  var displayText = text || ('Attached ' + pendingAttachments.length + ' file(s)');
+  contentBlocks.push(ChatState.textBlock(displayText));
 
-  if (!state.messages[state.activeProject]) state.messages[state.activeProject] = [];
-  state.messages[state.activeProject].push(userMsg);
-  window.api.saveChat(state.activeProject, state.messages[state.activeProject]);
+  // Create user message node in tree
+  var parentId = store.tree.getActiveLeafId();
+  store.tree.addMessage(parentId, 'user', contentBlocks, 'complete');
+
+  // Transition turn state
+  store.turnState.transition('user_send');
+
+  // Save and render
+  chatManager.saveToDisk(project);
+  ChatRenderer.renderFullChat(store.tree, store.turnState, project, chatCallbacks);
 
   // Clear input and attachments
   input.value = '';
@@ -2050,29 +1505,26 @@ async function sendMessage() {
   renderAttachmentPreview();
   $('#send-btn').disabled = true;
 
-  aps().isGenerating = true;
-  aps()._lastEventTime = Date.now();
+  var ps = getPS(project);
+  ps._lastEventTime = Date.now();
   input.disabled = false; // Keep input enabled for queueing
-  $('#stop-btn').classList.remove('hidden');
-  $('#deploy-btn').disabled = true;
-
-  // Create a live message in data so dots show immediately via renderMessages
-  var sendProject = state.activeProject;
-  getLiveMsg(sendProject);
-  renderMessages();
-  scrollToBottom();
+  restoreProjectUI(store.turnState);
 
   // Safety timeout: if no events received for 3 minutes, auto-stop
+  var sendProject = project;
   var safetyTimer = setInterval(function () {
-    var ps = getPS(sendProject);
-    if (!ps.isGenerating) { clearInterval(safetyTimer); return; }
-    if (Date.now() - (ps._lastEventTime || 0) > 180000) {
+    var sps = getPS(sendProject);
+    var sStore = chatManager.getOrCreate(sendProject);
+    if (!sStore.turnState.isGenerating()) { clearInterval(safetyTimer); return; }
+    if (Date.now() - (sps._lastEventTime || 0) > 180000) {
       clearInterval(safetyTimer);
-      ps.isGenerating = false;
-      finalizeLiveMsg(sendProject);
+      sStore.turnState.transition('stop');
+      var staleNode = sStore.tree.getStreamingNode();
+      if (staleNode) sStore.tree.finalizeNode(staleNode.id);
+      chatManager.saveToDisk(sendProject);
       if (state.activeProject === sendProject) {
-        renderMessages();
-        restoreProjectUI(ps);
+        ChatRenderer.renderFullChat(sStore.tree, sStore.turnState, sendProject, chatCallbacks);
+        restoreProjectUI(sStore.turnState);
       }
       renderProjectList();
     }
@@ -2083,31 +1535,42 @@ async function sendMessage() {
   } catch (err) {
     clearInterval(safetyTimer);
     addStatusMessage('Failed to send: ' + err.message);
-    aps().isGenerating = false;
+    store.turnState.transition('stop');
     input.disabled = false;
-    $('#stop-btn').classList.add('hidden');
+    restoreProjectUI(store.turnState);
   }
 }
 
 async function stopGeneration() {
-  var ps = aps();
-  ps.isGenerating = false; // Mark immediately so incoming 'done' event doesn't re-process queue
-  ps.currentStream = null;
+  if (!state.activeProject || !chatManager) return;
+  var store = chatManager.getOrCreate(state.activeProject);
+  store.turnState.transition('stop');
+  var streamNode = store.tree.getStreamingNode();
+  if (streamNode) store.tree.finalizeNode(streamNode.id);
   await window.api.stopGeneration(state.activeProject);
-  finalizeLiveMsg(state.activeProject);
-  renderMessages();
-  restoreProjectUI(ps);
+  chatManager.saveToDisk(state.activeProject);
+  ChatRenderer.renderFullChat(store.tree, store.turnState, state.activeProject, chatCallbacks);
+  restoreProjectUI(store.turnState);
   renderProjectList();
 }
 
 function addStatusMessage(text) {
-  var container = $('#chat-messages');
-  container.appendChild(createStatusBubble(text));
-  if (state.activeProject) {
-    if (!state.messages[state.activeProject]) state.messages[state.activeProject] = [];
-    state.messages[state.activeProject].push({ role: 'status', content: text, timestamp: Date.now() });
+  if (!state.activeProject || !chatManager) {
+    // Fallback: just append a status element directly
+    var container = $('#chat-messages');
+    if (container) {
+      container.appendChild(el('div', { className: 'message message-status' }, [
+        el('span', { textContent: text }),
+      ]));
+      scrollToBottom();
+    }
+    return;
   }
-  scrollToBottom();
+  var store = chatManager.getOrCreate(state.activeProject);
+  var parentId = store.tree.getActiveLeafId();
+  store.tree.addMessage(parentId, 'status', [ChatState.statusBlock(text)], 'complete');
+  chatManager.saveToDisk(state.activeProject);
+  ChatRenderer.renderFullChat(store.tree, store.turnState, state.activeProject, chatCallbacks);
 }
 
 // ── Dev Server ─────────────────────────────────────���─────────
@@ -2259,7 +1722,10 @@ function detectDeployUrl(text) {
 
 function deploy() {
   if (!state.activeProject) return;
-  if (aps().isGenerating) return;
+  if (chatManager) {
+    var store = chatManager.getOrCreate(state.activeProject);
+    if (store.turnState.isGenerating()) return;
+  }
   // Send deploy as a chat message so the AI handles it
   var input = $('#chat-input');
   input.value = 'Deploy this project to Cloudflare Pages and give me the live URL.';
@@ -2613,145 +2079,7 @@ function setupResize() {
   });
 }
 
-// ── Markdown Renderer ────────────────────────────────────────
-function renderMarkdown(text) {
-  // Close any unclosed code fences to prevent mangled output
-  var fenceCount = (text.match(/^```/gm) || []).length;
-  if (fenceCount % 2 !== 0) text += '\n```';
-
-  var fragment = document.createDocumentFragment();
-  var codeBlockRe = /```(\w*)\n([\s\S]*?)```/g;
-  var lastIndex = 0;
-  var match;
-
-  while ((match = codeBlockRe.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      renderTextBlock(text.slice(lastIndex, match.index), fragment);
-    }
-    var langClass = match[1] ? 'language-' + match[1] : '';
-    var codeText = match[2];
-    var codeEl = el('code', { className: langClass, textContent: codeText });
-    var copyBtn = el('button', { className: 'code-copy-btn', textContent: 'Copy' });
-    (function (text, btn) {
-      btn.addEventListener('click', function () {
-        navigator.clipboard.writeText(text).then(function () {
-          btn.textContent = 'Copied!';
-          setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
-        });
-      });
-    })(codeText, copyBtn);
-    var pre = el('pre', {}, [copyBtn, codeEl]);
-    fragment.appendChild(pre);
-    lastIndex = match.index + match[0].length;
-  }
-
-  if (lastIndex < text.length) {
-    renderTextBlock(text.slice(lastIndex), fragment);
-  }
-
-  if (!fragment.hasChildNodes()) {
-    fragment.appendChild(document.createTextNode(text));
-  }
-
-  return fragment;
-}
-
-function renderTextBlock(text, fragment) {
-  var paragraphs = text.split(/\n\n+/);
-  for (var i = 0; i < paragraphs.length; i++) {
-    var trimmed = paragraphs[i].trim();
-    if (!trimmed) continue;
-
-    var headerMatch = trimmed.match(/^(#{1,3})\s+(.+)/);
-    if (headerMatch) {
-      var level = headerMatch[1].length;
-      var tag = 'h' + (level + 1);
-      var header = el(tag);
-      renderInline(headerMatch[2], header);
-      fragment.appendChild(header);
-      continue;
-    }
-
-    var lines = trimmed.split('\n');
-
-    // Unordered list: lines starting with - or *
-    if (lines.every(function (l) { return /^\s*[-*]\s/.test(l) || !l.trim(); })) {
-      var ul = el('ul');
-      for (var j = 0; j < lines.length; j++) {
-        var lineText = lines[j].replace(/^\s*[-*]\s+/, '').trim();
-        if (!lineText) continue;
-        var li = el('li');
-        renderInline(lineText, li);
-        ul.appendChild(li);
-      }
-      fragment.appendChild(ul);
-      continue;
-    }
-
-    // Ordered list: lines starting with 1. 2. etc.
-    if (lines.some(function (l) { return /^\s*\d+[.)]\s/.test(l); })) {
-      var ol = el('ol');
-      for (var oj = 0; oj < lines.length; oj++) {
-        var olText = lines[oj].replace(/^\s*\d+[.)]\s+/, '').trim();
-        if (!olText) continue;
-        var oli = el('li');
-        renderInline(olText, oli);
-        ol.appendChild(oli);
-      }
-      fragment.appendChild(ol);
-      continue;
-    }
-
-    // Regular paragraph — preserve single line breaks as <br>
-    var p = el('p');
-    for (var lk = 0; lk < lines.length; lk++) {
-      if (lk > 0) p.appendChild(document.createElement('br'));
-      renderInline(lines[lk], p);
-    }
-    fragment.appendChild(p);
-  }
-}
-
-function renderInline(text, parent) {
-  // Match bold, inline code, and URLs
-  var re = /(\*\*(.+?)\*\*|`([^`]+)`|(https?:\/\/[^\s<>\])"']+))/g;
-  var lastIdx = 0;
-  var m;
-
-  while ((m = re.exec(text)) !== null) {
-    if (m.index > lastIdx) {
-      parent.appendChild(document.createTextNode(text.slice(lastIdx, m.index)));
-    }
-    if (m[2]) {
-      parent.appendChild(el('strong', { textContent: m[2] }));
-    } else if (m[3]) {
-      parent.appendChild(el('code', { textContent: m[3] }));
-    } else if (m[4]) {
-      // URL — strip trailing punctuation that's likely not part of the URL
-      var url = m[4].replace(/[.,;:!?)]+$/, '');
-      var trailingChars = m[4].slice(url.length);
-      var link = el('a', {
-        href: '#',
-        className: 'chat-link',
-        textContent: url,
-        title: url,
-      });
-      (function (u) {
-        link.addEventListener('click', function (e) {
-          e.preventDefault();
-          window.api.openExternal(u);
-        });
-      })(url);
-      parent.appendChild(link);
-      if (trailingChars) parent.appendChild(document.createTextNode(trailingChars));
-    }
-    lastIdx = m.index + m[0].length;
-  }
-
-  if (lastIdx < text.length) {
-    parent.appendChild(document.createTextNode(text.slice(lastIdx)));
-  }
-}
+// (Markdown rendering is now handled by chat-renderer.js via ChatRenderer.renderMarkdown)
 
 // ── Chat Import Detection ───────��────────────────────────────
 async function detectChatImports() {
