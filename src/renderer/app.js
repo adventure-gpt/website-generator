@@ -522,9 +522,11 @@ async function showSetupScreen(status) {
 
   continueBtn.onclick = function () {
     if (continueBtn.disabled) return;
+    var authenticatedBackend = getAuthenticatedAIBackend(_lastAuthStatus);
     var profileSettings = {
       authSetupSeen: true,
       aiBackends: getSelectedAI(),
+      backend: authenticatedBackend || getSelectedAI()[0] || 'claude',
       userName: ($('#setup-user-name') || {}).value || '',
       userEmail: ($('#setup-user-email') || {}).value || '',
       userPronouns: ($('#setup-user-pronouns') || {}).value || 'they',
@@ -534,7 +536,42 @@ async function showSetupScreen(status) {
   };
 }
 
-/** Enable "Get Started" only when all required auth is done and no tools are missing */
+function getAuthService(authStatus, serviceId) {
+  if (!authStatus || !authStatus.services) return null;
+  for (var i = 0; i < authStatus.services.length; i++) {
+    if (authStatus.services[i].id === serviceId) return authStatus.services[i];
+  }
+  return null;
+}
+
+function isAuthServiceReady(authStatus, serviceId) {
+  var service = getAuthService(authStatus, serviceId);
+  return !!(service && service.authenticated);
+}
+
+function getAuthenticatedAIBackend(authStatus) {
+  var selected = (_lastAIBackends && _lastAIBackends.length) ? _lastAIBackends : ['claude', 'codex'];
+  for (var i = 0; i < selected.length; i++) {
+    if ((selected[i] === 'claude' || selected[i] === 'codex') && isAuthServiceReady(authStatus, selected[i])) {
+      return selected[i];
+    }
+  }
+  return null;
+}
+
+function getAuthGateStatus(authStatus) {
+  var cloudflareReady = isAuthServiceReady(authStatus, 'cloudflare');
+  var githubReady = isAuthServiceReady(authStatus, 'github');
+  var aiBackend = getAuthenticatedAIBackend(authStatus);
+  return {
+    ready: cloudflareReady && githubReady && !!aiBackend,
+    cloudflareReady: cloudflareReady,
+    githubReady: githubReady,
+    aiBackend: aiBackend,
+  };
+}
+
+/** Enable "Get Started" only when required auth is done and no tools are missing */
 async function updateGetStartedBtn() {
   var btn = $('#setup-continue-btn');
   if (!btn) return;
@@ -545,26 +582,67 @@ async function updateGetStartedBtn() {
     btn.textContent = 'Install tools first';
     return;
   }
-  // Check all auth badges
-  var allAuth = true;
-  var badges = document.querySelectorAll('.auth-status-badge');
-  for (var i = 0; i < badges.length; i++) {
-    if (!badges[i].classList.contains('authenticated')) {
-      allAuth = false;
-      break;
-    }
-  }
-  if (allAuth && badges.length > 0) {
+  var gate = getAuthGateStatus(_lastAuthStatus);
+  if (gate.ready) {
     btn.disabled = false;
     btn.textContent = 'Get Started';
+  } else if (!gate.aiBackend) {
+    btn.disabled = true;
+    btn.textContent = 'Connect Claude or Codex to continue';
   } else {
     btn.disabled = true;
-    btn.textContent = 'Connect all accounts to continue';
+    btn.textContent = 'Connect deployment accounts to continue';
   }
 }
 
 // ── Auth Section ──────────────────────────────────────────────
 var _authCleanup = null;
+var _authAutoOpened = {};
+var _lastAuthStatus = null;
+
+function showAuthBrowserAction(evt) {
+  var serviceId = evt.service;
+  var rowEl = document.getElementById('auth-row-' + serviceId);
+  if (!rowEl || !evt.url) return;
+
+  var badgeEl = document.getElementById('auth-badge-' + serviceId);
+  if (badgeEl) {
+    badgeEl.textContent = evt.code ? 'Code ready' : 'Browser ready';
+    badgeEl.className = 'auth-status-badge connecting';
+  }
+
+  var codeEl = document.getElementById('auth-code-' + serviceId);
+  if (!codeEl) {
+    codeEl = el('div', { className: 'auth-code-display', id: 'auth-code-' + serviceId });
+    rowEl.appendChild(codeEl);
+  }
+
+  codeEl.textContent = '';
+  codeEl.classList.remove('hidden');
+  codeEl.appendChild(el('div', {
+    className: 'auth-code-message',
+    textContent: evt.message || 'Open your browser to finish signing in.',
+  }));
+  if (evt.code) {
+    codeEl.appendChild(el('div', { className: 'auth-code-value', textContent: evt.code }));
+  }
+
+  var openBtn = el('button', {
+    className: 'auth-open-browser-btn',
+    textContent: 'Open browser',
+  });
+  openBtn.addEventListener('click', async function () {
+    openBtn.disabled = true;
+    openBtn.textContent = 'Browser opened';
+    await window.api.openAuthUrl(serviceId, evt.url);
+  });
+  codeEl.appendChild(openBtn);
+
+  if (evt.autoOpen && !_authAutoOpened[serviceId]) {
+    _authAutoOpened[serviceId] = true;
+    setTimeout(function () { openBtn.click(); }, 150);
+  }
+}
 
 async function renderAuthSection(aiBackends) {
   var authEl = $('#setup-auth');
@@ -577,6 +655,7 @@ async function renderAuthSection(aiBackends) {
     console.error('Auth check failed:', err);
     return;
   }
+  _lastAuthStatus = authStatus;
 
   authEl.textContent = '';
 
@@ -659,16 +738,18 @@ async function renderAuthSection(aiBackends) {
     authEl.appendChild(row);
   }
 
-  authEl.classList.remove('hidden');
-  updateGetStartedBtn();
-
   // Store current backends for re-render
   _lastAIBackends = aiBackends;
+
+  authEl.classList.remove('hidden');
+  updateGetStartedBtn();
 
   // Set up the auth event listener (once)
   if (!_authCleanup) {
     _authCleanup = window.api.onAuthEvent(function (evt) {
-      if (evt.type === 'auth-log') {
+      if (evt.type === 'auth-url-ready') {
+        showAuthBrowserAction(evt);
+      } else if (evt.type === 'auth-log') {
         // For GitHub: detect the one-time code and show it in the UI
         if (evt.service === 'github' && evt.message) {
           var codeMatch = evt.message.match(/code:\s*([A-Z0-9]{4}-[A-Z0-9]{4})/i);
@@ -681,6 +762,7 @@ async function renderAuthSection(aiBackends) {
           }
         }
       } else if (evt.type === 'auth-done') {
+        _authAutoOpened[evt.service] = false;
         // Re-render the whole auth section to get accurate state
         renderAuthSection(_lastAIBackends);
       }
@@ -698,7 +780,7 @@ function startAuthFlow(serviceId) {
     btn.textContent = 'Connecting...';
   }
   if (badgeEl) {
-    badgeEl.textContent = 'Opening browser...';
+    badgeEl.textContent = 'Preparing...';
     badgeEl.className = 'auth-status-badge connecting';
   }
   // Add a code display area for services that use one-time codes

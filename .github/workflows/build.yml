@@ -39,7 +39,13 @@ jobs:
       - name: Build Electron app
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx electron-builder --${{ matrix.platform }} --publish never
+        shell: bash
+        run: |
+          if [ "${{ matrix.platform }}" = "win" ]; then
+            npx electron-builder --win --publish never --config.win.signAndEditExecutable=false
+          else
+            npx electron-builder --${{ matrix.platform }} --publish never
+          fi
 
       - name: Upload artifacts to release
         if: startsWith(github.ref, 'refs/tags/v')
@@ -48,6 +54,7 @@ jobs:
         shell: bash
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "$TAG" --notes "Website Generator $TAG"
           for file in dist/*.exe dist/*.dmg dist/*.AppImage dist/*.deb dist/*.yml; do
             [ -f "$file" ] && gh release upload "$TAG" "$file" --clobber || true
           done

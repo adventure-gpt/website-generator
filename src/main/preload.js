@@ -59,6 +59,7 @@ contextBridge.exposeInMainWorld('api', {
   // Auth
   checkAuth: (aiBackends) => ipcRenderer.invoke('auth:check', aiBackends),
   runAuth: (serviceId) => ipcRenderer.invoke('auth:run', serviceId),
+  openAuthUrl: (serviceId, url) => ipcRenderer.invoke('auth:open-url', serviceId, url),
   logoutAuth: (serviceId) => ipcRenderer.invoke('auth:logout', serviceId),
   onAuthEvent: (callback) => {
     var handler = function (_event, data) { callback(data); };

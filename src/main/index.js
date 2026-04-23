@@ -7,7 +7,7 @@ const ProjectManager = require('./project-manager');
 const DevServer = require('./dev-server');
 const Deployer = require('./deploy');
 const ChatStore = require('./chat-store');
-const { checkSetup, runSetup, checkAuth, runAuthCommand, runLogoutCommand, AI_TOOLS } = require('./setup');
+const { checkSetup, runSetup, checkAuth, runAuthCommand, continueAuthCommand, runLogoutCommand, AI_TOOLS } = require('./setup');
 
 let mainWindow;
 const aiBackend = new AIBackend();
@@ -669,15 +669,19 @@ ipcMain.handle('auth:check', async (_event, aiBackends) => {
 
 ipcMain.handle('auth:run', (_event, serviceId) => {
   runAuthCommand(serviceId, (evt) => {
-    // Intercept open-url events to open browser from main process
-    if (evt.type === 'auth-open-url' && evt.url) {
-      shell.openExternal(evt.url);
-    }
     safeSend('auth:event', evt);
   }).catch((err) => {
     safeSend('auth:event', { type: 'auth-done', service: serviceId, success: false, message: err.message });
   });
   return true;
+});
+
+ipcMain.handle('auth:open-url', (_event, serviceId, url) => {
+  if (typeof url === 'string' && /^https?:\/\//i.test(url)) {
+    continueAuthCommand(serviceId);
+    return shell.openExternal(url);
+  }
+  return false;
 });
 
 ipcMain.handle('auth:logout', async (_event, serviceId) => {

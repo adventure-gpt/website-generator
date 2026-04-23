@@ -381,11 +381,42 @@ html, body {
   border: 1px solid var(--accent);
   border-radius: var(--radius-sm);
   color: var(--accent-hover);
-  font-size: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: left;
+  letter-spacing: 0;
+}
+
+.auth-code-message {
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.auth-code-value {
+  font-size: 18px;
   font-weight: 700;
   font-family: var(--font-mono);
-  text-align: center;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
+  color: var(--accent-hover);
+  margin-bottom: 10px;
+}
+
+.auth-open-browser-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: white;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: inherit;
+}
+.auth-open-browser-btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+.auth-open-browser-btn:disabled { opacity: 0.7; cursor: default; }
 }
 
 .setup-actions {

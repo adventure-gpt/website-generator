@@ -463,8 +463,9 @@ THE MOST COMMON MISTAKE: Sending messages like "Now let me also check the..." or
           onEvent({ type: 'rate_limit', text: text.trim(), resetInfo: this._parseResetTime(text) });
           return;
         }
-        if (!text.includes('Warning') && !text.includes('ExperimentalWarning')) {
-          onEvent({ type: 'status', text: text.trim() });
+        const statusText = this._cleanCodexStatus(text);
+        if (statusText) {
+          onEvent({ type: 'status', text: statusText });
         }
       });
 
@@ -509,6 +510,20 @@ THE MOST COMMON MISTAKE: Sending messages like "Now let me also check the..." or
       /overloaded/i.test(text) ||
       /API Error:\s*(429|500|502|503|529)/i.test(text) ||
       /internal server error/i.test(text);
+  }
+
+  _cleanCodexStatus(text) {
+    if (!text) return '';
+    const trimmed = text.trim();
+    if (!trimmed) return '';
+    if (/warning/i.test(trimmed) || /ExperimentalWarning/.test(trimmed)) return '';
+
+    // Codex writes internal tracing/log lines to stderr. They are useful for
+    // debugging the CLI itself, but they look broken in the end-user chat.
+    if (/\bcodex_core::/i.test(trimmed)) return '';
+    if (/^\d{4}-\d{2}-\d{2}T\S+\s+(TRACE|DEBUG|INFO|WARN|ERROR)\s+codex[_\w:]+/i.test(trimmed)) return '';
+
+    return trimmed;
   }
 
   _parseResetTime(text) {

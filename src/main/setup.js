@@ -8,6 +8,7 @@ const path = require('path');
  */
 
 const PLATFORM = os.platform(); // 'win32', 'darwin', 'linux'
+const HIDDEN_PROCESS_OPTIONS = PLATFORM === 'win32' ? { windowsHide: true } : {};
 
 // Ensure Homebrew paths and ~/.local/bin are in PATH on macOS
 if (PLATFORM === 'darwin') {
@@ -28,7 +29,7 @@ async function checkBrewHealth() {
   if (PLATFORM !== 'darwin') return false;
   if (_brewHealthy !== null) return _brewHealthy;
   return new Promise((resolve) => {
-    execFile('brew', ['--version'], { shell: true, timeout: 10000 }, (err) => {
+    execFile('brew', ['--version'], { shell: true, timeout: 10000, ...HIDDEN_PROCESS_OPTIONS }, (err) => {
       _brewHealthy = !err;
       resolve(_brewHealthy);
     });
@@ -101,7 +102,7 @@ async function macFallbackInstallGh(onEvent) {
  */
 function captureCmd(cmd, args, timeout) {
   return new Promise((resolve, reject) => {
-    execFile(cmd, args, { shell: true, timeout: timeout || 10000, encoding: 'utf8' }, (err, stdout) => {
+    execFile(cmd, args, { shell: true, timeout: timeout || 10000, encoding: 'utf8', ...HIDDEN_PROCESS_OPTIONS }, (err, stdout) => {
       if (err) reject(err);
       else resolve(stdout);
     });
@@ -111,7 +112,7 @@ function captureCmd(cmd, args, timeout) {
 function commandExists(cmd) {
   return new Promise((resolve) => {
     const which = PLATFORM === 'win32' ? 'where' : 'which';
-    execFile(which, [cmd], { stdio: 'pipe' }, (err) => {
+    execFile(which, [cmd], { stdio: 'pipe', ...HIDDEN_PROCESS_OPTIONS }, (err) => {
       resolve(!err);
     });
   });
@@ -413,7 +414,7 @@ async function runSetup(onEvent, options) {
 function runCommand(cmd, args, onEvent, timeoutMs) {
   const timeout = timeoutMs || 180000; // default 3 minutes
   return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { shell: true, stdio: ['pipe', 'pipe', 'pipe'] });
+    const child = spawn(cmd, args, { shell: true, stdio: ['pipe', 'pipe', 'pipe'], ...HIDDEN_PROCESS_OPTIONS });
     let stderrBuf = '';
     let done = false;
     const timer = setTimeout(() => {
@@ -533,7 +534,7 @@ function checkAuthClaude() {
       } catch { /* fall through */ }
     }
     // Check via CLI (current Claude Code uses OAuth without local auth files)
-    execFile('claude', ['auth', 'status'], { shell: true, timeout: 10000, encoding: 'utf8' }, (err, stdout) => {
+    execFile('claude', ['auth', 'status'], { shell: true, timeout: 10000, encoding: 'utf8', ...HIDDEN_PROCESS_OPTIONS }, (err, stdout) => {
       if (err) return resolve(false);
       try {
         const status = JSON.parse(stdout);
@@ -547,23 +548,24 @@ function checkAuthClaude() {
 
 function checkAuthCodex() {
   return new Promise((resolve) => {
-    // Codex CLI uses OPENAI_API_KEY env var or ~/.codex/auth.json
+    // Codex CLI uses OPENAI_API_KEY env var, ~/.codex/auth.json, or CLI-managed ChatGPT auth.
     if (process.env.OPENAI_API_KEY) return resolve(true);
     const authFile = path.join(os.homedir(), '.codex', 'auth.json');
     if (fs.existsSync(authFile)) {
       try {
         const auth = JSON.parse(fs.readFileSync(authFile, 'utf8'));
-        resolve(!!auth.OPENAI_API_KEY || !!auth.tokens || !!auth.apiKey);
-        return;
+        if (auth.OPENAI_API_KEY || auth.tokens || auth.apiKey) return resolve(true);
       } catch { /* fall through */ }
     }
-    resolve(false);
+    execFile('codex', ['login', 'status'], { shell: true, timeout: 10000, encoding: 'utf8', ...HIDDEN_PROCESS_OPTIONS }, (err) => {
+      resolve(!err);
+    });
   });
 }
 
 function checkAuthCloudflare() {
   return new Promise((resolve) => {
-    execFile('wrangler', ['whoami'], { shell: true, timeout: 10000 }, (err, stdout) => {
+    execFile('wrangler', ['whoami'], { shell: true, timeout: 10000, ...HIDDEN_PROCESS_OPTIONS }, (err, stdout) => {
       if (err) return resolve(false);
       var output = (stdout || '').toLowerCase();
       resolve(!output.includes('not authenticated') && !output.includes('no oauth token'));
@@ -573,7 +575,7 @@ function checkAuthCloudflare() {
 
 function checkAuthGitHub() {
   return new Promise((resolve) => {
-    execFile('gh', ['auth', 'status'], { shell: true, timeout: 10000 }, (err) => {
+    execFile('gh', ['auth', 'status'], { shell: true, timeout: 10000, ...HIDDEN_PROCESS_OPTIONS }, (err) => {
       resolve(!err);
     });
   });
@@ -597,11 +599,183 @@ async function checkAuth(aiBackends) {
     checks.push(checkAuthCodex().then(function (ok) { return { id: 'codex', name: 'Codex CLI (OpenAI)', authenticated: ok }; }));
   }
   var results = await Promise.all(checks);
+  var cloudflareReady = results.some(function (r) { return r.id === 'cloudflare' && r.authenticated; });
+  var githubReady = results.some(function (r) { return r.id === 'github' && r.authenticated; });
+  var aiReady = results.some(function (r) {
+    return (r.id === 'claude' || r.id === 'codex') && r.authenticated;
+  });
   return {
     services: results,
-    allAuthenticated: results.every(function (r) { return r.authenticated; }),
+    allAuthenticated: cloudflareReady && githubReady && aiReady,
     meta: AUTH_SERVICES,
   };
+}
+
+const activeAuthSessions = new Map();
+
+function setActiveAuthSession(serviceId, session) {
+  activeAuthSessions.set(serviceId, session);
+}
+
+function clearActiveAuthSession(serviceId, child) {
+  var session = activeAuthSessions.get(serviceId);
+  if (!session) return;
+  if (!child || session.child === child) activeAuthSessions.delete(serviceId);
+}
+
+function continueAuthCommand(serviceId) {
+  var session = activeAuthSessions.get(serviceId);
+  if (!session || session.continued) return false;
+  session.continued = true;
+  if (typeof session.continue === 'function') {
+    try {
+      session.continue();
+      return true;
+    } catch { /* ignore */ }
+  }
+  return false;
+}
+
+function runCodexAppServerAuth(onEvent, flowType) {
+  var loginFlow = flowType || 'chatgpt';
+  return new Promise((resolve) => {
+    var args = ['--disable', 'plugins', '--disable', 'apps', 'app-server', '--listen', 'stdio://'];
+    var child = spawn('codex', args, { shell: true, stdio: ['pipe', 'pipe', 'pipe'], ...HIDDEN_PROCESS_OPTIONS });
+    var buffer = '';
+    var settled = false;
+    var loginRequestId = 2;
+    var loginId = null;
+    var gotLoginResponse = false;
+
+    function finish(success, message) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(loginTimer);
+      clearTimeout(doneTimer);
+      clearActiveAuthSession('codex', child);
+      try { child.kill(); } catch { /* ignore */ }
+      onEvent({ type: 'auth-done', service: 'codex', success: !!success, message: message || null });
+      resolve();
+    }
+
+    function send(msg) {
+      try {
+        child.stdin.write(JSON.stringify(msg) + '\n');
+      } catch (err) {
+        finish(false, err.message);
+      }
+    }
+
+    function startLogin() {
+      send({ jsonrpc: '2.0', id: loginRequestId, method: 'account/login/start', params: { type: loginFlow } });
+    }
+
+    function handleMessage(msg) {
+      if (msg.id === 1) {
+        send({ jsonrpc: '2.0', method: 'initialized' });
+        startLogin();
+        return;
+      }
+
+      if (msg.id === loginRequestId) {
+        gotLoginResponse = true;
+        if (msg.error) {
+          if (loginFlow === 'chatgpt') {
+            try { child.kill(); } catch { /* ignore */ }
+            runCodexAppServerAuth(onEvent, 'chatgptDeviceCode').then(resolve);
+            settled = true;
+            return;
+          }
+          finish(false, msg.error.message || 'Codex login failed');
+          return;
+        }
+
+        var result = msg.result || {};
+        loginId = result.loginId || null;
+        if (result.type === 'chatgpt' && result.authUrl) {
+          onEvent({
+            type: 'auth-url-ready',
+            service: 'codex',
+            url: result.authUrl,
+            autoOpen: true,
+            message: 'Opening Codex sign-in in your browser...',
+          });
+        } else if (result.type === 'chatgptDeviceCode' && result.verificationUrl) {
+          onEvent({
+            type: 'auth-url-ready',
+            service: 'codex',
+            url: result.verificationUrl,
+            code: result.userCode || '',
+            autoOpen: false,
+            message: 'Copy the code, then open the browser to finish Codex sign-in.',
+          });
+        }
+        return;
+      }
+
+      if (msg.method === 'account/login/completed') {
+        var params = msg.params || {};
+        if (!loginId || !params.loginId || params.loginId === loginId) {
+          finish(!!params.success, params.error || null);
+        }
+      }
+    }
+
+    var loginTimer = setTimeout(function () {
+      if (gotLoginResponse || settled) return;
+      if (loginFlow === 'chatgpt') {
+        try { child.kill(); } catch { /* ignore */ }
+        settled = true;
+        runCodexAppServerAuth(onEvent, 'chatgptDeviceCode').then(resolve);
+      } else {
+        finish(false, 'Timed out preparing Codex login');
+      }
+    }, 20000);
+
+    var doneTimer = setTimeout(function () {
+      finish(false, 'Timed out waiting for Codex authentication');
+    }, 15 * 60 * 1000);
+
+    setActiveAuthSession('codex', { child: child });
+
+    child.stdout.on('data', function (d) {
+      buffer += d.toString();
+      var lines = buffer.split(/\r?\n/);
+      buffer = lines.pop() || '';
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+        if (!line) continue;
+        try {
+          handleMessage(JSON.parse(line));
+        } catch {
+          onEvent({ type: 'auth-log', service: 'codex', message: line });
+        }
+      }
+    });
+
+    child.stderr.on('data', function () {
+      // Drain stderr so the app-server cannot block on a full pipe.
+    });
+
+    child.on('close', function (code) {
+      clearActiveAuthSession('codex', child);
+      if (!settled) finish(false, 'Codex auth process exited with code ' + code);
+    });
+
+    child.on('error', function (err) {
+      finish(false, err.message);
+    });
+
+    send({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        clientInfo: { name: 'website-generator', title: 'Website Generator', version: '1.0.0' },
+        capabilities: { experimentalApi: true },
+      },
+    });
+  });
 }
 
 function runAuthCommand(serviceId, onEvent) {
@@ -648,9 +822,7 @@ function runAuthCommand(serviceId, onEvent) {
         }, 1000);
       });
     case 'codex':
-      cmd = 'codex';
-      args = ['login'];
-      break;
+      return runCodexAppServerAuth(onEvent);
     case 'cloudflare':
       cmd = 'wrangler';
       args = ['login'];
@@ -665,22 +837,32 @@ function runAuthCommand(serviceId, onEvent) {
   }
 
   return new Promise((resolve, reject) => {
-    var child = spawn(cmd, args, { shell: true, stdio: ['pipe', 'pipe', 'pipe'] });
+    var child = spawn(cmd, args, { shell: true, stdio: ['pipe', 'pipe', 'pipe'], ...HIDDEN_PROCESS_OPTIONS });
     var browserOpened = false;
+    if (serviceId === 'github') {
+      setActiveAuthSession('github', {
+        child: child,
+        continue: function () {
+          try { child.stdin.write('\n'); } catch { /* ignore */ }
+        },
+      });
+    }
 
     function handleOutput(text) {
       onEvent({ type: 'auth-log', service: serviceId, message: text });
-      // For GitHub: detect one-time code, open browser ourselves, and send Enter
+      // For GitHub: detect one-time code and let the UI decide when to open the browser.
       if (serviceId === 'github' && !browserOpened) {
         var codeMatch = text.match(/code[:\s]+([A-Z0-9]{4}-[A-Z0-9]{4})/i);
         if (codeMatch) {
           browserOpened = true;
-          // Tell renderer to open the browser (via event)
-          onEvent({ type: 'auth-open-url', service: serviceId, url: 'https://github.com/login/device' });
-          // Also send Enter to advance gh past its prompt
-          setTimeout(function () {
-            try { child.stdin.write('\n'); } catch (e) { /* ignore */ }
-          }, 300);
+          onEvent({
+            type: 'auth-url-ready',
+            service: serviceId,
+            url: 'https://github.com/login/device',
+            code: codeMatch[1],
+            autoOpen: false,
+            message: 'Copy this GitHub code, then open the browser to finish signing in.',
+          });
         }
       }
     }
@@ -688,6 +870,7 @@ function runAuthCommand(serviceId, onEvent) {
     child.stdout.on('data', function (d) { handleOutput(d.toString()); });
     child.stderr.on('data', function (d) { handleOutput(d.toString()); });
     child.on('close', function (code) {
+      clearActiveAuthSession(serviceId, child);
       if (code === 0) {
         onEvent({ type: 'auth-done', service: serviceId, success: true });
         resolve();
@@ -697,6 +880,7 @@ function runAuthCommand(serviceId, onEvent) {
       }
     });
     child.on('error', function (err) {
+      clearActiveAuthSession(serviceId, child);
       onEvent({ type: 'auth-done', service: serviceId, success: false, message: err.message });
       resolve();
     });
@@ -732,7 +916,7 @@ function runLogoutCommand(serviceId) {
       default:
         return resolve(false);
     }
-    var child = spawn(cmd, args, { shell: true, stdio: ['pipe', 'pipe', 'pipe'] });
+    var child = spawn(cmd, args, { shell: true, stdio: ['pipe', 'pipe', 'pipe'], ...HIDDEN_PROCESS_OPTIONS });
     // gh auth logout prompts "are you sure?" — send Y
     child.stdin.write('Y\n');
     child.on('close', function () { resolve(true); });
@@ -740,4 +924,4 @@ function runLogoutCommand(serviceId) {
   });
 }
 
-module.exports = { checkSetup, runSetup, checkAuth, runAuthCommand, runLogoutCommand, AUTH_SERVICES, AI_TOOLS };
+module.exports = { checkSetup, runSetup, checkAuth, runAuthCommand, continueAuthCommand, runLogoutCommand, AUTH_SERVICES, AI_TOOLS };
